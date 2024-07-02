@@ -219,6 +219,6 @@ docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.
 **pgAdmin:**
 
 ```bash
-docker run --name pgadmin -p 5050:80 -e "PGADMIN_DEFAULT_EMAIL=ivan_0110@mail.ru" -e "PGADMIN_DEFAULT_PASSWORD=Admin12345678" -d  dpage/pgadmin4
+docker run --name pgadmin -p 5050:80 -e "PGADMIN_DEFAULT_EMAIL=admin@admin.com" -e "PGADMIN_DEFAULT_PASSWORD=Admin12345678" -d  dpage/pgadmin4
 ```
 

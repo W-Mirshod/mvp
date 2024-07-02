@@ -12,6 +12,7 @@ x-backend-base: &backend-base
   volumes:
     - ./:/mm
     - ./logs:/mm/logs/
+    - ./scripts:/mm/scripts/
     - ./src/static:/mm/src/static/
     - ./src/media:/mm/src/media/
 
@@ -93,22 +94,9 @@ services:
     links:
       - db
       - redis
-    container_name: ap_wsgi
+    container_name: mm_wsgi
     command: >
      sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-wsgi-web.sh"
-    depends_on:
-      db:
-        condition: service_healthy
-
-  # Django WSGI App for debug in docker
-  pycharm-wsgi-server:
-    <<: *backend
-    ports:
-      - 8025:8025
-    links:
-      - db
-      - redis
-    container_name: pycharm_wsgi
     depends_on:
       db:
         condition: service_healthy
