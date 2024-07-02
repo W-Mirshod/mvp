@@ -10,6 +10,7 @@
   - [Project development](#project-development)
       - [Project structure for development](#project-structure-for-development)
       - [Installation for development](#installation-for-development)
+      - [Creating and setting up containers in Docker](#creating-and-setting-up-containers-in-docker)
 
 ## Description
 
@@ -139,7 +140,11 @@ mm_backend/
    pip install -r requirements.txt
    ```
 
-6. To be continued...
+6. Create and setting up containers in Docker:
+
+   ```bash
+   docker compose up -d --build
+   ```
 
 ## Project development
 
@@ -184,4 +189,36 @@ mm_backend/
 3. Create file `.env` by template `.env.template` with you values.
 
 4. To be continued...
+
+
+
+#### Creating and setting up containers in Docker
+
+**Insatll Docker and docker-compose (for Ubuntu):**
+
+```bash
+sudo apt install apt-transport-https ca-certificates curl software-properties-common 
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt update
+
+sudo apt install docker-ce -y
+
+sudo systemctl status docker
+```
+
+**Portainer:** - for cofort managing containers
+
+```bash
+docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer:latest
+```
+
+**pgAdmin:**
+
+```bash
+docker run --name pgadmin -p 5050:80 -e "PGADMIN_DEFAULT_EMAIL=ivan_0110@mail.ru" -e "PGADMIN_DEFAULT_PASSWORD=Admin12345678" -d  dpage/pgadmin4
+```
 
