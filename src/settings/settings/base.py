@@ -25,7 +25,7 @@ def get_secret_key():
 SECRET_KEY = get_secret_key()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ROOT_DIR = environ.Path(__file__) - 2
 
 DEBUG = True
@@ -109,18 +109,6 @@ LOGIN_URL = "rest_framework:login"
 LOGOUT_URL = "rest_framework:logout"
 
 
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -164,11 +152,15 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
+STATIC_URL = "/static/"
+STATIC_ROOT = "/var/www/static/"
+STATICFILES_DIRS = [
+    str(BASE_DIR / "static"),
+]
 
-STATIC_URL = "static/"
+MEDIA_ROOT = str(BASE_DIR / "media")
+MEDIA_URL = "/media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

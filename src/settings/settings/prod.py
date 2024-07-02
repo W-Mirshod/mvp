@@ -4,6 +4,12 @@ from .base import *
 DEBUG = env.bool("DEBUG", False)
 SQL_DEBUG = env.bool("SQL_DEBUG", False)
 
+if SQL_DEBUG:
+    MIDDLEWARE = MIDDLEWARE + ["utils.middleware.DebugQuerysetsWare"]
+if DEBUG:
+    MIDDLEWARE = MIDDLEWARE + [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    ]
 
 # region Database
 DATABASES = {
@@ -18,6 +24,11 @@ DATABASES = {
 }
 # endregion
 
+# STATIC_URL = "/static/"
+# STATIC_ROOT = "/var/www/static/"
+# STATICFILES_DIRS = [
+#     str(BASE_DIR / "static"),
+# ]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
