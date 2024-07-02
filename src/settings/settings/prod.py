@@ -24,12 +24,6 @@ DATABASES = {
 }
 # endregion
 
-# STATIC_URL = "/static/"
-# STATIC_ROOT = "/var/www/static/"
-# STATICFILES_DIRS = [
-#     str(BASE_DIR / "static"),
-# ]
-
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
