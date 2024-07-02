@@ -180,17 +180,21 @@ mm_backend/
 #### Installation for development
 
 1. Execute 1-4 points of the [common installation](#general-installation).
+2. Copy from repository [mm_backend_dev](#https://github.com/Iv-Gorbunov/mm_backend_dev) the "_dev/" folder with all its contents into the "src/" folder.
 
-2. Install packages from `requirements.txt`
+3. Install packages from `requirements_dev.txt`
 
    ```bash
    pip install -r ./src/_dev/requirements_dev.txt
    ```
-3. Create file `.env` by template `.env.template` with you values.
 
-4. To be continued...
+4. Create file `.env` by template `.env.template` with you values.
 
+5. Create and setting up containers in Docker:
 
+   ```bash
+   docker compose -f ./src/_dev/docker-compose-dev.yml up -d --build
+   ```
 
 #### Creating and setting up containers in Docker
 
@@ -221,4 +225,3 @@ docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.
 ```bash
 docker run --name pgadmin -p 5050:80 -e "PGADMIN_DEFAULT_EMAIL=admin@admin.com" -e "PGADMIN_DEFAULT_PASSWORD=Admin12345678" -d  dpage/pgadmin4
 ```
-
