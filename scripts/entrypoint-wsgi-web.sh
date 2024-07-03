@@ -25,7 +25,7 @@ django-admin compilemessages --ignore=venv
 # User credentials
 email=admin@example.com
 password=admin123
-#echo "from apps.users.models import User; (User.objects.create_superuser(email='$email', password='$password', role='super_admin', is_verified=True, is_active=True)) if not User.objects.filter(email='$email').exists() else False" | python3 manage.py shell
+echo "from apps.users.models import User; (User.objects.create_superuser(email='$email', password='$password', is_verified=True, is_active=True)) if not User.objects.filter(email='$email').exists() else False" | python3 manage.py shell
 
 # Запуск самого проекта
 #gunicorn --env DJANGO_SETTINGS_MODULE=settings.settings.local settings.wsgi:application --chdir /mm/src/ --bind 0.0.0.0:8000 --workers 2 --timeout 900 --error-logfile ../logs/gunicorn_web_error.log
