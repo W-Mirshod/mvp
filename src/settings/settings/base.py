@@ -1,12 +1,10 @@
+import os
+from datetime import timedelta
+from pathlib import Path
 
 import environ
-import os
-
-from datetime import timedelta
-
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
-from pathlib import Path
 
 env = environ.Env(
     # set casting, default value
@@ -28,8 +26,6 @@ SECRET_KEY = get_secret_key()
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ROOT_DIR = environ.Path(__file__) - 2
 
-DEBUG = True
-
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 
 # Application definition
@@ -47,8 +43,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "django_celery_results",
     "django_celery_beat",
+    "apps.users",
     "drf_yasg",
-    "debug_toolbar",
     "admin_extra_buttons",
 ]
 
@@ -107,7 +103,7 @@ SIMPLE_JWT = {
 }
 # endregion
 
-
+AUTH_USER_MODEL = "users.User"
 LOGIN_URL = "rest_framework:login"
 LOGOUT_URL = "rest_framework:logout"
 
@@ -135,12 +131,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "utils.validators.LowercaseValidator",
-    },
-    {
-        "NAME": "utils.validators.DontRepeatValidator",
-        "OPTIONS": {
-            "history": 10,
-        },
     },
 ]
 

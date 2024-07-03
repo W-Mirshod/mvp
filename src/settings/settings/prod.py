@@ -5,9 +5,10 @@ DEBUG = env.bool("DEBUG", False)
 SQL_DEBUG = env.bool("SQL_DEBUG", False)
 
 if SQL_DEBUG:
-    MIDDLEWARE = MIDDLEWARE + ["utils.middleware.DebugQuerysetsWare"]
+    MIDDLEWARE += ["utils.middleware.DebugQuerysetsWare"]
 if DEBUG:
-    MIDDLEWARE = MIDDLEWARE + [
+    INSTALLED_APPS += ["debug_toolbar"]
+    MIDDLEWARE += [
         "debug_toolbar.middleware.DebugToolbarMiddleware",
     ]
 
@@ -50,5 +51,3 @@ SWAGGER_SETTINGS = {
     },
 }
 # endregion
-
-
