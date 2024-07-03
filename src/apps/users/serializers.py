@@ -1,0 +1,53 @@
+from typing import Any, Dict
+
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import update_last_login
+from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.settings import api_settings
+
+from .models import User
+
+
+class TokenSerializer(TokenObtainPairSerializer):
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[Any, Any]:
+        authenticate_kwargs = {
+            self.username_field: attrs[self.username_field],
+            "password": attrs["password"],
+        }
+        try:
+            authenticate_kwargs["request"] = self.context["request"]
+        except KeyError:
+            pass
+
+        self.user = authenticate(**authenticate_kwargs)
+
+        if not self.user:
+            return {"error": "Invalid credentials, try again"}
+        if not self.user.is_active:
+            return {"error": "Account disabled, contact admin"}
+        if not self.user.is_verified:
+            return {"error": "Email is not verified"}
+        if not api_settings.USER_AUTHENTICATION_RULE(self.user):
+            return {"error": "Invalid user credentials"}
+
+        refresh = self.get_token(self.user)
+
+        data = {
+            "user_id": self.user.id,
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }
+
+        if api_settings.UPDATE_LAST_LOGIN:
+            update_last_login(None, self.user)
+
+        return data
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = "__all__"
