@@ -1,18 +1,25 @@
 from rest_framework import permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.tokens import RefreshToken
+from apps.users.models.jwt import BlackListedAccessToken
+
 
 class IsTokenValid(permissions.BasePermission):
     """
     Custom permission to check if the provided JWT is valid.
     """
     def has_permission(self, request, view):
+        token = request.META.get('HTTP_AUTHORIZATION')
+        if not token:
+            return False
         try:
-            token = request.headers.get('Authorization').split()[1]
-            RefreshToken(token).validate(request.user)
-        except Exception as e:
-            raise PermissionDenied(detail="Invalid or expired token.")
-        return True
+            jti, jti_refresh = token.split()
+            blacklisted_token = BlackListedAccessToken.objects.filter(jti=jti, jti_refresh=jti_refresh).first()
+            if blacklisted_token:
+                raise PermissionDenied('Access token is blacklisted')
+            return True
+        except Exception:
+            return False
 
 class IsOneTimeTokenValid(permissions.BasePermission):
     """
