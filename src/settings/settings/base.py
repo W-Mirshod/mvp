@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "apps.users",
     "drf_yasg",
     "admin_extra_buttons",
+    "apps.mail_servers",
 ]
 
 MIDDLEWARE = [
