@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     "apps.users",
     "drf_yasg",
     "admin_extra_buttons",
+    'apps.changelog',
+
 ]
 
 MIDDLEWARE = [
@@ -55,6 +57,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    'apps.changelog.middleware.RequestMiddleware',
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
