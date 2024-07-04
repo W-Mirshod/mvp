@@ -5,7 +5,9 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -63,3 +65,22 @@ class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
         if "error" in serializer.validated_data.keys():
             current_status = status.HTTP_401_UNAUTHORIZED
         return Response(serializer.validated_data, status=current_status)
+
+
+class EmailVerificationView(GenericAPIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        jwt_authenticator = JWTAuthentication()
+        user_auth = jwt_authenticator.authenticate(request)
+
+        if user_auth is None:
+            return Response(
+                {"detail": "Invalid or missing token"}, status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        user, token = user_auth
+        user.is_verified = True
+        user.save()
+        return Response({"detail": "Email verified", "user_id": user.id}, status=status.HTTP_200_OK)
