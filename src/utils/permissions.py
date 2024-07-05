@@ -1,7 +1,7 @@
 from rest_framework import permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.tokens import RefreshToken
-from apps.users.models.jwt import BlackListedAccessToken
+
 
 
 class IsTokenValid(permissions.BasePermission):
@@ -14,13 +14,16 @@ class IsTokenValid(permissions.BasePermission):
             return False
         try:
             jti, jti_refresh = token.split()
-            blacklisted_token = BlackListedAccessToken.objects.filter(jti=jti, jti_refresh=jti_refresh).first()
-            if blacklisted_token:
-                raise PermissionDenied('Access token is blacklisted')
+            refresh_token = RefreshToken(jti_refresh)
+            refresh_token.verify()
             return True
         except Exception:
             return False
 
+class RefreshToken(RefreshToken):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.is_one_time = kwargs.get('is_one_time', False)
 class IsOneTimeTokenValid(permissions.BasePermission):
     """
     Custom permission to check if the provided one-time JWT is valid.
@@ -28,14 +31,19 @@ class IsOneTimeTokenValid(permissions.BasePermission):
     def has_permission(self, request, view):
         try:
             token = request.headers.get('Authorization').split()[1]
-            RefreshToken(token).validate(request.user, one_time=True)
+            refresh_token = RefreshToken(token)
+            refresh_token.verify()
+            if refresh_token.payload.get('one_time', False):
+                return True
+            else:
+                raise PermissionDenied('Token is not one-time')
         except Exception as e:
             raise PermissionDenied(detail="Invalid or expired one-time token.")
-        return True
+        return False
 
 class IsOwner(permissions.BasePermission):
     """
     Custom permission to check if the user is the owner of the object.
     """
     def has_object_permission(self, request, view, obj):
-        return obj.user == request.user
+        return obj == request.user
