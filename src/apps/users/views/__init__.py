@@ -1,1 +1,1 @@
-from .v1.views_users import LoginTokenView, RegistrationViewSet
+from .v1.views_users import LoginTokenView, RegistrationViewSet, RefreshTokenView

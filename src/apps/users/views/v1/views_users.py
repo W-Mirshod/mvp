@@ -8,8 +8,10 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.permissions import AllowAny
+
 
 from apps.users.serializers import TokenSerializer, UserRegistrationSerializer
 from utils.views import MultiSerializerViewSet
@@ -101,3 +103,24 @@ class RegistrationViewSet(ModelViewSet):
             return Response({"error": text}, status=status.HTTP_400_BAD_REQUEST)
         logger.info(f'Crated a new user (email:{data.get("email")})')
         return response
+
+class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
+    authentication_classes = ()
+    permission_classes = [AllowAny]
+
+    def refresh(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+        data = serializer.validated_data
+        refresh = serializer.token_class(data["refresh"])
+
+        data["user_id"] = refresh.payload["user_id"]
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
