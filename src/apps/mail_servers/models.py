@@ -17,3 +17,11 @@ class IMAPServer(MailServer):
 
 class ProxyServer(MailServer):
     pass
+
+class MessageTemplate(models.Model):
+    is_deleted = models.BooleanField(default=False)
+    from_address = models.CharField(max_length=255, blank=True, null=True)
+    template = models.TextField(blank=True, null=True)
+    message = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
