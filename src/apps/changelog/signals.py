@@ -4,6 +4,8 @@ from django.dispatch import receiver
 from .models import ChangeLog
 from .middleware import get_current_user, get_current_url
 from .mixins import ChangeloggableMixin
+from .choices import ActionType
+
 
 
 @receiver(post_save)
@@ -11,7 +13,7 @@ def log_changes_on_save(sender, instance, created, **kwargs):
     if not isinstance(instance, ChangeloggableMixin) or sender == ChangeLog:
         return
 
-    action = 'created' if created else 'updated'
+    action = ActionType.CREATED.value if created else ActionType.UPDATED.value
     changes = instance.get_changed_fields()
     current_user = get_current_user()
     current_url = get_current_url()
@@ -22,7 +24,7 @@ def log_changes_on_save(sender, instance, created, **kwargs):
         url=current_url,
         model_name=sender.__name__,
         object_id=instance.pk,
-        data_changes=json.dumps(changes),
+        data=json.dumps(changes),
         action=action
     )
 
@@ -41,6 +43,7 @@ def log_changes_on_delete(sender, instance, **kwargs):
         url=current_url,
         model_name=sender.__name__,
         object_id=instance.pk,
-        data_changes=json.dumps(changes),
-        action='deleted'
+        data=json.dumps(changes),
+        action=ActionType.DELETED.value
+
     )
