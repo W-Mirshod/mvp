@@ -11,6 +11,7 @@ from rest_framework.reverse import reverse, reverse_lazy
 from utils.tests import CustomViewTestCase
 
 from .factories import UserFactory
+from ..models.jwt import BlackListedAccessToken
 
 User = get_user_model()
 
@@ -92,3 +93,32 @@ class LoginTokenViewTests(CustomViewTestCase):
         data = {"email": "testuser@example.com", "password": "testpassword"}
         response = self.client.post(reverse_lazy("users_api:token_obtain_pair"), data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class LogoutViewTests(CustomViewTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+            is_active=True,
+            is_verified=True,
+        )
+
+    def test_successful_logout(self):
+        data = {
+            "email": "testuser@example.com",
+            "password": "testpassword"
+        }
+        user = User.objects.get(email=data['email'])
+        self.auth_user(User, user, data['password'])
+        response_logout = self.client.post(reverse_lazy("users_api:logout"), data)
+        self.assertEqual(response_logout.status_code, status.HTTP_200_OK)
+        # self.assertFalse(get_user(self.client).is_authenticated)
+
+    def test_logout_unauthenticated(self):
+        self.user.is_active = False
+        self.client.post(reverse_lazy("users_api:logout"))
+        response = self.client.post(reverse_lazy("users_api:logout"))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
