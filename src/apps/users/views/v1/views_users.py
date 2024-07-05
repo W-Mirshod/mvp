@@ -73,14 +73,15 @@ class EmailVerificationView(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         jwt_authenticator = JWTAuthentication()
-        user_auth = jwt_authenticator.authenticate(request)
+        raw_token = request.GET.get("token")
 
-        if user_auth is None:
+        if raw_token is None:
             return Response(
                 {"detail": "Invalid or missing token"}, status=status.HTTP_401_UNAUTHORIZED
             )
 
-        user, token = user_auth
+        validated_token = jwt_authenticator.get_validated_token(raw_token)
+        user = jwt_authenticator.get_user(validated_token)
         user.is_verified = True
         user.save()
-        return Response({"detail": "Email verified", "user_id": user.id}, status=status.HTTP_200_OK)
+        return Response({"detail": "Email verified"}, status=status.HTTP_200_OK)
