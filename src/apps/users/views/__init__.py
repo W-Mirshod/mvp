@@ -1,1 +1,1 @@
-from .v1.views_users import EmailVerificationView, LoginTokenView
+from .v1.views_users import EmailVerificationView, LoginTokenView, RegistrationViewSet
