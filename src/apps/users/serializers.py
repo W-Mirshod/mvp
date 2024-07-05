@@ -2,7 +2,10 @@ from typing import Any, Dict
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
+from django.contrib.auth.password_validation import validate_password
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
 
@@ -46,8 +49,30 @@ class TokenSerializer(TokenObtainPairSerializer):
         return data
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
 
     class Meta:
         model = User
-        fields = "__all__"
+        fields = (
+            "email",
+            "password",
+        )
+
+    def validate_email(self, attr):
+        if User.objects.filter(email=attr).exists():
+            raise ValidationError(
+                {"error": _("User with this e-mail already exists.")},
+                code="invalid_email",
+            )
+        return attr
+
+    def create(self, validated_data):
+        user = User.objects.create(
+            email=validated_data["email"],
+        )
+
+        user.set_password(validated_data["password"])
+        user.save()
+
+        return user
