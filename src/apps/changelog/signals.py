@@ -2,11 +2,9 @@ import json
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from .models import ChangeLog
-from .middleware import get_current_user
+from .middleware import get_current_user, get_current_url
 from .mixins import ChangeloggableMixin
-import logging
 
-logger = logging.getLogger(__name__)
 
 @receiver(post_save)
 def log_changes_on_save(sender, instance, created, **kwargs):
@@ -16,13 +14,12 @@ def log_changes_on_save(sender, instance, created, **kwargs):
     action = 'created' if created else 'updated'
     changes = instance.get_changed_fields()
     current_user = get_current_user()
-    ipaddress = None
-    if hasattr(instance, '_request'):
-        ipaddress = instance._request.META.get('REMOTE_ADDR')
+    current_url = get_current_url()
+
 
     ChangeLog.objects.create(
         user=current_user,
-        url=None,
+        url=current_url,
         model_name=sender.__name__,
         object_id=instance.pk,
         data_changes=json.dumps(changes),
@@ -36,13 +33,12 @@ def log_changes_on_delete(sender, instance, **kwargs):
 
     changes = {field.name: getattr(instance, field.name) for field in instance._meta.fields}
     current_user = get_current_user()
-    ipaddress = None
-    if hasattr(instance, '_request'):
-        ipaddress = instance._request.META.get('REMOTE_ADDR')
+    current_url = get_current_url()
+
 
     ChangeLog.objects.create(
         user=current_user,
-        url=None,
+        url=current_url,
         model_name=sender.__name__,
         object_id=instance.pk,
         data_changes=json.dumps(changes),

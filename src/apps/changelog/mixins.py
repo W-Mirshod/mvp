@@ -19,9 +19,8 @@ class ChangeloggableMixin(models.Model):
     def get_changed_fields(self):
         """ Receiving the changed data """
         result = {}
-        for name, value in self._original_values.items():
-            if value != getattr(self, name):
-                temp = {}
-                temp[name] = getattr(self, name)
-                result.update(temp)
+        for name, original_value in self._original_values.items():
+            current_value = getattr(self, name)
+            if original_value != current_value:
+                result[name] = current_value
         return result
