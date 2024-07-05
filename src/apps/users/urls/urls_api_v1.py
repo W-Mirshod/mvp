@@ -6,5 +6,9 @@ app_name = "users_api"
 
 urlpatterns = [
     path("login/", views.LoginTokenView.as_view({"post": "login"}), name="token_obtain_pair"),
-    path("email_verify/", views.EmailVerificationView.as_view(), name="email_verify"),
+    path(
+        "email_verify/",
+        views.EmailVerificationView.as_view({"post": "email_verify"}),
+        name="email_verify",
+    ),
 ]

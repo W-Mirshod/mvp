@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.db import transaction
@@ -8,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from apps.users.serializers import TokenSerializer
@@ -67,21 +68,29 @@ class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
         return Response(serializer.validated_data, status=current_status)
 
 
-class EmailVerificationView(GenericAPIView):
+class EmailVerificationView(MultiSerializerViewSet):
     authentication_classes = []
     permission_classes = []
 
-    def post(self, request, *args, **kwargs):
+    @transaction.atomic
+    def email_verify(self, request, *args, **kwargs):
         jwt_authenticator = JWTAuthentication()
         raw_token = request.GET.get("token")
 
         if raw_token is None:
+            return Response({"detail": "Missing token"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            validated_token = jwt_authenticator.get_validated_token(raw_token)
+            user = jwt_authenticator.get_user(validated_token)
+        except InvalidToken as e:
+            return Response({"detail": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
             return Response(
-                {"detail": "Invalid or missing token"}, status=status.HTTP_401_UNAUTHORIZED
+                {"detail": "An error occurred during verification"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        validated_token = jwt_authenticator.get_validated_token(raw_token)
-        user = jwt_authenticator.get_user(validated_token)
         user.is_verified = True
         user.save()
         return Response({"detail": "Email verified"}, status=status.HTTP_200_OK)
