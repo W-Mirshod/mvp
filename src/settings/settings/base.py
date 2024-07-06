@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django_celery_results",
     "django_celery_beat",
     "apps.users",
+    "apps.mail_servers",
     "drf_yasg",
     "admin_extra_buttons",
 ]
