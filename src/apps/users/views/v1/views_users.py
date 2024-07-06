@@ -11,9 +11,11 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from apps.users.serializers import TokenSerializer, UserRegistrationSerializer
+from utils.mailer import Mailer
 from utils.views import MultiSerializerViewSet
 
 logger = logging.getLogger(__name__)
@@ -89,6 +91,13 @@ class RegistrationViewSet(ModelViewSet):
             # create user
             response = super().create(request, *args, **kwargs)
             if response.status_code == status.HTTP_201_CREATED:
+                new_user = User.objects.get(email=response.data["email"])
+                new_user.is_active = True
+                new_user.save()
+                verification_mailer = Mailer()
+                verification_mailer.send_verification_email(
+                    data.get("email"), self._generate_access_token(new_user)
+                )
                 response = Response({"status": "Ok"}, status=status.HTTP_201_CREATED)
 
         except ValidationError as ex:
@@ -103,6 +112,11 @@ class RegistrationViewSet(ModelViewSet):
             return Response({"error": text}, status=status.HTTP_400_BAD_REQUEST)
         logger.info(f'Crated a new user (email:{data.get("email")})')
         return response
+
+    def _generate_access_token(self, user):
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+        return str(access)
 
 
 class EmailVerificationView(MultiSerializerViewSet):
