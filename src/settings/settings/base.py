@@ -160,3 +160,9 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# region Redis
+REDIS_HOST = env.str("REDIS_HOST", "redis")
+REDIS_PORT = env.str("REDIS_PORT", "6379")
+REDIS_DB = "0"
+# endregion
