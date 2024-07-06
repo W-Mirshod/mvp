@@ -1,17 +1,11 @@
-import json
-from datetime import timedelta, timezone as dt_timezone
-
-from django.conf import settings
 from django.contrib.auth import get_user, get_user_model
 from django.test import TestCase
-from django.utils import timezone
 from rest_framework import status
-from rest_framework.reverse import reverse, reverse_lazy
+from rest_framework.reverse import reverse_lazy
 
 from utils.tests import CustomViewTestCase
 
 from .factories import UserFactory
-from ..models.jwt import BlackListedAccessToken
 
 User = get_user_model()
 
@@ -114,7 +108,6 @@ class LogoutViewTests(CustomViewTestCase):
         self.auth_user(User, user, data['password'])
         response_logout = self.client.post(reverse_lazy("users_api:logout"), data)
         self.assertEqual(response_logout.status_code, status.HTTP_200_OK)
-        # self.assertFalse(get_user(self.client).is_authenticated)
 
     def test_logout_unauthenticated(self):
         self.user.is_active = False
