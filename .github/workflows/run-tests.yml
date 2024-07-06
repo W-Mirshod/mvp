@@ -77,8 +77,8 @@ jobs:
     - name: Add .env
       run: |
         touch ./src/settings/settings/.env
-        echo DEBUG=True >> ./src/settings/.env
-        echo SQL_DEBUG=True >> ./src/settings/.env
+        echo DEBUG=False >> ./src/settings/.env
+        echo SQL_DEBUG=False >> ./src/settings/.env
         echo SECRET_KEY=secrets.SECRET_KEY >> ./src/settings/settings/.env
         echo DJANGO_ALLOWED_HOSTS='*' >> ./src/settings/settings/.env
         echo STATIC_ROOT=var/www/staticfiles >> ./src/settings/settings/.env
