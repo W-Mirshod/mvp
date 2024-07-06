@@ -1,1 +1,1 @@
-from .users import User, UserManager
+from .users import User, UserManager  # noqa: F401

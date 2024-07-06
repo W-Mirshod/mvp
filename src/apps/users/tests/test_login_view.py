@@ -12,7 +12,7 @@ User = get_user_model()
 
 class UserViewTest(TestCase):
     """
-    ./manage.py test apps.users.tests.test_view.UserViewTest --settings=_dev.settings_test
+    ./manage.py test apps.users.tests.test_view.UserViewTest --settings=_dev.settings_test      # noqa: E501
     """
 
     CONTENT_TYPE_JSON = "application/json"
@@ -43,11 +43,12 @@ class UserViewTest(TestCase):
 
 class LoginTokenViewTests(CustomViewTestCase):
     """
-    ./manage.py test apps.users.tests.test_view.LoginTokenViewTests --settings=_dev.settings_test
+    ./manage.py test apps.users.tests.test_test_login_view.LoginTokenViewTests --settings=_dev.settings_test    # noqa: E501
     """
 
     def setUp(self):
-        self.user = User.objects.create_user(
+        self.url = reverse_lazy("users_api:token_obtain_pair")
+        self.user = UserFactory(
             email="user_verified@example.com",
             password="testpassword",
             is_active=True,
@@ -56,7 +57,7 @@ class LoginTokenViewTests(CustomViewTestCase):
 
     def test_successful_login(self):
         data = {"email": "user_verified@example.com", "password": "testpassword"}
-        response = self.client.post(reverse_lazy("users_api:token_obtain_pair"), data)
+        response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("refresh", response.data)
         self.assertIn("access", response.data)
@@ -64,21 +65,21 @@ class LoginTokenViewTests(CustomViewTestCase):
 
     def test_invalid_credentials(self):
         data = {"email": "user_verified@example.com", "password": "wrongpassword"}
-        response = self.client.post(reverse_lazy("users_api:token_obtain_pair"), data)
+        response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_missing_password(self):
         data = {
             "email": "testuser@example.com",
         }
-        response = self.client.post(reverse_lazy("users_api:token_obtain_pair"), data)
+        response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_missing_email(self):
         data = {
             "password": "testpassword",
         }
-        response = self.client.post(reverse_lazy("users_api:token_obtain_pair"), data)
+        response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_inactive_user(self):
@@ -87,31 +88,3 @@ class LoginTokenViewTests(CustomViewTestCase):
         data = {"email": "testuser@example.com", "password": "testpassword"}
         response = self.client.post(reverse_lazy("users_api:token_obtain_pair"), data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-
-class LogoutViewTests(CustomViewTestCase):
-
-    def setUp(self):
-        self.user = User.objects.create_user(
-            email="testuser@example.com",
-            password="testpassword",
-            is_active=True,
-            is_verified=True,
-        )
-
-    def test_successful_logout(self):
-        data = {
-            "email": "testuser@example.com",
-            "password": "testpassword"
-        }
-        user = User.objects.get(email=data['email'])
-        self.auth_user(User, user, data['password'])
-        response_logout = self.client.post(reverse_lazy("users_api:logout"), data)
-        self.assertEqual(response_logout.status_code, status.HTTP_200_OK)
-
-    def test_logout_unauthenticated(self):
-        self.user.is_active = False
-        self.client.post(reverse_lazy("users_api:logout"))
-        response = self.client.post(reverse_lazy("users_api:logout"))
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-

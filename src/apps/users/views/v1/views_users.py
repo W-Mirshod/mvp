@@ -1,22 +1,24 @@
 import logging
-from datetime import timedelta, datetime
 
-from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from apps.users.serializers import TokenSerializer
+from apps.users.serializers import TokenSerializer, UserRegistrationSerializer
 from utils.views import MultiSerializerViewSet
-from rest_framework.permissions import IsAuthenticated
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
@@ -57,7 +59,7 @@ class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-        except TokenError as e:
+        except TokenError:
             current_status = status.HTTP_401_UNAUTHORIZED
         except ValidationError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -67,6 +69,41 @@ class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
         if "error" in serializer.validated_data.keys():
             current_status = status.HTTP_401_UNAUTHORIZED
         return Response(serializer.validated_data, status=current_status)
+
+
+class RegistrationViewSet(ModelViewSet):
+    queryset = User.objects.none()
+    serializer_class = UserRegistrationSerializer
+    authentication_classes = []
+    permission_classes = []
+    http_method_names = [
+        "post",
+    ]
+
+    def registration(self, request, *args, **kwargs):
+        try:
+            # check of input data
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            data = serializer.validated_data
+
+            # create user
+            response = super().create(request, *args, **kwargs)
+            if response.status_code == status.HTTP_201_CREATED:
+                response = Response({"status": "Ok"}, status=status.HTTP_201_CREATED)
+
+        except ValidationError as ex:
+            return Response({"error": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            logger.error(f"Can`t register a new user: {ex}")
+            if isinstance(ex.args, tuple):
+                text = ", ".join([str(e) for e in ex.args])
+            else:
+                full_text = str(ex.detail)
+                text = full_text.split("ErrorDetail(string='")[1].split("'")[0]
+            return Response({"error": text}, status=status.HTTP_400_BAD_REQUEST)
+        logger.info(f'Crated a new user (email:{data.get("email")})')
+        return response
 
 
 class LogoutViewSet(MultiSerializerViewSet):
