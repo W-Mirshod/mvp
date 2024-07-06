@@ -43,7 +43,7 @@ class UserViewTest(TestCase):
 
 class LoginTokenViewTests(CustomViewTestCase):
     """
-    ./manage.py test apps.users.tests.test_test_login_view.LoginTokenViewTests --settings=_dev.settings_test
+    ./manage.py test apps.users.tests.test_test_login_view.LoginTokenViewTests --settings=_dev.settings_test    # noqa: E501
     """
 
     def setUp(self):

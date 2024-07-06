@@ -1,10 +1,8 @@
-import os
 from datetime import timedelta
 from pathlib import Path
 
 import environ
 from django.utils.crypto import get_random_string
-from django.utils.translation import gettext_lazy as _
 
 env = environ.Env(
     # set casting, default value
@@ -44,12 +42,10 @@ INSTALLED_APPS = [
     "django_celery_results",
     "django_celery_beat",
     "apps.users",
-    'apps.changelog',
+    "apps.changelog",
     "apps.mail_servers",
     "drf_yasg",
     "admin_extra_buttons",
-
-
 ]
 
 MIDDLEWARE = [
@@ -59,7 +55,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    'apps.changelog.middleware.RequestMiddleware',
+    "apps.changelog.middleware.RequestMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
