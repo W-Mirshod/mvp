@@ -104,4 +104,5 @@ jobs:
 
     - name: Run tests
       run: |
+        cd src/
         python ./manage.py test
