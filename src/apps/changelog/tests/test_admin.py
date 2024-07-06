@@ -53,5 +53,5 @@ class ChangeLogAdminTest(TestCase):
     def test_search_fields(self):
         self.assertEqual(
             self.admin.search_fields,
-            ("model_name", "user__username", "object_id", "action"),
+            ("model_name", "user__email", "object_id", "action"),
         )
