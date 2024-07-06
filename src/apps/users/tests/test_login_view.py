@@ -51,7 +51,7 @@ class LoginTokenViewTests(CustomViewTestCase):
 
     def setUp(self):
         self.url = reverse_lazy("users_api:token_obtain_pair")
-        self.user = User.objects.create_user(
+        self.user = UserFactory(
             email="user_verified@example.com",
             password="testpassword",
             is_active=True,
