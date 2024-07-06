@@ -2,7 +2,5 @@ from django.apps import AppConfig
 
 
 class ChangelogConfig(AppConfig):
-    name = 'apps.changelog'
-
-    def ready(self):
-        import apps.changelog.signals
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.changelog"
