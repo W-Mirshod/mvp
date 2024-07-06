@@ -12,7 +12,7 @@ User = get_user_model()
 
 class UserViewTest(TestCase):
     """
-    ./manage.py test apps.users.tests.test_view.UserViewTest --settings=_dev.settings_test      # flake8: noqa
+    ./manage.py test apps.users.tests.test_view.UserViewTest --settings=_dev.settings_test      # noqa: E501
     """
 
     CONTENT_TYPE_JSON = "application/json"

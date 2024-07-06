@@ -1,1 +1,1 @@
-from .users import User, UserManager  # flake8: noqa
+from .users import User, UserManager  # noqa: F401

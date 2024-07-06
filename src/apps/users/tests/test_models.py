@@ -5,7 +5,7 @@ from apps.users.models.users import User
 
 class UserCreationTestCase(TestCase):
     """
-    ./manage.py test apps.users.tests.test_models.UserCreationTestCase --settings=_dev.settings_test        # flake8: noqa
+    ./manage.py test apps.users.tests.test_models.UserCreationTestCase --settings=_dev.settings_test        # noqa: E501
     """
 
     def test_create_user(self):
