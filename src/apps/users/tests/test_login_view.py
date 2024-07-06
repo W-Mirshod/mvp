@@ -1,6 +1,3 @@
-import json
-from datetime import timedelta, timezone as dt_timezone
-
 from django.contrib.auth import get_user, get_user_model
 from django.test import TestCase
 from rest_framework import status
@@ -15,7 +12,7 @@ User = get_user_model()
 
 class UserViewTest(TestCase):
     """
-    ./manage.py test apps.users.tests.test_view.UserViewTest --settings=_dev.settings_test
+    ./manage.py test apps.users.tests.test_view.UserViewTest --settings=_dev.settings_test      # flake8: noqa
     """
 
     CONTENT_TYPE_JSON = "application/json"
