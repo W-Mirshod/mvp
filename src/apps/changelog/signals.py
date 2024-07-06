@@ -1,11 +1,12 @@
 import json
+
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from .models import ChangeLog
-from .middleware import get_current_user, get_current_url
-from .mixins import ChangeloggableMixin
-from .choices import ActionType
 
+from .choices import ActionType
+from .middleware import get_current_url, get_current_user
+from .mixins import ChangeloggableMixin
+from .models import ChangeLog
 
 
 @receiver(post_save)
@@ -18,15 +19,15 @@ def log_changes_on_save(sender, instance, created, **kwargs):
     current_user = get_current_user()
     current_url = get_current_url()
 
-
     ChangeLog.objects.create(
         user=current_user,
         url=current_url,
         model_name=sender.__name__,
         object_id=instance.pk,
         data=json.dumps(changes),
-        action=action
+        action=action,
     )
+
 
 @receiver(pre_delete)
 def log_changes_on_delete(sender, instance, **kwargs):
@@ -37,13 +38,11 @@ def log_changes_on_delete(sender, instance, **kwargs):
     current_user = get_current_user()
     current_url = get_current_url()
 
-
     ChangeLog.objects.create(
         user=current_user,
         url=current_url,
         model_name=sender.__name__,
         object_id=instance.pk,
         data=json.dumps(changes),
-        action=ActionType.DELETED.value
-
+        action=ActionType.DELETED.value,
     )

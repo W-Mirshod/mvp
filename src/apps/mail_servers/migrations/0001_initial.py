@@ -7,47 +7,61 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='IMAPServer',
+            name="IMAPServer",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.URLField()),
-                ('port', models.IntegerField()),
-                ('password', models.CharField(max_length=255)),
-                ('queries_per_sec', models.IntegerField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("url", models.URLField()),
+                ("port", models.IntegerField()),
+                ("password", models.CharField(max_length=255)),
+                ("queries_per_sec", models.IntegerField()),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ProxyServer',
+            name="ProxyServer",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.URLField()),
-                ('port', models.IntegerField()),
-                ('password', models.CharField(max_length=255)),
-                ('queries_per_sec', models.IntegerField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("url", models.URLField()),
+                ("port", models.IntegerField()),
+                ("password", models.CharField(max_length=255)),
+                ("queries_per_sec", models.IntegerField()),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='SMTPServer',
+            name="SMTPServer",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.URLField()),
-                ('port', models.IntegerField()),
-                ('password', models.CharField(max_length=255)),
-                ('queries_per_sec', models.IntegerField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("url", models.URLField()),
+                ("port", models.IntegerField()),
+                ("password", models.CharField(max_length=255)),
+                ("queries_per_sec", models.IntegerField()),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]
