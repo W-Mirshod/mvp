@@ -86,13 +86,12 @@ jobs:
         echo SQL_DATABASE=mega_mailer >> ./src/settings/settings/.env
         echo SQL_PORT=5432 >> ./src/settings/settings/.env
         echo CELERY_ACCEPT_CONTENT=application/json >> ./src/settings/settings/.env
-        cd src/
-        poetry run python manage.py test apps/
 
     - name: Apply migrations
       run: |
-        python src/manage.py migrate
+        cd src/
+        python ./manage.py migrate
 
     - name: Run tests
       run: |
-        python src/manage.py test
+        python ./manage.py test
