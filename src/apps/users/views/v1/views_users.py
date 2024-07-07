@@ -118,7 +118,7 @@ class LogoutViewSet(MultiSerializerViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-        except TokenError as e:
+        except TokenError:
             current_status = status.HTTP_401_UNAUTHORIZED
         except ValidationError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
