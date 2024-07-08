@@ -46,6 +46,9 @@ INSTALLED_APPS = [
     "apps.mail_servers",
     "drf_yasg",
     "admin_extra_buttons",
+    "constance",
+    "constance.backends.database",
+
 ]
 
 MIDDLEWARE = [
@@ -165,4 +168,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REDIS_HOST = env.str("REDIS_HOST", "redis")
 REDIS_PORT = env.str("REDIS_PORT", "6379")
 REDIS_DB = "0"
+# endregion
+
+# region CONSTANCE
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+CONSTANCE_CONFIG = {
+    'MY_TEST_SETTING': (1, 'Parameter description'),
+    'TEST_ENABLE_FEATURE': (True, 'Description of the functionality enable flag'),
+}
 # endregion
