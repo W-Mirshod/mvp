@@ -13,10 +13,8 @@ from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenBlacklistView, TokenObtainPairView
 
-from apps.users.models.jwt import BlackListedAccessToken
 from apps.users.serializers import TokenSerializer, UserRegistrationSerializer
 from utils.views import MultiSerializerViewSet
 
