@@ -11,7 +11,7 @@ from apps.users.views.v1.views_users import RefreshTokenView
 
 class UserCreationTestCase(TestCase):
     """
-    ./manage.py test apps.users.tests.test_models.UserCreationTestCase --settings=_dev.settings_test
+    ./manage.py test apps.users.tests.test_models.UserCreationTestCase --settings=_dev.settings_test        # noqa: E501
     """
 
     def test_create_user(self):

@@ -1,10 +1,8 @@
-import os
 from datetime import timedelta
 from pathlib import Path
 
 import environ
 from django.utils.crypto import get_random_string
-from django.utils.translation import gettext_lazy as _
 
 env = environ.Env(
     # set casting, default value
@@ -44,6 +42,8 @@ INSTALLED_APPS = [
     "django_celery_results",
     "django_celery_beat",
     "apps.users",
+    "apps.changelog",
+    "apps.mail_servers",
     "drf_yasg",
     "admin_extra_buttons",
 ]
@@ -55,6 +55,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.changelog.middleware.RequestMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -159,3 +160,9 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# region Redis
+REDIS_HOST = env.str("REDIS_HOST", "redis")
+REDIS_PORT = env.str("REDIS_PORT", "6379")
+REDIS_DB = "0"
+# endregion
