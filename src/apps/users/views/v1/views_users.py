@@ -145,9 +145,9 @@ class EmailVerificationView(MultiSerializerViewSet):
         try:
             validated_token = jwt_authenticator.get_validated_token(raw_token)
             user = jwt_authenticator.get_user(validated_token)
-        except InvalidToken as e:
+        except InvalidToken:
             return Response({"detail": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
-        except Exception as e:
+        except Exception:
             return Response(
                 {"detail": "An error occurred during verification"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,

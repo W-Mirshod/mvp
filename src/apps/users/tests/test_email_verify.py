@@ -1,16 +1,8 @@
-import json
-from datetime import timedelta, timezone as dt_timezone
-
-from django.conf import settings
-from django.contrib.auth import get_user, get_user_model
-from django.test import TestCase
-from django.utils import timezone
+from django.contrib.auth import get_user_model
 from rest_framework import status
-from rest_framework.reverse import reverse, reverse_lazy
+from rest_framework.reverse import reverse_lazy
 
 from utils.tests import CustomViewTestCase
-
-from .factories import UserFactory
 
 User = get_user_model()
 
