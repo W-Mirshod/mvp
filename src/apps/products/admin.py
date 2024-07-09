@@ -9,5 +9,5 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 @admin.register(Tariff)
-class ProductAdmin(admin.ModelAdmin):
+class TariffAdmin(admin.ModelAdmin):
     list_display = ("title", "rate", "product")
