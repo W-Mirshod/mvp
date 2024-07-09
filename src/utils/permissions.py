@@ -41,7 +41,7 @@ class IsOneTimeTokenValid(permissions.BasePermission):
                 return True
             else:
                 raise PermissionDenied("Token is not one-time")
-        except Exception as e:
+        except Exception:
             raise PermissionDenied(detail="Invalid or expired one-time token.")
         return False
 

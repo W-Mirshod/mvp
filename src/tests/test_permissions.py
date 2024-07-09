@@ -1,8 +1,6 @@
-from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
-from rest_framework import permissions, status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.test import APIClient, APIRequestFactory
+from rest_framework.test import APIRequestFactory
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.users.models import User
@@ -10,6 +8,11 @@ from utils.permissions import IsOneTimeTokenValid, IsOwner, IsTokenValid
 
 
 class TestIsOneTimeTokenValid(TestCase):
+    """
+    python manage.py test tests.test_permissions --settings=_dev.settings_test
+
+    """
+
     def setUp(self):
         self.user = User.objects.create_user(
             email="test@example.com", password="testpass"
