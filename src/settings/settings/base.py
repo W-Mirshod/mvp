@@ -46,6 +46,9 @@ INSTALLED_APPS = [
     "apps.mail_servers",
     "drf_yasg",
     "admin_extra_buttons",
+    "constance",
+    "constance.backends.database",
+
 ]
 
 MIDDLEWARE = [
@@ -165,4 +168,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REDIS_HOST = env.str("REDIS_HOST", "redis")
 REDIS_PORT = env.str("REDIS_PORT", "6379")
 REDIS_DB = "0"
+# endregion
+
+# region CONSTANCE
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+CONSTANCE_CONFIG = {
+    'ENABLE_SMTP_SENDING': (False, 'Enable or disable SMTP sending'),
+    'ENABLE_IMAP_SENDING': (False, 'Enable or disable IMAP sending'),
+    'ENABLE_PROXY_SENDING': (False, 'Enable or disable proxy sending'),
+}
 # endregion
