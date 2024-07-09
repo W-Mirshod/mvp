@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import ModelViewSet
 
+
 class MultiSerializerViewSet(ModelViewSet):
     filtersets = {
         "default": None,
@@ -16,7 +17,9 @@ class MultiSerializerViewSet(ModelViewSet):
 
     @property
     def serializer_class(self):
-        return self.serializers.get(self.action) or self.serializers.get("default", Serializer)
+        return self.serializers.get(self.action) or self.serializers.get(
+            "default", Serializer
+        )
 
     def get_response(self, data=None):
         return Response(data)

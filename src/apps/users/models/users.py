@@ -63,9 +63,11 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects = UserManager()
+
     def get_one_time_token(self):
         token = RefreshToken.for_user(self)
-        token['is_one_time'] = True
+        token["is_one_time"] = True
         return str(token)
+
     class Meta(AbstractUser.Meta):
         ordering = ["-id"]
