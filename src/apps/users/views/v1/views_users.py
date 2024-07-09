@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from drf_yasg import openapi
@@ -15,7 +16,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from apps.users.serializers import TokenSerializer, UserRegistrationSerializer
-from utils.mailer import Mailer
+from apps.users.tasks import send_verification_email_task
 from utils.views import MultiSerializerViewSet
 
 logger = logging.getLogger(__name__)
@@ -94,10 +95,20 @@ class RegistrationViewSet(ModelViewSet):
                 new_user = User.objects.get(email=response.data["email"])
                 new_user.is_active = True
                 new_user.save()
-                verification_mailer = Mailer()
-                verification_mailer.send_verification_email(
-                    data.get("email"), self._generate_access_token(new_user)
-                )
+
+                if settings.CELERY_BROKER_URL:
+                    send_verification_email_task.delay(
+                        settings.DEFAULT_FROM_EMAIL,
+                        data.get("email"),
+                        self._generate_access_token(new_user),
+                    )
+                else:
+                    send_verification_email_task(
+                        settings.DEFAULT_FROM_EMAIL,
+                        data.get("email"),
+                        self._generate_access_token(new_user),
+                    )
+
                 response = Response({"status": "Ok"}, status=status.HTTP_201_CREATED)
 
         except ValidationError as ex:
