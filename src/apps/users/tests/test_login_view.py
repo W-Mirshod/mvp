@@ -1,6 +1,3 @@
-import json
-from datetime import timedelta, timezone as dt_timezone
-
 from django.contrib.auth import get_user, get_user_model
 from django.test import TestCase
 from rest_framework import status
@@ -15,7 +12,7 @@ User = get_user_model()
 
 class UserViewTest(TestCase):
     """
-    ./manage.py test apps.users.tests.test_view.UserViewTest --settings=_dev.settings_test
+    ./manage.py test apps.users.tests.test_view.UserViewTest --settings=_dev.settings_test      # noqa: E501
     """
 
     CONTENT_TYPE_JSON = "application/json"
@@ -46,12 +43,12 @@ class UserViewTest(TestCase):
 
 class LoginTokenViewTests(CustomViewTestCase):
     """
-    ./manage.py test apps.users.tests.test_test_login_view.LoginTokenViewTests --settings=_dev.settings_test
+    ./manage.py test apps.users.tests.test_test_login_view.LoginTokenViewTests --settings=_dev.settings_test    # noqa: E501
     """
 
     def setUp(self):
         self.url = reverse_lazy("users_api:token_obtain_pair")
-        self.user = User.objects.create_user(
+        self.user = UserFactory(
             email="user_verified@example.com",
             password="testpassword",
             is_active=True,

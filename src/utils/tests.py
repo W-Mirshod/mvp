@@ -1,15 +1,9 @@
 import json
 
-from django.contrib.auth import get_user
 from django.db.models import Model
 from django.test import override_settings
 from django.urls import reverse_lazy
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
-from rest_framework_simplejwt.token_blacklist.models import (
-    BlacklistedToken,
-    OutstandingToken,
-)
 
 from apps.users.models import User
 
