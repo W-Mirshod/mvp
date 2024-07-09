@@ -6,11 +6,11 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework.permissions import AllowAny
 
 from apps.users.serializers import TokenSerializer, UserRegistrationSerializer
 from utils.views import MultiSerializerViewSet
@@ -27,12 +27,12 @@ class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
     @swagger_auto_schema(
         responses={
             status.HTTP_200_OK: openapi.Schema(
-                title="User`s token",
+                title="User's token",
                 type=openapi.TYPE_OBJECT,
                 properties={
                     "user_id": openapi.Schema(
                         type=openapi.TYPE_INTEGER,
-                        title="User`s ID",
+                        title="User's ID",
                         readOnly=True,
                     ),
                     "refresh": openapi.Schema(
@@ -62,7 +62,7 @@ class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
         except ValidationError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            logger.error(f"Can`t login to service: {e}")
+            logger.error(f"Can't login to service: {e}")
             current_status = status.HTTP_500_INTERNAL_SERVER_ERROR
         if "error" in serializer.validated_data.keys():
             current_status = status.HTTP_401_UNAUTHORIZED
@@ -93,14 +93,14 @@ class RegistrationViewSet(ModelViewSet):
         except ValidationError as ex:
             return Response({"error": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
-            logger.error(f"Can`t register a new user: {ex}")
+            logger.error(f"Can't register a new user: {ex}")
             if isinstance(ex.args, tuple):
                 text = ", ".join([str(e) for e in ex.args])
             else:
                 full_text = str(ex.detail)
                 text = full_text.split("ErrorDetail(string='")[1].split("'")[0]
             return Response({"error": text}, status=status.HTTP_400_BAD_REQUEST)
-        logger.info(f'Crated a new user (email:{data.get("email")})')
+        logger.info(f'Created a new user (email:{data.get("email")})')
         return response
 
 
