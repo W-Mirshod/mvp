@@ -3,6 +3,7 @@ from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from constance import config
 from .models import SMTPServer, IMAPServer
 
+
 class BaseDriver:
     def __init__(self, server_name):
         self.server_name = server_name
@@ -13,6 +14,7 @@ class BaseDriver:
 
     def send_mail(self, subject, message, recipient_list):
         raise ImproperlyConfigured("Subclasses must implement this method")
+
 
 class SMTPDriver(BaseDriver):
     def __init__(self, server_name):
@@ -46,6 +48,7 @@ class SMTPDriver(BaseDriver):
             )
             email.send()
 
+
 class IMAPDriver(BaseDriver):
     def __init__(self, server_name):
         super().__init__(server_name)
@@ -61,6 +64,7 @@ class IMAPDriver(BaseDriver):
     def send_mail(self, subject, message, recipient_list):
         if not self.enable:
             raise ImproperlyConfigured("IMAP sending is disabled")
+
         with get_connection(
             host=self.settings.url,
             port=self.settings.port,
