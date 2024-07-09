@@ -9,7 +9,8 @@ User = get_user_model()
 
 class EmailVerificationViewTests(CustomViewTestCase):
     """
-    ./manage.py test apps.users.tests.test_email_verify.EmailVerificationViewTests --settings=_dev.settings_test
+    ./manage.py test apps.users.tests.test_email_verify.EmailVerificationViewTests
+    --settings=_dev.settings_test
     """
 
     def setUp(self):
