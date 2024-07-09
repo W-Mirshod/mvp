@@ -11,15 +11,21 @@ class MailServer(models.Model):
 
 
 class SMTPServer(MailServer):
-    pass
+    username = models.EmailField(default='default_smtp@example.com')
+    email_use_tls = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
 
 class IMAPServer(MailServer):
-    pass
+    username = models.EmailField(default='default_imap@example.com')
+    email_use_tls = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
 
 class ProxyServer(MailServer):
-    pass
+    username = models.EmailField(default='default_proxy@example.com')
+    email_use_tls = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
 
 class MessageTemplate(models.Model):
