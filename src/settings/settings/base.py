@@ -174,7 +174,8 @@ REDIS_DB = "0"
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
 CONSTANCE_CONFIG = {
-    'MY_TEST_SETTING': (1, 'Parameter description'),
-    'TEST_ENABLE_FEATURE': (True, 'Description of the functionality enable flag'),
+    'ENABLE_SMTP_SENDING': (False, 'Enable or disable SMTP sending'),
+    'ENABLE_IMAP_SENDING': (False, 'Enable or disable IMAP sending'),
+    'ENABLE_PROXY_SENDING': (False, 'Enable or disable proxy sending'),
 }
 # endregion
