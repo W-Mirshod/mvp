@@ -44,11 +44,11 @@ INSTALLED_APPS = [
     "apps.users",
     "apps.changelog",
     "apps.mail_servers",
+    "apps.products",
     "drf_yasg",
     "admin_extra_buttons",
     "constance",
     "constance.backends.database",
-
 ]
 
 MIDDLEWARE = [
@@ -171,11 +171,11 @@ REDIS_DB = "0"
 # endregion
 
 # region CONSTANCE
-CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 
 CONSTANCE_CONFIG = {
-    'ENABLE_SMTP_SENDING': (False, 'Enable or disable SMTP sending'),
-    'ENABLE_IMAP_SENDING': (False, 'Enable or disable IMAP sending'),
-    'ENABLE_PROXY_SENDING': (False, 'Enable or disable proxy sending'),
+    "ENABLE_SMTP_SENDING": (False, "Enable or disable SMTP sending"),
+    "ENABLE_IMAP_SENDING": (False, "Enable or disable IMAP sending"),
+    "ENABLE_PROXY_SENDING": (False, "Enable or disable proxy sending"),
 }
 # endregion
