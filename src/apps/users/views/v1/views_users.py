@@ -12,7 +12,6 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.permissions import AllowAny
 
-
 from apps.users.serializers import TokenSerializer, UserRegistrationSerializer
 from utils.views import MultiSerializerViewSet
 
@@ -104,6 +103,7 @@ class RegistrationViewSet(ModelViewSet):
         logger.info(f'Crated a new user (email:{data.get("email")})')
         return response
 
+
 class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
     authentication_classes = ()
     permission_classes = [AllowAny]
@@ -122,5 +122,3 @@ class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
         data["user_id"] = refresh.payload["user_id"]
 
         return Response(data, status=status.HTTP_200_OK)
-
-

@@ -3,8 +3,6 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.test import APIRequestFactory
 
-
-
 from apps.users.models.users import User
 from apps.users.views.v1.views_users import RefreshTokenView
 
@@ -36,12 +34,12 @@ class UserCreationTestCase(TestCase):
         self.assertTrue(user[0].is_active)
         self.assertTrue(user[0].is_superuser)
 
+
 class RefreshTokenViewTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(email="test@example.com", password="testpass")
         self.client = APIRequestFactory()
         self.view = RefreshTokenView.as_view({'post': 'refresh'})
-
 
     def test_refresh_token_valid(self):
         # create a new token for the user
@@ -76,4 +74,3 @@ class RefreshTokenViewTestCase(TestCase):
         response_data = response.data
         self.assertIn("detail", response_data)
         self.assertEqual(response_data["detail"], "Token is invalid or expired")
-
