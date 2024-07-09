@@ -10,7 +10,9 @@ urlpatterns = [
         views.LoginTokenView.as_view({"post": "login"}),
         name="token_obtain_pair",
     ),
-    path("logout/", views.LogoutViewSet.as_view({"post": "logout"}), name="logout"),
+    path(
+        "logout/", views.BlacklistTokenView.as_view({"post": "logout"}), name="logout"
+    ),
     path(
         "registration/",
         views.RegistrationViewSet.as_view({"post": "registration"}),

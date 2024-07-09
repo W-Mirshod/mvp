@@ -9,11 +9,14 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenBlacklistView, TokenObtainPairView
 
+from apps.users.models.jwt import BlackListedAccessToken
 from apps.users.serializers import TokenSerializer, UserRegistrationSerializer
 from utils.views import MultiSerializerViewSet
 
@@ -106,36 +109,36 @@ class RegistrationViewSet(ModelViewSet):
         return response
 
 
-class LogoutViewSet(MultiSerializerViewSet):
+class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
+    authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (IsAuthenticated,)
     serializer_class = TokenSerializer
 
-    @transaction.atomic
     def logout(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-
-        current_status = status.HTTP_200_OK
-
         try:
-            serializer.is_valid(raise_exception=True)
-        except TokenError:
-            current_status = status.HTTP_401_UNAUTHORIZED
-        except ValidationError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Can`t login to service: {e}")
-            current_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+            with transaction.atomic():
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                refresh_token = serializer.validated_data["refresh"]
+                access_token = serializer.validated_data["access"]
+                OutstandingToken.objects.create(
+                    token=access_token,
+                    created_at=timezone.now(),
+                    expires_at=timezone.now() + timezone.timedelta(minutes=25),
+                    user=request.user,
+                    jti=refresh_token,
+                )
+        except TokenError as ex:
+            logger.error(f"Can't logout (token error): {ex}")
+            return Response(
+                {"error": "Can't logout"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        except Exception as ex:
+            logger.error(f"Can't logout: {ex}")
+            return Response(
+                {"error": "Can't logout"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
-        access_token = serializer.validated_data["access"]
-        refresh_token = serializer.validated_data["refresh"]
-        current_user = request.user
-        current_user.is_active = False
-        current_user.save()
-        OutstandingToken.objects.create(
-            token=access_token,
-            created_at=timezone.now(),
-            expires_at=timezone.now() + timezone.timedelta(minutes=25),
-            user=current_user,
-            jti=refresh_token,
-        )
-        return Response(serializer.validated_data, status=current_status)
+        context = serializer.validated_data
+        context["logout"] = "success"
+        return Response(context, status=status.HTTP_200_OK)
