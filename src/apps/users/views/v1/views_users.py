@@ -7,6 +7,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -14,7 +15,11 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from apps.users.serializers import TokenSerializer, UserRegistrationSerializer
+from apps.users.serializers import (
+    TokenSerializer,
+    UserDetailSerializer,
+    UserRegistrationSerializer,
+)
 from apps.users.tasks import send_verification_email_task
 from utils.views import MultiSerializerViewSet
 
@@ -155,3 +160,20 @@ class EmailVerificationView(MultiSerializerViewSet):
         user.is_verified = True
         user.save()
         return Response({"detail": "Email verified"}, status=status.HTTP_200_OK)
+
+
+class UserViewSet(MultiSerializerViewSet):
+    queryset = User.objects.filter(is_active=True).all()
+    serializers = {
+        "retrieve": UserDetailSerializer,
+    }
+    # permission_classes = (
+    #     IsAuthenticated,
+    #     IsTokenValid,
+    # )
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        User`s view
+        """
+        return super().retrieve(request, *args, **kwargs)
