@@ -7,7 +7,7 @@ app_name = "users_api"
 urlpatterns = [
     path(
         "<int:pk>/",
-        views.UserViewSet.as_view({"get": "retrieve", "patch": "partial_update"}),
+        views.UserViewSet.as_view({"get": "retrieve"}),
         name="manage",
     ),
     path(
