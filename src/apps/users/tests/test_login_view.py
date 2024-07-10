@@ -56,7 +56,7 @@ class LoginTokenViewTests(CustomViewTestCase):
         )
 
     def test_successful_login(self):
-        data = {"email": "user_verified@example.com", "password": "testpassword"}
+        data = {"email": self.user.email, "password": "testpassword"}
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("refresh", response.data)
