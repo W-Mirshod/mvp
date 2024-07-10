@@ -3,7 +3,6 @@ import logging
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -16,11 +15,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import (
-    TokenBlacklistView,
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenBlacklistView, TokenObtainPairView
 
 from apps.users.models.jwt import BlackListedAccessToken
 from apps.users.serializers import (
@@ -109,10 +104,10 @@ class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
 
         except TokenError as ex:
             logger.error(f"Can`t logout (token error): {ex.args[0]}")
-            return Response(f"Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response("Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as ex:
             logger.error(f"Can`t logout: {ex}")
-            return Response(f"Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response("Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         context = serializer.validated_data
         context["logout"] = "success"
