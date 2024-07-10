@@ -176,11 +176,10 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
-
 CELERY_BEAT_SCHEDULE = {
     'test-periodic-task': {
         'task': 'apps.mail_servers.tasks.test_periodic_task',
-        'schedule': crontab(minute='*/1'), 
+        'schedule': crontab(minute='*/1'),
     },
 }
 
