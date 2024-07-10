@@ -76,3 +76,19 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "last_login",
+            "is_superuser",
+            "is_active",
+            "date_joined",
+            "email",
+            "is_verified",
+            "is_staff",
+        )
