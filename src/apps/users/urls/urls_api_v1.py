@@ -5,5 +5,15 @@ from .. import views
 app_name = "users_api"
 
 urlpatterns = [
+    path(
+        "email_verify/",
+        views.EmailVerificationView.as_view({"post": "email_verify"}),
+        name="email_verify",
+    ),
     path("login/", views.LoginTokenView.as_view({"post": "login"}), name="token_obtain_pair"),
+    path(
+        "registration/",
+        views.RegistrationViewSet.as_view({"post": "registration"}),
+        name="registration",
+    ),
 ]
