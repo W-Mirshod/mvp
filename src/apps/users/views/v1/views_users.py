@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
@@ -11,11 +12,23 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
-from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
-from rest_framework_simplejwt.views import TokenBlacklistView, TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import (
+    TokenBlacklistView,
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
-from apps.users.serializers import TokenSerializer, UserRegistrationSerializer
+from apps.users.models.jwt import BlackListedAccessToken
+from apps.users.serializers import (
+    TokenSerializer,
+    UserDetailSerializer,
+    UserRegistrationSerializer,
+)
+from apps.users.tasks import send_verification_email_task
 from utils.views import MultiSerializerViewSet
 
 logger = logging.getLogger(__name__)
@@ -72,6 +85,40 @@ class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
         return Response(serializer.validated_data, status=current_status)
 
 
+class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
+    authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    permission_classes = (IsAuthenticated,)
+
+    def logout(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            with transaction.atomic():
+                serializer.is_valid(raise_exception=True)
+                refresh_token = OutstandingToken.objects.filter(
+                    token=request.data.get("refresh")
+                ).first()
+                BlackListedAccessToken.objects.create(
+                    jti=request.auth.payload.get("jti"),
+                    jti_refresh=refresh_token.jti,
+                    token=request.auth,
+                    user=request.user,
+                    created_at=refresh_token.created_at,
+                    expires_at=refresh_token.expires_at,
+                )
+
+        except TokenError as ex:
+            logger.error(f"Can`t logout (token error): {ex.args[0]}")
+            return Response(f"Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as ex:
+            logger.error(f"Can`t logout: {ex}")
+            return Response(f"Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        context = serializer.validated_data
+        context["logout"] = "success"
+        return Response(context, status=status.HTTP_200_OK)
+
+
 class RegistrationViewSet(ModelViewSet):
     queryset = User.objects.none()
     serializer_class = UserRegistrationSerializer
@@ -91,6 +138,23 @@ class RegistrationViewSet(ModelViewSet):
             # create user
             response = super().create(request, *args, **kwargs)
             if response.status_code == status.HTTP_201_CREATED:
+                new_user = User.objects.get(email=response.data["email"])
+                new_user.is_active = True
+                new_user.save()
+
+                if settings.CELERY_BROKER_URL:
+                    send_verification_email_task.delay(
+                        settings.DEFAULT_FROM_EMAIL,
+                        data.get("email"),
+                        self._generate_access_token(new_user),
+                    )
+                else:
+                    send_verification_email_task(
+                        settings.DEFAULT_FROM_EMAIL,
+                        data.get("email"),
+                        self._generate_access_token(new_user),
+                    )
+
                 response = Response({"status": "Ok"}, status=status.HTTP_201_CREATED)
 
         except ValidationError as ex:
@@ -106,37 +170,48 @@ class RegistrationViewSet(ModelViewSet):
         logger.info(f'Crated a new user (email:{data.get("email")})')
         return response
 
+    def _generate_access_token(self, user):
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+        return str(access)
 
-class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
-    authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES
-    permission_classes = (IsAuthenticated,)
-    serializer_class = TokenSerializer
 
-    def logout(self, request, *args, **kwargs):
+class EmailVerificationView(MultiSerializerViewSet):
+    authentication_classes = []
+    permission_classes = []
+
+    @transaction.atomic
+    def email_verify(self, request, *args, **kwargs):
+        jwt_authenticator = JWTAuthentication()
+        raw_token = request.GET.get("token")
+
+        if raw_token is None:
+            return Response({"detail": "Missing token"}, status=status.HTTP_401_UNAUTHORIZED)
+
         try:
-            with transaction.atomic():
-                serializer = self.get_serializer(data=request.data)
-                serializer.is_valid(raise_exception=True)
-                refresh_token = serializer.validated_data["refresh"]
-                access_token = serializer.validated_data["access"]
-                OutstandingToken.objects.create(
-                    token=access_token,
-                    created_at=timezone.now(),
-                    expires_at=timezone.now() + timezone.timedelta(minutes=25),
-                    user=request.user,
-                    jti=refresh_token,
-                )
-        except TokenError as ex:
-            logger.error(f"Can't logout (token error): {ex}")
+            validated_token = jwt_authenticator.get_validated_token(raw_token)
+            user = jwt_authenticator.get_user(validated_token)
+        except InvalidToken:
+            return Response({"detail": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception:
             return Response(
-                {"error": "Can't logout"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-        except Exception as ex:
-            logger.error(f"Can't logout: {ex}")
-            return Response(
-                {"error": "Can't logout"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"detail": "An error occurred during verification"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        context = serializer.validated_data
-        context["logout"] = "success"
-        return Response(context, status=status.HTTP_200_OK)
+        user.is_verified = True
+        user.save()
+        return Response({"detail": "Email verified"}, status=status.HTTP_200_OK)
+
+
+class UserViewSet(MultiSerializerViewSet):
+    queryset = User.objects.filter(is_active=True).all()
+    serializers = {
+        "retrieve": UserDetailSerializer,
+    }
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        User`s view
+        """
+        return super().retrieve(request, *args, **kwargs)
