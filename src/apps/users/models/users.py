@@ -1,6 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -54,6 +54,7 @@ class User(AbstractUser):
             "Unselect this instead of deleting accounts."
         ),
     )
+    is_one_time_jwt_created = models.BooleanField(_("One-time JWT created"), default=False)
 
     username = None
     first_name = None
@@ -64,10 +65,25 @@ class User(AbstractUser):
 
     objects = UserManager()
 
-    def get_one_time_token(self):
-        token = RefreshToken.for_user(self)
-        token["is_one_time"] = True
-        return str(token)
-
     class Meta(AbstractUser.Meta):
         ordering = ["-id"]
+
+    def create_one_time_jwt(self):
+        self.is_one_time_jwt_created = True
+
+        try:
+            with transaction.atomic():
+                self.save()
+                from ..serializers import TokenSerializer
+
+                refresh = TokenSerializer(data={"username_field": self.USERNAME_FIELD}).get_token(
+                    self
+                )
+        except Exception:
+            self.is_one_time_jwt_created = False
+            self.save()
+            return {"error": _("Error with generation JWT")}, status.HTTP_400_BAD_REQUEST
+        context = {
+            "access": str(refresh.access_token),
+        }
+        return context, status.HTTP_200_OK

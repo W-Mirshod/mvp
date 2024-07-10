@@ -24,6 +24,7 @@ from apps.users.serializers import (
     UserRegistrationSerializer,
 )
 from apps.users.tasks import send_verification_email_task
+from utils.permissions import IsTokenValid
 from utils.views import MultiSerializerViewSet
 
 logger = logging.getLogger(__name__)
