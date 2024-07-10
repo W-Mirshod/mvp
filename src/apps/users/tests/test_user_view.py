@@ -1,5 +1,3 @@
-from rest_framework.reverse import reverse_lazy
-
 from apps.users.tests.factories import UserFactory
 from utils.tests import CustomViewTestCase
 
