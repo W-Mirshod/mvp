@@ -1,8 +1,6 @@
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
-from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
-from apps.users.forms import User
 from apps.users.tests.factories import UserFactory
 from utils.tests import CustomViewTestCase
 
