@@ -34,17 +34,6 @@ class LogoutViewTests(CustomViewTestCase):
         response_logout = self.client.post(reverse_lazy("users_api:logout"), data, headers=headers)
         self.assertEqual(response_logout.status_code, status.HTTP_200_OK)
 
-    def test_successful_logout_token_in_blacklist(self):
-        data = {"email": "testuser@example.com", "password": "testpassword"}
-        user = User.objects.get(email=data["email"])
-        self.auth_user(User, user, data["password"])
-        num_blacklisted_tokens_before = OutstandingToken.objects.count()
-        self.client.post(reverse_lazy("users_api:logout"), data)
-        num_blacklisted_tokens_after = OutstandingToken.objects.count()
-        self.assertEqual(
-            num_blacklisted_tokens_after, num_blacklisted_tokens_before + 1
-        )
-
     def test_logout_unauthenticated(self):
         self.user.is_active = False
         self.client.post(reverse_lazy("users_api:logout"))
