@@ -166,6 +166,10 @@ class UserViewSet(MultiSerializerViewSet):
     serializers = {
         "retrieve": UserDetailSerializer,
     }
+    permission_classes = (
+        IsAuthenticated,
+        IsTokenValid,
+    )
 
     def retrieve(self, request, *args, **kwargs):
         """
