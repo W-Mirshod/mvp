@@ -6,6 +6,11 @@ app_name = "users_api"
 
 urlpatterns = [
     path(
+        "<int:pk>/",
+        views.UserViewSet.as_view({"get": "retrieve"}),
+        name="manage",
+    ),
+    path(
         "email_verify/",
         views.EmailVerificationView.as_view({"post": "email_verify"}),
         name="email_verify",
