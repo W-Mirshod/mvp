@@ -1,0 +1,68 @@
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+from apps.mail_servers.choices import ServerType
+from utils.models import DateModelMixin, DeleteModelMixin
+
+
+class Server(DeleteModelMixin, DateModelMixin, models.Model):
+    type = models.CharField(max_length=255, choices=ServerType.CHOICES)
+    url = models.URLField()
+    port = models.IntegerField()
+    password = models.CharField(max_length=255, blank=True, null=True)
+    username = models.EmailField(default="default_smtp@example.com", blank=True, null=True)
+    email_use_tls = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = _("Server")
+        verbose_name_plural = _("Servers")
+        ordering = ("-id",)
+
+
+class SMTPManager(models.Manager):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.filter(type=ServerType.SMTP)
+        return qs
+
+
+class SMTPServer(Server):
+    objects = SMTPManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = _("SMTP server")
+        verbose_name_plural = _("SMTP servers")
+
+
+class IMAPManager(models.Manager):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.filter(type=ServerType.IMAP)
+        return qs
+
+
+class IMAPServer(Server):
+    objects = IMAPManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = _("IMAP server")
+        verbose_name_plural = _("IMAP servers")
+
+
+class PROXYManager(models.Manager):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.filter(type=ServerType.PROXY)
+        return qs
+
+
+class ProxyServer(Server):
+    objects = PROXYManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = _("Proxy server")
+        verbose_name_plural = _("Proxy servers")
