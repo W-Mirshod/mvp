@@ -26,10 +26,6 @@ class UserViewTest(CustomViewTestCase):
         response = self.client.get(f"/api/1.0/users/{self.user_admin.id}/")
         self.assertEqual(response.status_code, 200)
 
-    def test_list_02_url_accessible_by_name(self):
-        response = self.client.get(reverse_lazy("users_api:manage") + str(self.user_admin.id) + "/")
-        self.assertEqual(response.status_code, 200)
-
     def test_detail_01(self):
         self.auth_user(user=self.user_admin)
         self._test_detail("users_api:manage", self.user_admin)
