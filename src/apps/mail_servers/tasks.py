@@ -8,3 +8,4 @@ logger = get_task_logger(__name__)
 def test_periodic_task():
     logger.info("The periodic task is running.")
     return "Periodic task executed"
+
