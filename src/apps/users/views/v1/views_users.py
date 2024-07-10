@@ -7,13 +7,17 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenBlacklistView, TokenObtainPairView
 
+from apps.users.models.jwt import BlackListedAccessToken
 from apps.users.serializers import (
     TokenSerializer,
     UserDetailSerializer,
@@ -74,6 +78,40 @@ class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
         if "error" in serializer.validated_data.keys():
             current_status = status.HTTP_401_UNAUTHORIZED
         return Response(serializer.validated_data, status=current_status)
+
+
+class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
+    authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    permission_classes = (IsAuthenticated,)
+
+    def logout(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            with transaction.atomic():
+                serializer.is_valid(raise_exception=True)
+                refresh_token = OutstandingToken.objects.filter(
+                    token=request.data.get("refresh")
+                ).first()
+                BlackListedAccessToken.objects.create(
+                    jti=request.auth.payload.get("jti"),
+                    jti_refresh=refresh_token.jti,
+                    token=request.auth,
+                    user=request.user,
+                    created_at=refresh_token.created_at,
+                    expires_at=refresh_token.expires_at,
+                )
+
+        except TokenError as ex:
+            logger.error(f"Can`t logout (token error): {ex.args[0]}")
+            return Response("Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as ex:
+            logger.error(f"Can`t logout: {ex}")
+            return Response("Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        context = serializer.validated_data
+        context["logout"] = "success"
+        return Response(context, status=status.HTTP_200_OK)
 
 
 class RegistrationViewSet(ModelViewSet):
