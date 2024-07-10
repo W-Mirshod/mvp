@@ -7,6 +7,8 @@ from apps.mail_servers.views import (
     SMTPServerView,
 )
 
+app_name = "servers_api"
+
 urlpatterns = [
     path("smtp-servers/", SMTPServerView.as_view({"get": "server_list"}), name="smtp-server_list"),
     path(
