@@ -6,22 +6,22 @@ from .models import IMAPServer, MessageTemplate, ProxyServer, SMTPServer
 class SMTPServerSerializer(serializers.ModelSerializer):
     class Meta:
         model = SMTPServer
-        fields = "__all__"
+        fields = ("id", "type", "url", "port", "password", "username", "email_use_tls", "is_active")
 
 
 class IMAPServerSerializer(serializers.ModelSerializer):
     class Meta:
         model = IMAPServer
-        fields = "__all__"
+        fields = ("id", "type", "url", "port", "password", "username", "email_use_tls", "is_active")
 
 
 class ProxyServerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProxyServer
-        fields = "__all__"
+        fields = ("id", "type", "url", "port", "password", "username", "email_use_tls", "is_active")
 
 
 class MessageTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageTemplate
-        fields = "__all__"
+        fields = ("id", "from_address", "template", "message")

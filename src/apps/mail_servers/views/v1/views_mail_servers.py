@@ -13,15 +13,7 @@ from apps.mail_servers.serializers import (
 from utils.views import MultiSerializerViewSet
 
 
-class MailServerView(MultiSerializerViewSet):
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-
-class SMTPServerView(MailServerView):
+class SMTPServerView(MultiSerializerViewSet):
     queryset = SMTPServer.objects.all()
     serializers = {
         "retrieve": SMTPServerSerializer,
@@ -29,7 +21,7 @@ class SMTPServerView(MailServerView):
     }
 
 
-class IMAPServerView(MailServerView):
+class IMAPServerView(MultiSerializerViewSet):
     queryset = IMAPServer.objects.all()
     serializers = {
         "retrieve": IMAPServerSerializer,
@@ -37,7 +29,7 @@ class IMAPServerView(MailServerView):
     }
 
 
-class ProxyServerView(MailServerView):
+class ProxyServerView(MultiSerializerViewSet):
     queryset = ProxyServer.objects.all()
     serializers = {
         "retrieve": ProxyServerSerializer,
@@ -45,7 +37,7 @@ class ProxyServerView(MailServerView):
     }
 
 
-class MessageTemplateView(MailServerView):
+class MessageTemplateView(MultiSerializerViewSet):
     queryset = MessageTemplate.objects.all()
     serializers = {
         "retrieve": MessageTemplateSerializer,
