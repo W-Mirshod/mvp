@@ -11,7 +11,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
-from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
@@ -178,8 +177,6 @@ class RegistrationViewSet(MultiSerializerViewSet):
     def get_one_time_jwt(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data
-
         return Response("Successfully regenerated the new JWT.", status=status.HTTP_200_OK)
 
     def _generate_access_token(self, user):

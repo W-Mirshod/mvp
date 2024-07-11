@@ -136,7 +136,7 @@ class EmailTokenGenerationSerializer(serializers.Serializer):
         # checking the existence of the user
         try:
             user = User.objects.get(email=attrs["email"], is_verified=is_verified)
-        except Exception as exc:
+        except Exception:
             raise ValidationError(
                 {"error": _("Invalid email.")},
                 code="invalid_email",
