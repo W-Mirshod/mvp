@@ -2,6 +2,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 from django.utils.crypto import get_random_string
 
 env = environ.Env(
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     "apps.users",
     "apps.changelog",
     "apps.mail_servers",
+    "apps.mailers",
     "apps.products",
     "drf_yasg",
     "admin_extra_buttons",
@@ -168,6 +170,22 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REDIS_HOST = env.str("REDIS_HOST", "redis")
 REDIS_PORT = env.str("REDIS_PORT", "6379")
 REDIS_DB = "0"
+# endregion
+
+# celery settings
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/0")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+CELERY_BEAT_SCHEDULE = {
+    "test-periodic-task": {
+        "task": "apps.mail_servers.tasks.test_periodic_task",
+        "schedule": crontab(minute="*/1"),
+    },
+}
+
 # endregion
 
 # region CONSTANCE
