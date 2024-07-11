@@ -19,43 +19,40 @@ from utils.views import MultiSerializerViewSet
 
 
 class MailServerView(MultiSerializerViewSet):
-    @transaction.atomic
-    def server_list(self, request, *args, **kwargs):
-        try:
-            queryset = self.queryset
-            serializer = self.serializer_class(queryset, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
-    @transaction.atomic
-    def server_by_id(self, request, pk=None, *args, **kwargs):
-        try:
-            queryset = self.queryset
-            server = get_object_or_404(queryset, pk=pk)
-            serializer = self.get_serializer(server)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except self.queryset.model.DoesNotExist as e:
-            return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class SMTPServerView(MailServerView):
     queryset = SMTPServer.objects.all()
-    serializer_class = SMTPServerSerializer
+    serializers = {
+        "retrieve": SMTPServerSerializer,
+        "list": SMTPServerSerializer,
+    }
 
 
 class IMAPServerView(MailServerView):
     queryset = IMAPServer.objects.all()
-    serializer_class = IMAPServerSerializer
+    serializers = {
+        "retrieve": IMAPServerSerializer,
+        "list": IMAPServerSerializer,
+    }
 
 
 class ProxyServerView(MailServerView):
     queryset = ProxyServer.objects.all()
-    serializer_class = ProxyServerSerializer
+    serializers = {
+        "retrieve": ProxyServerSerializer,
+        "list": ProxyServerSerializer,
+    }
 
 
 class MessageTemplateView(MailServerView):
     queryset = MessageTemplate.objects.all()
-    serializer_class = MessageTemplateSerializer
+    serializers = {
+        "retrieve": MessageTemplateSerializer,
+        "list": MessageTemplateSerializer,
+    }
