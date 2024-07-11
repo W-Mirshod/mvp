@@ -1,8 +1,3 @@
-from django.db import transaction
-from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework.response import Response
-
 from apps.mail_servers.models import (
     IMAPServer,
     MessageTemplate,

@@ -173,9 +173,9 @@ class ServersViewTests(CustomViewTestCase):
             reverse_lazy("servers_api:message-template_by_id", kwargs={"pk": 10})
         )
 
-        self.assertEqual(smtp_response.data["error"], "No SMTPServer matches the given query.")
-        self.assertEqual(imap_response.data["error"], "No IMAPServer matches the given query.")
-        self.assertEqual(proxy_response.data["error"], "No ProxyServer matches the given query.")
+        self.assertEqual(smtp_response.data["detail"], "No SMTPServer matches the given query.")
+        self.assertEqual(imap_response.data["detail"], "No IMAPServer matches the given query.")
+        self.assertEqual(proxy_response.data["detail"], "No ProxyServer matches the given query.")
         self.assertEqual(
-            message_response.data["error"], "No MessageTemplate matches the given query."
+            message_response.data["detail"], "No MessageTemplate matches the given query."
         )
