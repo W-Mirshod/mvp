@@ -17,3 +17,19 @@ class Event(DeleteModelMixin, DateModelMixin, models.Model):
     sent_message = models.ForeignKey(SentMessage, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def create_new_event(cls, user, server, template='', results=None):
+        if results is None:
+            results = {}
+        sent_message = SentMessage.objects.create(
+            user=user,
+            template=template,
+            results=results
+        )
+        event = cls.objects.create(
+            server=server,
+            status=StatusType.NEW,
+            sent_message=sent_message
+        )
+        return event
