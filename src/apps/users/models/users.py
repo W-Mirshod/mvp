@@ -2,7 +2,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import status
 
 
 class UserManager(BaseUserManager):
@@ -55,6 +55,7 @@ class User(AbstractUser):
         ),
     )
     is_one_time_jwt_created = models.BooleanField(_("One-time JWT created"), default=False)
+    jwt_max_out = models.DateTimeField(blank=True, null=True)
 
     username = None
     first_name = None
@@ -66,24 +67,8 @@ class User(AbstractUser):
     objects = UserManager()
 
     class Meta(AbstractUser.Meta):
-        ordering = ["-id"]
+        ordering = ("-id",)
 
-    def create_one_time_jwt(self):
-        self.is_one_time_jwt_created = True
-
-        try:
-            with transaction.atomic():
-                self.save()
-                from ..serializers import TokenSerializer
-
-                refresh = TokenSerializer(data={"username_field": self.USERNAME_FIELD}).get_token(
-                    self
-                )
-        except Exception:
-            self.is_one_time_jwt_created = False
-            self.save()
-            return {"error": _("Error with generation JWT")}, status.HTTP_400_BAD_REQUEST
-        context = {
-            "access": str(refresh.access_token),
-        }
-        return context, status.HTTP_200_OK
+    def restore_password(self, new_password: str):
+        self.set_password(new_password)
+        self.save(update_fields=("password",))

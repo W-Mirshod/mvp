@@ -3,6 +3,7 @@ import logging
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -19,12 +20,15 @@ from rest_framework_simplejwt.views import TokenBlacklistView, TokenObtainPairVi
 
 from apps.users.models.jwt import BlackListedAccessToken
 from apps.users.serializers import (
+    EmailTokenGenerationSerializer,
+    RestorePasswordSerializer,
     TokenSerializer,
     UserDetailSerializer,
     UserRegistrationSerializer,
 )
+from apps.users.services.jwt import create_one_time_jwt
 from apps.users.tasks import send_verification_email_task
-from utils.permissions import IsTokenValid
+from utils.permissions import IsOneTimeTokenValid, IsTokenValid
 from utils.views import MultiSerializerViewSet
 
 logger = logging.getLogger(__name__)
@@ -115,9 +119,12 @@ class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
         return Response(context, status=status.HTTP_200_OK)
 
 
-class RegistrationViewSet(ModelViewSet):
+class RegistrationViewSet(MultiSerializerViewSet):
     queryset = User.objects.none()
-    serializer_class = UserRegistrationSerializer
+    serializers = {
+        "registration": UserRegistrationSerializer,
+        "get_one_time_jwt": EmailTokenGenerationSerializer,
+    }
     authentication_classes = []
     permission_classes = []
     http_method_names = [
@@ -126,32 +133,32 @@ class RegistrationViewSet(ModelViewSet):
 
     def registration(self, request, *args, **kwargs):
         try:
-            # check of input data
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            data = serializer.validated_data
+            with transaction.atomic():
+                # check of input data
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                data = serializer.validated_data
 
-            # create user
-            response = super().create(request, *args, **kwargs)
-            if response.status_code == status.HTTP_201_CREATED:
-                new_user = User.objects.get(email=response.data["email"])
-                new_user.is_active = True
-                new_user.save()
+                # create user
+                response = super().create(request, *args, **kwargs)
+                if response.status_code == status.HTTP_201_CREATED:
+                    new_user = User.objects.get(email=response.data["email"])
+                    new_user.is_active = True
+                    new_user.save()
+                    token = create_one_time_jwt(new_user)
 
-                if settings.CELERY_BROKER_URL:
-                    send_verification_email_task.delay(
-                        settings.DEFAULT_FROM_EMAIL,
-                        data.get("email"),
-                        self._generate_access_token(new_user),
-                    )
-                else:
-                    send_verification_email_task(
-                        settings.DEFAULT_FROM_EMAIL,
-                        data.get("email"),
-                        self._generate_access_token(new_user),
-                    )
-
-                response = Response({"status": "Ok"}, status=status.HTTP_201_CREATED)
+                    if settings.CELERY_BROKER_URL:
+                        send_verification_email_task.delay(
+                            settings.DEFAULT_FROM_EMAIL,
+                            data.get("email"),
+                            token,
+                        )
+                    else:
+                        send_verification_email_task(
+                            settings.DEFAULT_FROM_EMAIL,
+                            data.get("email"),
+                            token,
+                        )
 
         except ValidationError as ex:
             return Response({"error": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
@@ -163,8 +170,17 @@ class RegistrationViewSet(ModelViewSet):
                 full_text = str(ex.detail)
                 text = full_text.split("ErrorDetail(string='")[1].split("'")[0]
             return Response({"error": text}, status=status.HTTP_400_BAD_REQUEST)
+
+        response = Response({"status": "Ok"}, status=status.HTTP_201_CREATED)
         logger.info(f'Crated a new user (email:{data.get("email")})')
         return response
+
+    def get_one_time_jwt(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data
+
+        return Response("Successfully regenerated the new JWT.", status=status.HTTP_200_OK)
 
     def _generate_access_token(self, user):
         refresh = RefreshToken.for_user(user)
@@ -215,3 +231,31 @@ class UserViewSet(MultiSerializerViewSet):
         User`s view
         """
         return super().retrieve(request, *args, **kwargs)
+
+
+class OneTimeJWTFunctionsViewSet(MultiSerializerViewSet):
+    queryset = User.objects.filter(is_active=True)
+    serializers = {
+        "restore_password": RestorePasswordSerializer,
+    }
+    permission_classes = (
+        IsAuthenticated,
+        IsOneTimeTokenValid,
+    )
+    http_method_names = [
+        "patch",
+    ]
+
+    def restore_password(self, request):
+        request.data["user_id"] = request.user.id
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        user = request.user
+        user.restore_password(data.get("new_password"))
+
+        return Response(
+            {"message": _("Successfully set a new password for the user.")},
+            status=status.HTTP_200_OK,
+        )

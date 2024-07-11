@@ -1,7 +1,9 @@
+from django.db import transaction
 from rest_framework import permissions
 from rest_framework_simplejwt.exceptions import InvalidToken
 
 from apps.users.models.jwt import BlackListedAccessToken
+from apps.users.serializers import RestorePasswordSerializer
 
 
 class IsTokenValid(permissions.BasePermission):
@@ -28,6 +30,33 @@ class IsOneTimeTokenValid(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
+
+        is_allowed_user = not BlackListedAccessToken.objects.filter(
+            user=request.user.id, token=request.auth.token.decode("utf-8")
+        ).exists()
+        if not is_allowed_user:
+            raise InvalidToken("Token is blacklisted")
+
+        request.data["user_id"] = request.user.id
+        serializer = RestorePasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if request.user.is_one_time_jwt_created:
+            request.user.is_one_time_jwt_created = False
+            try:
+                with transaction.atomic():
+                    BlackListedAccessToken.objects.create(
+                        jti=request.auth.payload.get("jti"),
+                        jti_refresh=f'access_{request.auth.payload.get("jti")}',
+                        token=request.auth,
+                        user=request.user,
+                    )
+                    request.user.save()
+            except Exception as e:
+                request.user.is_one_time_jwt_created = False
+                request.user.save()
+                raise InvalidToken(f"The token cannot be blacklisted: {e}")
+
         return True
 
 
