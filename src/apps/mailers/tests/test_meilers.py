@@ -29,3 +29,8 @@ class EventModelTests(TestCase):
         self.assertEqual(event.sent_message.template, 'Test Template')
         self.assertEqual(event.sent_message.results, {'key': 'value'})
         self.assertEqual(event.sent_message.event_set.first(), event)
+        sent_message = SentMessage.objects.get(id=event.sent_message.id)
+        self.assertIsNotNone(sent_message)
+        self.assertEqual(sent_message.user, self.user)
+        self.assertEqual(sent_message.template, 'Test Template')
+        self.assertEqual(sent_message.results, {'key': 'value'})
