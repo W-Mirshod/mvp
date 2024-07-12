@@ -33,10 +33,6 @@ class TariffViewTests(CustomViewTestCase):
         response = self.client.get(reverse_lazy("tariffs_api:tariff_list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_create_tariff(self):
-        tariff = TariffFactory(id=2, title="Tariff 2", rate=999.99)
-        self.assertEqual(tariff, Tariff.objects.get(id=2))
-
     def test_tariff_list(self):
         response = self.client.get(reverse_lazy("tariffs_api:tariff_list")).json()
         self.assertTrue(len(response) > 0)

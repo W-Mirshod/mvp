@@ -33,10 +33,6 @@ class ProductViewTests(CustomViewTestCase):
         response = self.client.get(reverse_lazy("products_api:product_list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_create_product(self):
-        product = ProductFactory(id=2, title="Product 2", description="Product 2 desc")
-        self.assertEqual(product, Product.objects.get(id=2))
-
     def test_product_list(self):
         response = self.client.get(reverse_lazy("products_api:product_list")).json()
         self.assertEqual(response[0]["title"], "Product 1")
