@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
 from apps.users.forms import UserCreationForm
-from apps.users.models import User
+from apps.users.models import User, UserTariff
 
 logger = logging.getLogger(__name__)
 
@@ -66,3 +66,8 @@ class CustomUserAdmin(UserAdmin):
         "is_verified",
     )
     ordering = ("email",)
+
+
+@admin.register(UserTariff)
+class TariffAdmin(admin.ModelAdmin):
+    list_display = ("user", "tariff", "expired_at")

@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
 
-from .models import User
+from .models import User, UserTariff
 
 
 class TokenSerializer(TokenObtainPairSerializer):
@@ -78,7 +78,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserTariffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserTariff
+        fields = (
+            "id",
+            "tariff",
+            "expired_at",
+        )
+
+
 class UserDetailSerializer(serializers.ModelSerializer):
+    user_tariff = UserTariffSerializer(source="tariff", many=True, read_only=True)
 
     class Meta:
         model = User
@@ -91,4 +102,5 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "email",
             "is_verified",
             "is_staff",
+            "user_tariff",
         )
