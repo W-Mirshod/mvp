@@ -17,6 +17,8 @@ class CustomUserAdmin(UserAdmin):
         "email",
         "is_active",
         "is_verified",
+        "jwt_max_out",
+        "is_one_time_jwt_created",
     )
     search_fields = ("email",)
     list_per_page = 25
@@ -31,6 +33,15 @@ class CustomUserAdmin(UserAdmin):
                     "is_superuser",
                     "is_verified",
                 ),
+            },
+        ),
+        (
+            _("JWT"),
+            {
+                "fields": (
+                    "is_one_time_jwt_created",
+                    "jwt_max_out",
+                )
             },
         ),
         (

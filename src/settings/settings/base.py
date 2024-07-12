@@ -197,3 +197,5 @@ CONSTANCE_CONFIG = {
     "ENABLE_PROXY_SENDING": (False, "Enable or disable proxy sending"),
 }
 # endregion
+
+MAIN_HOST = "http://localhost:8000/"
