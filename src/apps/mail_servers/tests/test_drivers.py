@@ -1,7 +1,7 @@
 from django.test import TestCase
 from apps.mail_servers.drivers import SMTPDriver, IMAPDriver, ProxyDriver
 from apps.mail_servers.models.models_servers import SMTPServer, IMAPServer, ProxyServer, Server
-from apps.mailers.models import Event, SentMessage
+from apps.mailers.models import Event
 from django.core.exceptions import ImproperlyConfigured
 from apps.mail_servers.choices import ServerType
 
