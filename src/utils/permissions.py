@@ -12,6 +12,10 @@ class IsTokenValid(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
+
+        if request.user.is_one_time_jwt_created:
+            return False
+
         if not request.auth:
             return False
 

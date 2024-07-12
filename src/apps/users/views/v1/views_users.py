@@ -26,7 +26,7 @@ from apps.users.serializers import (
     UserRegistrationSerializer,
 )
 from apps.users.services.jwt import create_one_time_jwt
-from apps.users.tasks import send_verification_email_task
+from apps.users.tasks import send_one_time_jwt_task, send_verification_email_task
 from utils.permissions import IsOneTimeTokenValid, IsTokenValid
 from utils.views import MultiSerializerViewSet
 
@@ -177,6 +177,21 @@ class RegistrationViewSet(MultiSerializerViewSet):
     def get_one_time_jwt(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        context, _ = create_one_time_jwt(serializer.validated_data)
+
+        if settings.CELERY_BROKER_URL:
+            send_one_time_jwt_task.delay(
+                settings.DEFAULT_FROM_EMAIL,
+                request.data.get("email"),
+                context.get("access"),
+            )
+        else:
+            send_one_time_jwt_task(
+                settings.DEFAULT_FROM_EMAIL,
+                request.data.get("email"),
+                context.get("access"),
+            )
+
         return Response("Successfully regenerated the new JWT.", status=status.HTTP_200_OK)
 
     def _generate_access_token(self, user):
