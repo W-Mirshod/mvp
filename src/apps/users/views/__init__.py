@@ -1,7 +1,8 @@
-from .v1.views_users import LoginTokenView, RefreshTokenView, RegistrationViewSet
-
-views = [
+from .v1.views_users import (  # noqa: F401
+    BlacklistTokenView,
+    EmailVerificationView,
     LoginTokenView,
+    OneTimeJWTFunctionsViewSet,
     RegistrationViewSet,
-    RefreshTokenView,
-]
+    UserViewSet,
+)

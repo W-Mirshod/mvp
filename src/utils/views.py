@@ -17,7 +17,9 @@ class MultiSerializerViewSet(ModelViewSet):
 
     @property
     def serializer_class(self):
-        return self.serializers.get(self.action) or self.serializers.get("default", Serializer)
+        return self.serializers.get(self.action) or self.serializers.get(
+            "default", Serializer
+        )
 
     def get_response(self, data=None):
         return Response(data)
