@@ -22,4 +22,14 @@ urlpatterns = [
         views.RegistrationViewSet.as_view({"post": "registration"}),
         name="registration",
     ),
+    path(
+        "get_one_time_jwt/",
+        views.RegistrationViewSet.as_view({"post": "get_one_time_jwt"}),
+        name="get_one_time_jwt",
+    ),
+    path(
+        "restore_password/",
+        views.OneTimeJWTFunctionsViewSet.as_view({"patch": "restore_password"}),
+        name="restore_password",
+    ),
 ]
