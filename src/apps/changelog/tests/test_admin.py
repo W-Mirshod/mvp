@@ -1,5 +1,5 @@
 from django.contrib.admin.sites import AdminSite
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory
 
 from apps.changelog.admin import ChangeLogAdmin
 from apps.changelog.models import ChangeLog
