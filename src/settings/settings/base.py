@@ -182,6 +182,14 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.mail_servers.tasks.test_periodic_task',
         'schedule': crontab(minute='*/1'),
     },
+    'process-new-mail-queue-every-3-seconds': {
+        'task': 'apps.mail_servers.tasks.process_new_mail_queue',
+        'schedule': 3.0,
+    },
+    'process-in-process-mail-queue-every-3-seconds': {
+        'task': 'apps.mail_servers.tasks.process_in_process_mail_queue',
+        'schedule': 3.0,
+    },
 }
 
 # endregion
