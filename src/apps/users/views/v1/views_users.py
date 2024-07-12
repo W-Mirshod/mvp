@@ -15,7 +15,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenBlacklistView, TokenObtainPairView
+from rest_framework_simplejwt.views import (
+    TokenBlacklistView,
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 from apps.users.models.jwt import BlackListedAccessToken
 from apps.users.serializers import (
@@ -271,3 +275,23 @@ class OneTimeJWTFunctionsViewSet(MultiSerializerViewSet):
             {"message": _("Successfully set a new password for the user.")},
             status=status.HTTP_200_OK,
         )
+
+
+class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
+    authentication_classes = ()
+    permission_classes = ()
+
+    def refresh(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+        data = serializer.validated_data
+        refresh = serializer.token_class(data["refresh"])
+
+        data["user_id"] = refresh.payload["user_id"]
+
+        return Response(data, status=status.HTTP_200_OK)
