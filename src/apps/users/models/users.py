@@ -53,6 +53,8 @@ class User(AbstractUser):
             "Unselect this instead of deleting accounts."
         ),
     )
+    is_one_time_jwt_created = models.BooleanField(_("One-time JWT created"), default=False)
+    jwt_max_out = models.DateTimeField(blank=True, null=True)
 
     username = None
     first_name = None
@@ -64,4 +66,8 @@ class User(AbstractUser):
     objects = UserManager()
 
     class Meta(AbstractUser.Meta):
-        ordering = ["-id"]
+        ordering = ("-id",)
+
+    def restore_password(self, new_password: str):
+        self.set_password(new_password)
+        self.save(update_fields=("password",))
