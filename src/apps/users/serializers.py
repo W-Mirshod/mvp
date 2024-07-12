@@ -3,6 +3,7 @@ from typing import Any, Dict
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from django.contrib.auth.password_validation import validate_password
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -89,7 +90,7 @@ class UserTariffSerializer(serializers.ModelSerializer):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
-    user_tariff = UserTariffSerializer(source="tariff", many=True, read_only=True)
+    user_tariff = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -104,3 +105,12 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "is_staff",
             "user_tariff",
         )
+
+    def get_user_tariff(self, obj):
+        user_tariffs = obj.tariff.all().order_by("-created_at")
+
+        for user_tariff in user_tariffs:
+            if user_tariff.expired_at > timezone.now():
+                return UserTariffSerializer(user_tariff).data
+
+        return None
