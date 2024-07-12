@@ -1,4 +1,4 @@
-from apps.users.tests.factories import UserFactory
+from apps.users.tests.factories import UserFactory, UserTariffFactory
 from utils.tests import CustomViewTestCase
 
 
@@ -16,6 +16,9 @@ class UserViewTest(CustomViewTestCase):
             is_staff=True,
             is_active=True,
             is_verified=True,
+        )
+        cls.user_tariff = UserTariffFactory(
+            user=cls.user_admin,
         )
         cls.password = "adm1n"
         cls.user_admin.set_password(cls.password)
