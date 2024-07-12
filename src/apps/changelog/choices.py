@@ -1,11 +1,19 @@
-from enum import Enum
+from django.utils.translation import gettext_lazy as _
 
 
-class ActionType(Enum):
-    CREATED = 'created'
-    UPDATED = 'updated'
-    DELETED = 'deleted'
+class ActionsType:
+    CREATE = "create"
+    UPDATE = "update"
+    DELETE = "delete"
 
-    @classmethod
-    def choices(cls):
-        return [(key.value, key.name.title()) for key in cls]
+    ITEMS = [
+        CREATE,
+        UPDATE,
+        DELETE,
+    ]
+
+    CHOICES = (
+        (CREATE, _("Create")),
+        (UPDATE, _("Update")),
+        (DELETE, _("Delete")),
+    )
