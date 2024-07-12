@@ -1,25 +1,48 @@
-import threading
+class Singleton(object):
 
-# Create local storage for each thread
-_request_local = threading.local()
-
-
-def get_current_user():
-    return getattr(_request_local, "user", None)
+    def __new__(cls):
+        if not hasattr(cls, "instance"):
+            cls.instance = super(Singleton, cls).__new__(cls)
+        return cls.instance
 
 
-def get_current_url():
-    return getattr(_request_local, "url", None)
+class LoggedInUser(Singleton):
+    """Singleton to store the user,
+    on whose behalf the request is being made
+    """
+
+    __metaclass__ = Singleton
+
+    request = None
+    user = None
+    address = None
+
+    def set_data(self, request):
+        self.request = id(request)
+        if request.user.is_authenticated:
+            self.user = request.user
+            self.address = request.META.get("REMOTE_ADDR")
+
+    @property
+    def current_user(self):
+        return self.user
+
+    @property
+    def have_user(self):
+        return not self.user is None
 
 
-class RequestMiddleware:
+class LoggedInUserMiddleware(object):
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        _request_local.user = getattr(request, "user", None)
-        _request_local.url = request.build_absolute_uri()
+        """
+        Init LoggedInUser
+        """
+        logged_in_user = LoggedInUser()
+        logged_in_user.set_data(request)
+
         response = self.get_response(request)
-        del _request_local.user
-        del _request_local.url
+
         return response
