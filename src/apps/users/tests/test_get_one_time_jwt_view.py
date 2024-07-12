@@ -1,13 +1,10 @@
-from datetime import timedelta
 from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.test import override_settings
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 
-import apps.users.services.jwt
 from apps.users.tests.factories import UserFactory
 from utils.tests import CustomViewTestCase
 
