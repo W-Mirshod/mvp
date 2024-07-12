@@ -15,7 +15,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenBlacklistView, TokenObtainPairView
+from rest_framework_simplejwt.views import (
+    TokenBlacklistView,
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 from apps.users.models.jwt import BlackListedAccessToken
 from apps.users.serializers import (
@@ -275,7 +279,7 @@ class OneTimeJWTFunctionsViewSet(MultiSerializerViewSet):
 
 class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
     authentication_classes = ()
-    permission_classes = [AllowAny]
+    permission_classes = ()
 
     def refresh(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
