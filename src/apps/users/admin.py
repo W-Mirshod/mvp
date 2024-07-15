@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
 from apps.users.forms import UserCreationForm
-from apps.users.models import User
+from apps.users.models import User, UserTariff
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,8 @@ class CustomUserAdmin(UserAdmin):
         "email",
         "is_active",
         "is_verified",
+        "jwt_max_out",
+        "is_one_time_jwt_created",
     )
     search_fields = ("email",)
     list_per_page = 25
@@ -31,6 +33,15 @@ class CustomUserAdmin(UserAdmin):
                     "is_superuser",
                     "is_verified",
                 ),
+            },
+        ),
+        (
+            _("JWT"),
+            {
+                "fields": (
+                    "is_one_time_jwt_created",
+                    "jwt_max_out",
+                )
             },
         ),
         (
@@ -53,7 +64,7 @@ class CustomUserAdmin(UserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "phone", "password1", "password2"),
+                "fields": ("email", "password1", "password2"),
             },
         ),
     )
@@ -66,3 +77,8 @@ class CustomUserAdmin(UserAdmin):
         "is_verified",
     )
     ordering = ("email",)
+
+
+@admin.register(UserTariff)
+class TariffAdmin(admin.ModelAdmin):
+    list_display = ("user", "tariff", "expired_at")

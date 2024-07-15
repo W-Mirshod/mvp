@@ -1,7 +1,11 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.signals import post_delete, post_save
 from django.utils.translation import gettext_lazy as _
+
+from apps.changelog.mixins import ChangeloggableMixin
+from apps.changelog.signals import journal_delete_handler, journal_save_handler
 
 
 class UserManager(BaseUserManager):
@@ -40,7 +44,7 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-class User(AbstractUser):
+class User(ChangeloggableMixin, AbstractUser):
     """User`s model"""
 
     email = models.EmailField(_("e-mail"), unique=True)
@@ -53,6 +57,8 @@ class User(AbstractUser):
             "Unselect this instead of deleting accounts."
         ),
     )
+    is_one_time_jwt_created = models.BooleanField(_("One-time JWT created"), default=False)
+    jwt_max_out = models.DateTimeField(blank=True, null=True)
 
     username = None
     first_name = None
@@ -64,4 +70,12 @@ class User(AbstractUser):
     objects = UserManager()
 
     class Meta(AbstractUser.Meta):
-        ordering = ["-id"]
+        ordering = ("-id",)
+
+    def restore_password(self, new_password: str):
+        self.set_password(new_password)
+        self.save(update_fields=("password",))
+
+
+post_save.connect(journal_save_handler, sender=User)
+post_delete.connect(journal_delete_handler, sender=User)
