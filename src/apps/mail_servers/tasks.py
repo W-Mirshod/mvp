@@ -1,10 +1,10 @@
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from apps.mail_servers.models.models_servers import Server
-from apps.mail_servers.drivers import SMTPDriver, IMAPDriver, ProxyDriver
-from apps.mail_servers.choices import ServerType
-from apps.mailers.choices import StatusType
 
+from apps.mail_servers.choices import ServerType
+from apps.mail_servers.drivers.base_driver import IMAPDriver, ProxyDriver, SMTPDriver
+from apps.mail_servers.models.servers import Server
+from apps.mailers.choices import StatusType
 
 logger = get_task_logger(__name__)
 
