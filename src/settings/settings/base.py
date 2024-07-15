@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "apps.changelog",
     "apps.mail_servers",
     "apps.mailers",
+    "apps.products",
     "drf_yasg",
     "admin_extra_buttons",
     "constance",
@@ -169,6 +170,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REDIS_HOST = env.str("REDIS_HOST", "redis")
 REDIS_PORT = env.str("REDIS_PORT", "6379")
 REDIS_DB = "0"
+# endregion
 
 # celery settings
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/0")

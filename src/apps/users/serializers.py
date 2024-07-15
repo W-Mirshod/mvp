@@ -14,7 +14,7 @@ from rest_framework_simplejwt.settings import api_settings
 
 from utils import password_validation
 
-from .models import User
+from .models import User, UserTariff
 
 
 class TokenSerializer(TokenObtainPairSerializer):
@@ -83,7 +83,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserTariffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserTariff
+        fields = (
+            "id",
+            "tariff",
+            "expired_at",
+        )
+
+
 class UserDetailSerializer(serializers.ModelSerializer):
+    user_tariff = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -96,7 +107,17 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "email",
             "is_verified",
             "is_staff",
+            "user_tariff",
         )
+
+    def get_user_tariff(self, obj):
+        user_tariffs = obj.tariff.all().order_by("-created_at")
+
+        for user_tariff in user_tariffs:
+            if user_tariff.expired_at > timezone.now():
+                return UserTariffSerializer(user_tariff).data
+
+        return None
 
 
 class RestorePasswordSerializer(serializers.Serializer):
