@@ -1,13 +1,24 @@
 from django.contrib import admin
+
 from .models import ChangeLog
 
 
 @admin.register(ChangeLog)
 class ChangeLogAdmin(admin.ModelAdmin):
-    list_display = ('datetime', 'model_name', 'user', 'object_id', 'data', 'url', 'action')
-    readonly_fields = ('datetime', 'model_name', 'user', 'object_id', 'data', 'url', 'action')
-    list_filter = ('model_name', 'action')
-    search_fields = ('model_name', 'user__email', 'object_id', 'action')
+    list_display = (
+        "changed",
+        "model",
+        "user",
+        "record_id",
+        "data",
+        "ipaddress",
+        "action_on_model",
+    )
+    readonly_fields = ("user",)
+    list_filter = (
+        "model",
+        "action_on_model",
+    )
 
     def has_add_permission(self, request):
         return False

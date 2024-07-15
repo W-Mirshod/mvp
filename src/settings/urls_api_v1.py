@@ -5,6 +5,8 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     path("users/", include("apps.users.urls.urls_api_v1")),
     path("servers/", include("apps.mail_servers.urls.urls_servers")),
+    path("products/", include("apps.products.urls.urls_products")),
+    path("tariffs/", include("apps.products.urls.urls_tariffs")),
     path(
         "docs/",
         include_docs_urls(title="API Documents", authentication_classes=[], permission_classes=[]),

@@ -3,13 +3,18 @@ from typing import Any, Dict
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from django.contrib.auth.password_validation import validate_password
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework.fields import empty
+from rest_framework.serializers import as_serializer_error
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
 
-from .models import User
+from utils import password_validation
+
+from .models import User, UserTariff
 
 
 class TokenSerializer(TokenObtainPairSerializer):
@@ -78,7 +83,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserTariffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserTariff
+        fields = (
+            "id",
+            "tariff",
+            "expired_at",
+        )
+
+
 class UserDetailSerializer(serializers.ModelSerializer):
+    user_tariff = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -91,4 +107,72 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "email",
             "is_verified",
             "is_staff",
+            "user_tariff",
         )
+
+    def get_user_tariff(self, obj):
+        user_tariffs = obj.tariff.all().order_by("-created_at")
+
+        for user_tariff in user_tariffs:
+            if user_tariff.expired_at > timezone.now():
+                return UserTariffSerializer(user_tariff).data
+
+        return None
+
+
+class RestorePasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(required=True)
+
+    def validate(self, attrs):
+        user = User.objects.get(id=self.user_id)
+
+        new_password = attrs["new_password"]
+        if new_password:
+            try:
+                password_validation.validate_password(new_password, user)
+            except ValidationError as exc:
+                raise ValidationError(detail=as_serializer_error(exc))
+
+        return super().validate(attrs)
+
+    def run_validation(self, data=empty):
+        self.user_id = data.get("user_id")
+        return super().run_validation(data=data)
+
+
+class EmailTokenGenerationSerializer(serializers.Serializer):
+    email = serializers.CharField(required=True)
+
+    def validate(self, attrs):
+        user = self.check_existence_user_by_email(attrs)
+
+        current_timezone = timezone.get_current_timezone()
+        now = timezone.localtime(timezone.now(), current_timezone)
+
+        self.check_pause(current_timezone, now, user)
+
+        return user
+
+    def check_existence_user_by_email(self, attrs, is_verified: bool = True):
+        # checking the existence of the user
+        try:
+            user = User.objects.get(email=attrs["email"], is_verified=is_verified)
+        except Exception:
+            raise ValidationError(
+                {"error": _("Invalid email.")},
+                code="invalid_email",
+            )
+        return user
+
+    def check_pause(self, current_timezone, now, user):
+        # checking the pause between OTP input
+        jwt_max_out = (
+            timezone.localtime(user.jwt_max_out, current_timezone)
+            if user.jwt_max_out
+            else user.jwt_max_out
+        )
+        if jwt_max_out and now < jwt_max_out:
+            raise ValidationError(
+                {"error": _("Max JWT try reached, try after an hour.")},
+                code="invalid_otp",
+            )
