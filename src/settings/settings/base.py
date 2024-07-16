@@ -113,7 +113,6 @@ AUTH_USER_MODEL = "users.User"
 LOGIN_URL = "rest_framework:login"
 LOGOUT_URL = "rest_framework:logout"
 
-
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -196,6 +195,13 @@ CONSTANCE_CONFIG = {
     "ENABLE_IMAP_SENDING": (False, "Enable or disable IMAP sending"),
     "ENABLE_PROXY_SENDING": (False, "Enable or disable proxy sending"),
 }
+# endregion
+
+# region CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 # endregion
 
 MAIN_HOST = "http://localhost:8000/"
