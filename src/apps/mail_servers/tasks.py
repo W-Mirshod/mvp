@@ -16,7 +16,9 @@ def test_periodic_task():
 
 @shared_task
 def process_events():
-    events = Event.objects.select_related('server').filter(status=StatusType.NEW).only('server__type', 'sent_message')
+    events = Event.objects.select_related('server').filter(
+        status=StatusType.NEW
+    ).only('server__type', 'sent_message')
 
     for event in events:
         try:
