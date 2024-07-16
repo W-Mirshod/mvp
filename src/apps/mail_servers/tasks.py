@@ -5,9 +5,6 @@ from apps.mailers.choices import StatusType
 from apps.mail_servers.drivers import SMTPDriver, IMAPDriver
 from django.core.exceptions import ObjectDoesNotExist
 
-
-
-
 logger = get_task_logger(__name__)
 
 
