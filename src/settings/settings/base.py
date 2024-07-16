@@ -184,6 +184,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.mail_servers.tasks.test_periodic_task",
         "schedule": crontab(minute="*/1"),
     },
+    'process-events-every-minute': {
+        'task': 'apps.mail_servers.tasks.process_events',
+        'schedule': crontab(minute='*/1'),
+    },
 }
 
 # endregion
