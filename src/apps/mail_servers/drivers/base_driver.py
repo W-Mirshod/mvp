@@ -65,3 +65,4 @@ class BaseDriver:
     @property
     def enable(self):
         raise ImproperlyConfigured("Subclasses must implement this property")
+        
