@@ -57,3 +57,11 @@ class BaseDriver:
 
     def logout(self):
         raise ImproperlyConfigured("Subclasses must implement this method")
+    
+    @property
+    def _settings(self):
+        raise ImproperlyConfigured("Subclasses must implement this property")
+
+    @property
+    def enable(self):
+        raise ImproperlyConfigured("Subclasses must implement this property")
