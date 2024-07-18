@@ -27,7 +27,8 @@ class BaseDriver:
         )
 
     def process_queue(self):
-        events = Event.objects.filter(server=self.server, status=StatusType.NEW)
+        events = Event.objects.filter(server=self.server,
+                                      status=StatusType.NEW)
         for event in events:
             self.send_mail(
                 subject=event.sent_message.results["subject"],

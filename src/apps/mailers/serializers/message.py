@@ -36,4 +36,4 @@ class SentMessageCreateSerializer(serializers.ModelSerializer):
                 server=validated_data["server"],
                 sent_message=msg,
             )
-        return msg
+        return msg, event
