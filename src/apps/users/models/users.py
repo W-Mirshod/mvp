@@ -61,8 +61,6 @@ class User(ChangeloggableMixin, AbstractUser):
     jwt_max_out = models.DateTimeField(blank=True, null=True)
 
     username = None
-    first_name = None
-    last_name = None
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

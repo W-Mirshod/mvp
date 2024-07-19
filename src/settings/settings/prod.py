@@ -60,8 +60,10 @@ SESSION_CACHE_ALIAS = "default"
 CSRF_TRUSTED_ORIGINS = env.list(
     "CSRF_TRUSTED_ORIGINS",
     default=[
-        "http://localhost",
-        "http://127.0.0.1",
+        # "http://localhost",
+        # "http://127.0.0.1",
+        "http://127.0.0.1:3000/",
+        "http://localhost:3000",
     ],
 )
 
