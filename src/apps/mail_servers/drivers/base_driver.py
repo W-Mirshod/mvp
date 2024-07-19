@@ -3,11 +3,14 @@ from django.core.exceptions import ImproperlyConfigured
 from apps.mail_servers.models.servers import Server
 from apps.mailers.choices import StatusType
 from apps.mailers.models import Event
-from utils.chunks import chunks
+
+from .utils import chunks
 
 
 class BaseDriver:
     def __init__(self, server_name):
+        if not self.enable:
+            return None
         self.server_name = server_name
         self.server = Server.objects.get(url=self.server_name)
         self.settings = self.get_server_settings()
@@ -27,8 +30,7 @@ class BaseDriver:
         )
 
     def process_queue(self):
-        events = Event.objects.filter(server=self.server,
-                                      status=StatusType.NEW)
+        events = Event.objects.filter(server=self.server, status=StatusType.NEW)
         for event in events:
             self.send_mail(
                 subject=event.sent_message.results["subject"],

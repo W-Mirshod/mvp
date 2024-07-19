@@ -1,9 +1,10 @@
+from constance.test import override_config
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 
 from apps.mail_servers.choices import ServerType
-from apps.mail_servers.drivers.base_driver import IMAPDriver, ProxyDriver, SMTPDriver
-from apps.mail_servers.models.servers import IMAPServer, ProxyServer, Server, SMTPServer
+from apps.mail_servers.drivers import IMAPDriver, ProxyDriver, SMTPDriver
+from apps.mail_servers.models import IMAPServer, ProxyServer, Server, SMTPServer
 from apps.mailers.models import Event
 
 
@@ -56,6 +57,7 @@ class DriverTestCase(TestCase):
         with self.assertRaises(ImproperlyConfigured):
             driver.process_queue()
 
+    @override_config(ENABLE_IMAP_SENDING=True)
     def test_imap_send_mail(self):
         driver = IMAPDriver(server_name=self.imap_server.url)
         driver.add_message_to_queue(

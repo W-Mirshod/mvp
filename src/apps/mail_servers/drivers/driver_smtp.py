@@ -8,9 +8,10 @@ from .base_driver import BaseDriver
 
 
 class SMTPDriver(BaseDriver):
-    def __init__(self, server_name):
-        super().__init__(server_name)
-        self.enable = config.ENABLE_SMTP_SENDING
+
+    @property
+    def enable(self):
+        return config.ENABLE_SMTP_SENDING
 
     def get_server_settings(self):
         try:

@@ -8,9 +8,10 @@ from .base_driver import BaseDriver
 
 
 class IMAPDriver(BaseDriver):
-    def __init__(self, server_name):
-        super().__init__(server_name)
-        self.enable = config.ENABLE_IMAP_SENDING
+
+    @property
+    def enable(self):
+        return config.ENABLE_IMAP_SENDING
 
     def get_server_settings(self):
         try:
