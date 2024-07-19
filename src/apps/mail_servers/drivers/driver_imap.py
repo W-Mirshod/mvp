@@ -1,3 +1,5 @@
+import imaplib
+
 from constance import config
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.core.mail import EmailMessage, get_connection
@@ -39,3 +41,16 @@ class IMAPDriver(BaseDriver):
                 connection=connection,
             )
             email.send()
+
+    def check_connection(self):
+        try:
+            client = imaplib.IMAP4_SSL(self.server.hostname, self.server.port)
+            response, _ = client.login(self.settings.username, self.settings.password)
+            client.logout()
+
+            if response == "OK":
+                return True
+
+            return False
+        except (ConnectionRefusedError, TimeoutError) as e:
+            return False

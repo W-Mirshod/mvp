@@ -12,7 +12,7 @@ class BaseDriver:
         if not self.enable:
             return None
         self.server_name = server_name
-        self.server = Server.objects.get(url=self.server_name)
+        self.server = Server.objects.get(url=self.server_name, is_deleted=False)
         self.settings = self.get_server_settings()
 
     def get_server_settings(self):
@@ -58,6 +58,9 @@ class BaseDriver:
             self.send_messages_chunk(chunk)
 
     def logout(self):
+        raise ImproperlyConfigured("Subclasses must implement this method")
+
+    def check_connection(self):
         raise ImproperlyConfigured("Subclasses must implement this method")
 
     @property
