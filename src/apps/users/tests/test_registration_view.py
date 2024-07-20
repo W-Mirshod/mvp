@@ -19,6 +19,8 @@ class RegistrationViewSetTests(CustomViewTestCase):
         data = {
             "email": "new_user@example.com",
             "password": "New_Pa$$w0rd",
+            "first_name": "first_name",
+            "last_name": "last_name",
         }
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

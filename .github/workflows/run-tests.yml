@@ -58,10 +58,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Check Syntax # check code formatting
-      run: |
-        pip install pycodestyle
-        pycodestyle --exclude=./src/utils/validators.py --statistics --max-line-length=500 .
     - name: Check syntax with flake8
       run: |
         pip install flake8

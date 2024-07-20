@@ -10,3 +10,7 @@ class UserTariff(DateModelMixin, DeleteModelMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tariff")
     tariff = models.ForeignKey(Tariff, on_delete=models.CASCADE)
     expired_at = models.DateTimeField(_("Date of expiration"), blank=True, null=True)
+
+    class Meta:
+        verbose_name = _("User`s tariff")
+        verbose_name_plural = _("User`s tariffs")
