@@ -1,4 +1,5 @@
 import imaplib
+import logging
 
 from constance import config
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
@@ -7,6 +8,8 @@ from django.core.mail import EmailMessage, get_connection
 from apps.mail_servers.models import IMAPServer
 
 from .base_driver import BaseDriver
+
+logger = logging.getLogger(__name__)
 
 
 class IMAPDriver(BaseDriver):
@@ -47,10 +50,12 @@ class IMAPDriver(BaseDriver):
             client = imaplib.IMAP4_SSL(self.server.hostname, self.server.port)
             response, _ = client.login(self.settings.username, self.settings.password)
             client.logout()
-
-            if response == "OK":
-                return True
-
-            return False
         except (ConnectionRefusedError, TimeoutError) as e:
+            logger.error("Checking connection failed: %s", e)
             return False
+
+        if response == "OK":
+            return True
+
+        logger.error("Checking connection failed: %s", response)
+        return False
