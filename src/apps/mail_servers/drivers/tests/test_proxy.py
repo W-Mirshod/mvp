@@ -58,7 +58,8 @@
 #         self.assertEqual(response[0]["type"], ServerType.PROXY)
 #
 #     def test_server_by_id(self):
-#         response = self.client.get(reverse_lazy("servers_api:proxy-server_by_id", kwargs={"pk": 1}))
+#         response = self.client.get(
+#           reverse_lazy("servers_api:proxy-server_by_id", kwargs={"pk": 1}))
 #
 #         self.assertEqual(response.data["type"], ServerType.PROXY)
 #

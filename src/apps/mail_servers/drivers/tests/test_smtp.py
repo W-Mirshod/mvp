@@ -56,11 +56,13 @@
 #         self.assertEqual(response[0]["type"], ServerType.SMTP)
 #
 #     def test_server_by_id(self):
-#         response = self.client.get(reverse_lazy("servers_api:smtp-server_by_id", kwargs={"pk": 1}))
+#         response = self.client.get(
+#           reverse_lazy("servers_api:smtp-server_by_id", kwargs={"pk": 1}))
 #
 #         self.assertEqual(response.data["type"], ServerType.SMTP)
 #
 #     def test_wrong_id(self):
-#         response = self.client.get(reverse_lazy("servers_api:smtp-server_by_id", kwargs={"pk": 10}))
+#         response = self.client.get(
+#           reverse_lazy("servers_api:smtp-server_by_id", kwargs={"pk": 10}))
 #
 #         self.assertEqual(response.data["detail"], "No SMTPServer matches the given query.")

@@ -58,11 +58,13 @@
 #         self.assertEqual(response[0]["type"], ServerType.IMAP)
 #
 #     def test_server_by_id(self):
-#         response = self.client.get(reverse_lazy("servers_api:imap-server_by_id", kwargs={"pk": 1}))
+#         response = self.client.get(
+#           reverse_lazy("servers_api:imap-server_by_id", kwargs={"pk": 1}))
 #
 #         self.assertEqual(response.data["type"], ServerType.IMAP)
 #
 #     def test_wrong_id(self):
-#         response = self.client.get(reverse_lazy("servers_api:imap-server_by_id", kwargs={"pk": 10}))
+#         response = self.client.get(
+#           reverse_lazy("servers_api:imap-server_by_id", kwargs={"pk": 10}))
 #
 #         self.assertEqual(response.data["detail"], "No IMAPServer matches the given query.")
