@@ -76,7 +76,7 @@ class SMTPDriver(BaseDriver):
                     client.starttls()
                 response = client.login(self.settings.username, self.settings.password)
                 client.quit()
-                return response[0] == 235  
+                return response[0] == 235
         except Exception as e:
             logger.error("Login failed: %s", e)
             raise
