@@ -168,10 +168,27 @@ class RegistrationViewSet(MultiSerializerViewSet):
         except Exception as ex:
             logger.error(f"Can`t register a new user: {ex}")
             if isinstance(ex.args, tuple):
-                text = ", ".join([str(e) for e in ex.args])
+                result_error = []
+                if isinstance(ex.args[0], str):
+                    logger.error("Error: %s", ex.args[0])
+                    return Response(
+                        {"error": ex.args[0]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+                for errors in ex.args[0].values():
+                    val = {}
+                    for name, error in errors[0].items():
+                        if isinstance(error, list):
+                            val[name] = str(error[0])
+                        elif isinstance(error, dict):
+                            val[name] = str(error["error"])
+                        else:
+                            val[name] = str(error)
+                    result_error.append(str(val))
+                text = ", ".join(result_error)
             else:
                 full_text = str(ex.detail)
                 text = full_text.split("ErrorDetail(string='")[1].split("'")[0]
+                logger.error("Error: %s", text)
             return Response({"error": text}, status=status.HTTP_400_BAD_REQUEST)
 
         response = Response({"status": "Ok"}, status=status.HTTP_201_CREATED)
@@ -214,22 +231,22 @@ class EmailVerificationView(MultiSerializerViewSet):
         raw_token = request.GET.get("token")
 
         if raw_token is None:
-            return Response({"detail": "Missing token"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error": "Missing token"}, status=status.HTTP_401_UNAUTHORIZED)
 
         try:
             validated_token = jwt_authenticator.get_validated_token(raw_token)
             user = jwt_authenticator.get_user(validated_token)
         except InvalidToken:
-            return Response({"detail": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception:
             return Response(
-                {"detail": "An error occurred during verification"},
+                {"error": "An error occurred during verification"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
         user.is_verified = True
         user.save()
-        return Response({"detail": "Email verified"}, status=status.HTTP_200_OK)
+        return Response({"error": "Email verified"}, status=status.HTTP_200_OK)
 
 
 class UserViewSet(MultiSerializerViewSet):
