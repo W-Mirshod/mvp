@@ -246,7 +246,7 @@ class EmailVerificationView(MultiSerializerViewSet):
 
         user.is_verified = True
         user.save()
-        return Response({"error": "Email verified"}, status=status.HTTP_200_OK)
+        return Response({"detail": "Email verified"}, status=status.HTTP_200_OK)
 
 
 class UserViewSet(MultiSerializerViewSet):
