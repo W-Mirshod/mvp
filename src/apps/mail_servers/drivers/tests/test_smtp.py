@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import smtplib
-
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -21,8 +21,7 @@ from constance import config
 class SMTPDriverTests(unittest.TestCase):
 
     def setUp(self):
-        self.driver = SMTPDriver(server_name='http://smtp.example.com')
-        self.driver.server_name = 'http://smtp.example.com'
+        self.driver = SMTPDriver(server_name='smtp.example.com')
         config.ENABLE_SMTP_SENDING = True
 
     def tearDown(self):
