@@ -165,4 +165,3 @@ class SMTPServerViewTests(CustomViewTestCase):
             reverse_lazy("servers_api:smtp-server_by_id", kwargs={"pk": 10}))
 
         self.assertEqual(response.data["detail"], "No SMTPServer matches the given query.")
-        
