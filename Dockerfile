@@ -37,4 +37,3 @@ ENV DISPLAY=:99
 
 # set open port
 EXPOSE 8000
-

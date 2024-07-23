@@ -1,21 +1,24 @@
 version: "3.9"
 
+# Общие параметры окружения для бэкэнда
 x-backend-environment: &backend-environment
   DJANGO_SETTINGS_MODULE: settings.settings.prod
   CELERY_BROKER_URL: redis://redis:6379/0
   CELERY_RESULT_BACKEND: redis://redis:6379/0
 
+# Базовые параметры для бэкэнда
 x-backend-base: &backend-base
   build:
     context: .
-    dockerfile: ./Dockerfile
+    dockerfile: Dockerfile
   volumes:
-    - ./:/mm
-    - ./logs:/mm/logs/
-    - ./scripts:/mm/scripts/
-    - ./src/static:/mm/src/static/
-    - ./src/media:/mm/src/media/
+    - ./:/np
+    - ./logs:/np/logs/
+    - ./scripts:/np/scripts/
+    - ./src/static:/np/src/static/
+    - ./src/media:/np/src/media/
 
+# Параметры бэкэнда
 x-backend: &backend
   image: app:django
   <<: *backend-base
@@ -23,114 +26,40 @@ x-backend: &backend
     <<: *backend-environment
 
 services:
-
-  # Redis
   redis:
     image: redis:alpine
-    container_name: mm_redis
+    container_name: np1_redis
     ports:
-      - 6380:6379
+      - 6365:6349
+    networks:
+      - common_network
 
-  # Database Postgres
-  db:
-    image: postgres:15.4
-    restart: always
-    command:
-      - "postgres"
-      - "-c"
-      - "max_connections=50"
-      - "-c"
-      - "shared_buffers=1GB"
-      - "-c"
-      - "effective_cache_size=4GB"
-      - "-c"
-      - "work_mem=16MB"
-      - "-c"
-      - "maintenance_work_mem=512MB"
-      - "-c"
-      - "random_page_cost=1.1"
-      - "-c"
-      - "temp_file_limit=10GB"
-      - "-c"
-      - "log_min_duration_statement=200ms"
-      - "-c"
-      - "idle_in_transaction_session_timeout=10s"
-      - "-c"
-      - "lock_timeout=1s"
-      - "-c"
-      - "statement_timeout=60s"
-      - "-c"
-      - "shared_preload_libraries=pg_stat_statements"
-      - "-c"
-      - "pg_stat_statements.max=10000"
-      - "-c"
-      - "pg_stat_statements.track=all"
-    volumes:
-      - ./data/db:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: np_pgadmin
     environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=mega_mailer
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - ${POSTGRES_PORT:-5433}:5432
-    container_name: mm_postgres
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d mega_mailer" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 4G
+      - 8080:80
+    networks:
+      - common_network
 
-  # Django WSGI App
   wsgi-server:
     <<: *backend
     ports:
-      - 8000:8000
-    links:
-      - db
-      - redis
-    container_name: mm_wsgi
-    command: >
-     sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-wsgi-web.sh"
+      - 8001:8005
     depends_on:
-      db:
-        condition: service_healthy
+      - pgadmin
+      - redis
+    networks:
+      - common_network
+    env_file:
+      - .env
+    command: >
+      sh -c "./scripts/wait-for-it.sh pgadmin:5432 -- sh ./scripts/entrypoint-wsgi-web.sh"
 
-  # Celery
-  celery-worker-beat:
-    restart: always
-    <<: *backend
-    command: >
-      sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-worker.sh"
-    volumes:
-      - .:/mm
-    container_name: mm_celery
-    links:
-      - redis
-    depends_on:
-      - db
-      - redis
-      - wsgi-server
+networks:
+  common_network:
+    driver: bridge
 
-  # Flower
-  flower:
-    <<: *backend
-    command: >
-      sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-flower.sh"
-    volumes:
-      - .:/mm
-    ports:
-      - 5555:5555
-    links:
-      - redis
-      - celery-worker-beat
-    container_name: mm_flower
-    depends_on:
-      - wsgi-server
-      - redis
-      - celery-worker-beat
