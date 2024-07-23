@@ -62,8 +62,10 @@ CSRF_TRUSTED_ORIGINS = env.list(
     default=[
         # "http://localhost",
         # "http://127.0.0.1",
-        "http://127.0.0.1:3000/",
+        "http://127.0.0.1:3000",
         "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
     ],
 )
 
@@ -81,3 +83,7 @@ SWAGGER_SETTINGS = {
     },
 }
 # endregion
+
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
