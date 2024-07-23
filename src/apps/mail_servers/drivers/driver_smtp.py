@@ -53,12 +53,10 @@ class SMTPDriver(BaseDriver):
 
     def check_connection(self):
         try:
-            with smtplib.SMTP(self.settings.url, self.settings.port) as client:
-                if self.settings.email_use_tls:
-                    client.starttls()
-                client.login(self.settings.username, self.settings.password)
-                client.quit()
-                return True
+            server = smtplib.SMTP(self.settings.url, self.settings.port)
+            server.starttls() if self.settings.email_use_tls else None
+            server.login(self.settings.username, self.settings.password)
+            server.quit()
         except (ConnectionRefusedError, TimeoutError) as e:
             logger.error("Checking connection failed: %s", e)
             return False
@@ -69,22 +67,24 @@ class SMTPDriver(BaseDriver):
             logger.error("Unexpected error occurred while checking connection: %s", e)
             return False
 
+        return True
+
     def login(self):
         try:
-            with smtplib.SMTP(self.settings.url, self.settings.port) as client:
-                response = client.login(self.settings.username, self.settings.password)
-                client.quit()
-                return response[0] == 235
+            server = smtplib.SMTP(self.settings.url, self.settings.port)
+            server.starttls() if self.settings.email_use_tls else None
+            response = server.login(self.settings.username, self.settings.password)
+            server.quit()
+            return response[0] == 235
         except Exception as e:
             logger.error("Login failed: %s", e)
             raise
 
     def logout(self):
         try:
-            with smtplib.SMTP(self.settings.url, self.settings.port) as client:
-                client.login(self.settings.username, self.settings.password)
-                response = client.quit()
-                return response[0] == 221
+            server = smtplib.SMTP(self.settings.url, self.settings.port)
+            server.quit()
+            return True
         except Exception as e:
             logger.error("Logout failed: %s", e)
             raise
