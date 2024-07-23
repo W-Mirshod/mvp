@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
+import smtplib
 
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
@@ -68,7 +69,9 @@ class SMTPDriverTests(unittest.TestCase):
         self.driver.settings = mock_get.return_value
         with patch('smtplib.SMTP_SSL') as mock_smtp:
             mock_client = MagicMock()
-            mock_client.login.side_effect = smtplib.SMTPAuthenticationError(535, 'authentication failed')
+            mock_client.login.side_effect = smtplib.SMTPAuthenticationError(
+                535, 'authentication failed'
+            )
             mock_smtp.return_value = mock_client
             self.assertFalse(self.driver.check_connection())
 
