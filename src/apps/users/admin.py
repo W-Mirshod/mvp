@@ -23,7 +23,17 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ("email",)
     list_per_page = 25
     fieldsets = (
-        (None, {"fields": ("email", "password")}),
+        (
+            None,
+            {
+                "fields": (
+                    "email",
+                    "password",
+                    "first_name",
+                    "last_name",
+                )
+            },
+        ),
         (
             _("Permissions"),
             {

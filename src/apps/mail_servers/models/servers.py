@@ -22,6 +22,9 @@ class Server(ChangeloggableMixin, DeleteModelMixin, DateModelMixin, models.Model
         verbose_name_plural = _("Servers")
         ordering = ("-id",)
 
+    def __str__(self):
+        return f"{self.type} server({self.id}): {self.url}:{self.port}"
+
 
 class SMTPManager(models.Manager):
     def get_queryset(self):
@@ -37,6 +40,9 @@ class SMTPServer(Server):
         proxy = True
         verbose_name = _("SMTP server")
         verbose_name_plural = _("SMTP servers")
+
+    def __str__(self):
+        return f"SMTP server({self.id}): {self.url}:{self.port}"
 
 
 class IMAPManager(models.Manager):
@@ -54,6 +60,9 @@ class IMAPServer(Server):
         verbose_name = _("IMAP server")
         verbose_name_plural = _("IMAP servers")
 
+        def __str__(self):
+            return f"IMAP server({self.id}): {self.url}:{self.port}"
+
 
 class PROXYManager(models.Manager):
     def get_queryset(self):
@@ -69,6 +78,9 @@ class ProxyServer(Server):
         proxy = True
         verbose_name = _("Proxy server")
         verbose_name_plural = _("Proxy servers")
+
+    def __str__(self):
+        return f"Proxy server({self.id}): {self.url}:{self.port}"
 
 
 post_save.connect(journal_save_handler, sender=SMTPServer)

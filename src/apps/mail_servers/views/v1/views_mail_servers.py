@@ -1,14 +1,8 @@
 from rest_framework.permissions import IsAuthenticated
 
-from apps.mail_servers.models import (
-    IMAPServer,
-    MessageTemplate,
-    ProxyServer,
-    SMTPServer,
-)
+from apps.mail_servers.models import IMAPServer, ProxyServer, SMTPServer
 from apps.mail_servers.serializers import (
     IMAPServerSerializer,
-    MessageTemplateSerializer,
     ProxyServerSerializer,
     SMTPServerSerializer,
 )
@@ -49,16 +43,4 @@ class ProxyServerView(MultiSerializerViewSet):
     serializers = {
         "retrieve": ProxyServerSerializer,
         "list": ProxyServerSerializer,
-    }
-
-
-class MessageTemplateView(MultiSerializerViewSet):
-    queryset = MessageTemplate.objects.all()
-    permission_classes = (
-        IsAuthenticated,
-        IsTokenValid,
-    )
-    serializers = {
-        "retrieve": MessageTemplateSerializer,
-        "list": MessageTemplateSerializer,
     }

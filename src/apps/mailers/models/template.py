@@ -13,8 +13,8 @@ class MessageTemplate(ChangeloggableMixin, DeleteModelMixin, DateModelMixin, mod
     message = models.JSONField(blank=True, null=True)
 
     class Meta:
-        verbose_name = _("MessageTemplate")
-        verbose_name_plural = _("MessageTemplates")
+        verbose_name = _("Message template")
+        verbose_name_plural = _("Message templates")
 
 
 post_save.connect(journal_save_handler, sender=MessageTemplate)

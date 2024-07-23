@@ -7,6 +7,7 @@ urlpatterns = [
     path("servers/", include("apps.mail_servers.urls.urls_servers")),
     path("products/", include("apps.products.urls.urls_products")),
     path("tariffs/", include("apps.products.urls.urls_tariffs")),
+    path("messages/", include("apps.mailers.urls.message")),
     path(
         "docs/",
         include_docs_urls(title="API Documents", authentication_classes=[], permission_classes=[]),
