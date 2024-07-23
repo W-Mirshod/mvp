@@ -54,7 +54,7 @@ class SMTPDriver(BaseDriver):
     def check_connection(self):
         try:
             with smtplib.SMTP(self.settings.url, self.settings.port) as client:
-                if self.settings.use_tls:
+                if self.settings.email_use_tls:
                     client.starttls()
                 client.login(self.settings.username, self.settings.password)
                 client.quit()
@@ -72,7 +72,7 @@ class SMTPDriver(BaseDriver):
     def login(self):
         try:
             with smtplib.SMTP(self.settings.url, self.settings.port) as client:
-                if self.settings.use_tls:
+                if self.settings.email_use_tls:
                     client.starttls()
                 response = client.login(self.settings.username, self.settings.password)
                 client.quit()
@@ -84,7 +84,7 @@ class SMTPDriver(BaseDriver):
     def logout(self):
         try:
             with smtplib.SMTP(self.settings.url, self.settings.port) as client:
-                if self.settings.use_tls:
+                if self.settings.email_use_tls:
                     client.starttls()
                 client.login(self.settings.username, self.settings.password)
                 response = client.quit()
