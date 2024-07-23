@@ -19,82 +19,60 @@ from constance import config
 
 
 class SMTPDriverTests(unittest.TestCase):
+
     def setUp(self):
         self.driver = SMTPDriver(server_name='http://smtp.example.com')
         self.driver.server_name = 'http://smtp.example.com'
+        config.ENABLE_SMTP_SENDING = True
+
+    def tearDown(self):
+        config.ENABLE_SMTP_SENDING = False
 
     @patch('apps.mail_servers.models.SMTPServer.objects.get')
-    def test_login(self, mock_get):
-        mock_settings = MagicMock()
-        mock_settings.url = 'smtp.example.com'
-        mock_settings.port = 587
-        mock_settings.username = 'user@example.com'
-        mock_settings.password = 'password'
-        mock_settings.use_tls = True
-        mock_get.return_value = mock_settings
-        self.driver.settings = mock_get.return_value
-        
-        with patch('smtplib.SMTP') as mock_smtp:
-            mock_client = MagicMock()
-            mock_client.login.return_value = (235, 'Authentication successful')
-            mock_smtp.return_value = mock_client
-            
-            self.assertTrue(self.driver.login())
+    def test_get_server_settings(self, mock_get):
+        mock_get.return_value = SMTPServerFactory.build()
+        settings = self.driver.get_server_settings()
+        self.assertIsNotNone(settings)
+        self.assertEqual(settings.url, mock_get.return_value.url)
 
     @patch('apps.mail_servers.models.SMTPServer.objects.get')
-    def test_logout(self, mock_get):
-        mock_settings = MagicMock()
-        mock_settings.url = 'smtp.example.com'
-        mock_settings.port = 587
-        mock_settings.username = 'user@example.com'
-        mock_settings.password = 'password'
-        mock_settings.use_tls = True
-        mock_get.return_value = mock_settings
+    def test_get_server_settings_raises_exception(self, mock_get):
+        mock_get.side_effect = SMTPServer.DoesNotExist
+        with self.assertRaises(ObjectDoesNotExist):
+            self.driver.get_server_settings()
+
+    @patch('apps.mail_servers.drivers.driver_smtp.get_connection', autospec=True)
+    @patch('apps.mail_servers.models.SMTPServer.objects.get')
+    def test_send_mail(self, mock_get, mock_get_connection):
+        mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        
-        with patch('smtplib.SMTP') as mock_smtp:
-            mock_client = MagicMock()
-            mock_client.quit.return_value = (221, 'Service closing transmission channel')
-            mock_smtp.return_value = mock_client
-            
-            self.assertTrue(self.driver.logout())
+        mock_connection = MagicMock()
+        mock_get_connection.return_value.__enter__.return_value = mock_connection
+
+        with patch.object(EmailMessage, 'send') as mock_send:
+            self.driver.send_mail('Test Subject', 'Test Message', ['recipient@test.com'])
+            mock_send.assert_called_once()
 
     @patch('apps.mail_servers.models.SMTPServer.objects.get')
     def test_check_connection_success(self, mock_get):
-        mock_settings = MagicMock()
-        mock_settings.url = 'smtp.example.com'
-        mock_settings.port = 587
-        mock_settings.username = 'user@example.com'
-        mock_settings.password = 'password'
-        mock_settings.use_tls = True
-        mock_get.return_value = mock_settings
+        mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        
-        with patch('smtplib.SMTP') as mock_smtp:
+        with patch('smtplib.SMTP_SSL') as mock_smtp:
             mock_client = MagicMock()
-            mock_client.login.return_value = (235, 'Authentication successful')
+            mock_client.login.return_value = ('OK', [])
             mock_smtp.return_value = mock_client
-            
             self.assertTrue(self.driver.check_connection())
 
     @patch('apps.mail_servers.models.SMTPServer.objects.get')
     def test_check_connection_failure(self, mock_get):
-        mock_settings = MagicMock()
-        mock_settings.url = 'smtp.example.com'
-        mock_settings.port = 587
-        mock_settings.username = 'user@example.com'
-        mock_settings.password = 'password'
-        mock_settings.use_tls = True
-        mock_get.return_value = mock_settings
+        mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        
-        with patch('smtplib.SMTP') as mock_smtp:
+        with patch('smtplib.SMTP_SSL') as mock_smtp:
             mock_client = MagicMock()
             mock_client.login.side_effect = smtplib.SMTPAuthenticationError(
-                535, 'Authentication failed'
+                535, 'authentication failed'
             )
             mock_smtp.return_value = mock_client
-            
             self.assertFalse(self.driver.check_connection())
 
     @patch('apps.mail_servers.models.SMTPServer.objects.get')
