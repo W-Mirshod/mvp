@@ -2,6 +2,7 @@ import unittest
 from imaplib import IMAP4_SSL
 from concurrent.futures import ThreadPoolExecutor
 
+
 def connect_imap(server, username, password):
     try:
         with IMAP4_SSL(server) as imap:
@@ -11,6 +12,7 @@ def connect_imap(server, username, password):
     except Exception as e:
         raise AssertionError(f"IMAP connection failed: {e}")
 
+
 class IMAPStressTest(unittest.TestCase):
     def test_imap_stress(self):
         server = 'imap.example.com'
@@ -19,6 +21,13 @@ class IMAPStressTest(unittest.TestCase):
         num_connections = 100
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [executor.submit(connect_imap, server, username, password) for _ in range(num_connections)]
+            futures = [
+                executor.submit(connect_imap, server, username, password)
+                for _ in range(num_connections)
+            ]
             for future in futures:
                 future.result()
+
+
+if __name__ == '__main__':
+    unittest.main()
