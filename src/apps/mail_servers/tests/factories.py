@@ -65,10 +65,10 @@ class ProxyServerFactory(DjangoModelFactory):
 #     """
 #     Message Template Factory
 #     """
-# 
+#
 #     from_address = FuzzyText(length=20, suffix="_template@example.com")
 #     template = FuzzyText(length=20, prefix="template_")
 #     message = {"message": FuzzyText(length=20, prefix="message_").fuzz()}
-# 
+#
 #     class Meta:
 #         model = MessageTemplate

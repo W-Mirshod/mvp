@@ -99,7 +99,9 @@ class IMAPDriverTests(unittest.TestCase):
         mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
         self.driver.send_message('Test Subject', 'Test Message', 'recipient@test.com')
-        mock_send_mail.assert_called_once_with('Test Subject', 'Test Message', ['recipient@test.com'])
+        mock_send_mail.assert_called_once_with(
+            'Test Subject', 'Test Message', ['recipient@test.com']
+        )
 
 
 class IMAPServerViewTests(CustomViewTestCase):
