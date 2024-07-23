@@ -76,7 +76,7 @@ class SMTPDriverTests(unittest.TestCase):
 
     @patch('apps.mail_servers.models.SMTPServer.objects.get')
     def test_login(self, mock_get):
-        mock_get.return_value = SMTPServerFactory.build(url="smtp.example.com", port=587)
+        mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
         with patch('smtplib.SMTP') as mock_smtp:
             mock_client = MagicMock()
