@@ -81,7 +81,7 @@ class SMTPDriverTests(unittest.TestCase):
         self.driver.settings = mock_get.return_value
         with patch('smtplib.SMTP') as mock_smtp:
             mock_client = MagicMock()
-            mock_client.login.return_value = ('235', '2.7.0 Authentication successful')
+            mock_client.login.return_value = (235, '2.7.0 Authentication successful')
             mock_smtp.return_value = mock_client
             self.assertTrue(self.driver.login())
 
@@ -91,7 +91,7 @@ class SMTPDriverTests(unittest.TestCase):
         self.driver.settings = mock_get.return_value
         with patch('smtplib.SMTP') as mock_smtp:
             mock_client = MagicMock()
-            mock_client.quit.return_value = ('221', '2.0.0 Bye')
+            mock_client.quit.return_value = (221, '2.0.0 Bye')
             mock_smtp.return_value = mock_client
             self.assertTrue(self.driver.logout())
 
