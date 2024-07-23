@@ -4,11 +4,23 @@ from apps.mailers.models import Event
 from django.core.exceptions import ObjectDoesNotExist
 
 from apps.mail_servers.choices import ServerType
-from apps.mail_servers.drivers.base_driver import IMAPDriver, ProxyDriver, SMTPDriver
+from apps.mail_servers.drivers.driver_imap import IMAPDriver
+from apps.mail_servers.drivers.driver_smtp import SMTPDriver
+from apps.mail_servers.drivers.driver_proxy import ProxyDriver
 from apps.mail_servers.models.servers import Server
 from apps.mailers.choices import StatusType
 
 logger = get_task_logger(__name__)
+
+
+def get_driver(server_type, server_url):
+    if server_type == ServerType.SMTP:
+        return SMTPDriver(server_url)
+    elif server_type == ServerType.IMAP:
+        return IMAPDriver(server_url)
+    elif server_type == ServerType.PROXY:
+        return ProxyDriver(server_url)
+    return None
 
 
 @shared_task
@@ -25,11 +37,7 @@ def process_events():
 
     for event in events:
         try:
-            driver = None
-            if event.server.type == 'SMTP':
-                driver = SMTPDriver(event.server.url)
-            elif event.server.type == 'IMAP':
-                driver = IMAPDriver(event.server.url)
+            driver = get_driver(event.server.type, event.server.url)
 
             if driver and driver.enable:
                 event.status = StatusType.IN_PROCESS
@@ -56,13 +64,8 @@ def process_events():
 def process_mail_queue(status):
     servers = Server.objects.filter(is_active=True)
     for server in servers:
-        if server.type == ServerType.SMTP:
-            driver = SMTPDriver(server.url)
-        elif server.type == ServerType.IMAP:
-            driver = IMAPDriver(server.url)
-        elif server.type == ServerType.PROXY:
-            driver = ProxyDriver(server.url)
-        else:
+        driver = get_driver(server.type, server.url)
+        if not driver:
             continue
 
         try:
