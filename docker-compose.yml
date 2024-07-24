@@ -13,10 +13,10 @@ x-backend-base: &backend-base
     dockerfile: Dockerfile
   volumes:
     - ./:/np
-    - ./logs:/np/logs/
-    - ./scripts:/np/scripts/
-    - ./src/static:/np/src/static/
-    - ./src/media:/np/src/media/
+    - ./logs:/mm/logs/
+    - ./scripts:/mm/scripts/
+    - ./src/static:/mm/src/static/
+    - ./src/media:/mm/src/media/
 
 # Параметры бэкэнда
 x-backend: &backend
@@ -57,9 +57,8 @@ services:
     env_file:
       - .env
     command: >
-      sh -c "./scripts/wait-for-it.sh pgadmin:5432 -- sh ./scripts/entrypoint-wsgi-web.sh"
+      sh -c "chmod +x ./scripts/wait-for-it.sh && ./scripts/wait-for-it.sh pgadmin:5432 -- sh ./scripts/entrypoint-wsgi-web.sh"
 
 networks:
   common_network:
     driver: bridge
-
