@@ -1,12 +1,26 @@
 from celery import shared_task
 from celery.utils.log import get_task_logger
+from apps.mailers.models import Event
+from django.core.exceptions import ObjectDoesNotExist
 
 from apps.mail_servers.choices import ServerType
-from apps.mail_servers.drivers.base_driver import IMAPDriver, ProxyDriver, SMTPDriver
+from apps.mail_servers.drivers.driver_imap import IMAPDriver
+from apps.mail_servers.drivers.driver_smtp import SMTPDriver
+from apps.mail_servers.drivers.driver_proxy import ProxyDriver
 from apps.mail_servers.models.servers import Server
 from apps.mailers.choices import StatusType
 
 logger = get_task_logger(__name__)
+
+
+def get_driver(server_type, server_url):
+    if server_type == ServerType.SMTP:
+        return SMTPDriver(server_url)
+    elif server_type == ServerType.IMAP:
+        return IMAPDriver(server_url)
+    elif server_type == ServerType.PROXY:
+        return ProxyDriver(server_url)
+    return None
 
 
 @shared_task
@@ -16,16 +30,42 @@ def test_periodic_task():
 
 
 @shared_task
+def process_events():
+    events = Event.objects.select_related('server').filter(
+        status=StatusType.NEW
+    ).only('server__type', 'sent_message')
+
+    for event in events:
+        try:
+            driver = get_driver(event.server.type, event.server.url)
+
+            if driver and driver.enable:
+                event.status = StatusType.IN_PROCESS
+                event.save()
+
+                driver.send_mail(
+                    subject=event.sent_message.template,
+                    message=event.sent_message.results.get('message', ''),
+                    recipient_list=[event.sent_message.user.email]
+                )
+            else:
+                event.status = StatusType.FAILED
+                event.save()
+        except ObjectDoesNotExist:
+            logger.error(f"Server settings not found for event {event.id}")
+            event.status = StatusType.FAILED
+            event.save()
+        except Exception as e:
+            logger.error(f"Failed to process event {event.id}: {e}")
+            event.status = StatusType.FAILED
+            event.save()
+
+
 def process_mail_queue(status):
     servers = Server.objects.filter(is_active=True)
     for server in servers:
-        if server.type == ServerType.SMTP:
-            driver = SMTPDriver(server.url)
-        elif server.type == ServerType.IMAP:
-            driver = IMAPDriver(server.url)
-        elif server.type == ServerType.PROXY:
-            driver = ProxyDriver(server.url)
-        else:
+        driver = get_driver(server.type, server.url)
+        if not driver:
             continue
 
         try:
