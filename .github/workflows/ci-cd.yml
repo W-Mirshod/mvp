@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build-and-test:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     services:
@@ -30,21 +30,41 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Build Docker images
-        run: docker-compose -f docker-compose.yml build
+      - name: Add .env
+        run: |
+          touch ./src/settings/settings/.env
+          echo DEBUG=False >> ./src/settings/settings/.env
+          echo SQL_DEBUG=False >> ./src/settings/settings/.env
+          echo SECRET_KEY=secrets.SECRET_KEY >> ./src/settings/settings/.env
+          echo DJANGO_ALLOWED_HOSTS='*' >> ./src/settings/settings/.env
+          echo STATIC_ROOT=var/www/staticfiles >> ./src/settings/settings/.env
+          echo SQL_ENGINE=django.db.backends.postgresql >> ./src/settings/settings/.env
+          echo SQL_USER=postgres >> ./src/settings/settings/.env
+          echo SQL_PASSWORD=postgres >> ./src/settings/settings/.env
+          echo SQL_DATABASE=mega_mailer >> ./src/settings/settings/.env
+          echo SQL_PORT=5432 >> ./src/settings/settings/.env
+          echo RUN_IN_DOCKER=False >> ./src/settings/settings/.env
+          echo BROKER_URL=redis://localhost:6385/0 >> ./src/settings/settings/.env
+          echo REDIS_HOST=redis >> ./src/settings/settings/.env
+          echo REDIS_HOST_LOCAL=localhost >> ./src/settings/settings/.env
+          echo REDIS_PORT=6379 >> ./src/settings/settings/.env
+          echo REDIS_PORT_LOCAL=6385 >> ./src/settings/settings/.env
+          echo CELERY_BROKER_URL=redis://redis:6379/0 >> ./src/settings/settings/.env
+          echo CELERY_RESULT_BACKEND=redis://redis:6379/0 >> ./src/settings/settings/.env
+          echo CELERY_ACCEPT_CONTENT=application/json >> ./src/settings/settings/.env
 
-      - name: Start Docker containers
-        run: docker-compose -f docker-compose.yml up -d
-
-      - name: Run tests
-        run: docker-compose -f docker-compose.yml exec -T wsgi-server pytest
+      - name: Build and start Docker containers
+        run: |
+          docker-compose -f docker-compose.yml build
+          docker-compose -f docker-compose.yml up -d
 
       - name: Tear down
+        if: always()
         run: docker-compose -f docker-compose.yml down
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build-and-test
+    needs: build-and-deploy
 
     steps:
       - name: Checkout code
@@ -57,4 +77,4 @@ jobs:
 
       - name: Deploy to server
         run: |
-          ssh -o StrictHostKeyChecking=no root@93.123.72.45 'cd /root/mmb && docker-compose pull && docker-compose up -d'
+          ssh -o StrictHostKeyChecking=no root@93.123.72.45 'cd /root/mmb/ && docker-compose pull && docker-compose up -d'
