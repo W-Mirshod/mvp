@@ -37,7 +37,7 @@ jobs:
         run: docker-compose -f docker-compose.yml up -d
 
       - name: Run tests
-        run: docker-compose -f docker-compose.yml exec wsgi-server pytest
+        run: docker-compose -f docker-compose.yml exec -T wsgi-server pytest
 
       - name: Tear down
         run: docker-compose -f docker-compose.yml down
@@ -57,4 +57,4 @@ jobs:
 
       - name: Deploy to server
         run: |
-          ssh -o StrictHostKeyChecking=no root@93.123.72.45 'cd /root/mmb/ && docker-compose pull && docker-compose up -d'
+          ssh -o StrictHostKeyChecking=no root@93.123.72.45 'cd /root/mmb && docker-compose pull && docker-compose up -d'
