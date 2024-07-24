@@ -53,7 +53,7 @@ class IMAPDriver(BaseDriver):
 
     def check_connection(self):
         try:
-            client = imaplib.IMAP4_SSL(self.settings.hostname, self.settings.port)
+            client = imaplib.IMAP4_SSL(self.settings.url, self.settings.port)
             response, _ = client.login(self.settings.username, self.settings.password)
             client.logout()
         except (ConnectionRefusedError, TimeoutError) as e:
@@ -74,7 +74,7 @@ class IMAPDriver(BaseDriver):
 
     def login(self):
         try:
-            client = imaplib.IMAP4_SSL(self.settings.hostname, self.settings.port)
+            client = imaplib.IMAP4_SSL(self.settings.url, self.settings.port)
             response, _ = client.login(self.settings.username, self.settings.password)
             client.logout()
             return response == "OK"
@@ -84,7 +84,7 @@ class IMAPDriver(BaseDriver):
 
     def logout(self):
         try:
-            client = imaplib.IMAP4_SSL(self.settings.hostname, self.settings.port)
+            client = imaplib.IMAP4_SSL(self.settings.url, self.settings.port)
             response, _ = client.logout()
             return response == "BYE"
         except Exception as e:

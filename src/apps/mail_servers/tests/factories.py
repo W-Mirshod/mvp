@@ -5,7 +5,6 @@ from factory.fuzzy import FuzzyInteger, FuzzyText
 from apps.mail_servers.choices import ServerType
 from apps.mail_servers.models import (
     IMAPServer,
-    MessageTemplate,
     ProxyServer,
     SMTPServer,
 )
@@ -62,14 +61,14 @@ class ProxyServerFactory(DjangoModelFactory):
         model = ProxyServer
 
 
-class MessageTemplateFactory(DjangoModelFactory):
-    """
-    Message Template Factory
-    """
-
-    from_address = FuzzyText(length=20, suffix="_template@example.com")
-    template = FuzzyText(length=20, prefix="template_")
-    message = {"message": FuzzyText(length=20, prefix="message_").fuzz()}
-
-    class Meta:
-        model = MessageTemplate
+# class MessageTemplateFactory(DjangoModelFactory):
+#     """
+#     Message Template Factory
+#     """
+#
+#     from_address = FuzzyText(length=20, suffix="_template@example.com")
+#     template = FuzzyText(length=20, prefix="template_")
+#     message = {"message": FuzzyText(length=20, prefix="message_").fuzz()}
+#
+#     class Meta:
+#         model = MessageTemplate
