@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.changelog.mixins import ChangeloggableMixin
 from apps.changelog.signals import journal_delete_handler, journal_save_handler
+from apps.users.choices import UserRoles
 
 
 class UserManager(BaseUserManager):
@@ -59,6 +60,8 @@ class User(ChangeloggableMixin, AbstractUser):
     )
     is_one_time_jwt_created = models.BooleanField(_("One-time JWT created"), default=False)
     jwt_max_out = models.DateTimeField(blank=True, null=True)
+
+    role = models.CharField(choices=UserRoles.CHOICES, default=UserRoles.USER)
 
     username = None
 

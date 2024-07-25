@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "apps.mail_servers",
     "apps.mailers",
     "apps.products",
+    "apps.companies",
     "drf_yasg",
     "admin_extra_buttons",
     "constance",
