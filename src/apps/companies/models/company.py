@@ -3,8 +3,8 @@ from django.db.models.signals import post_delete, post_save
 from django.utils.translation import gettext_lazy as _
 
 from apps.changelog.mixins import ChangeloggableMixin
-from apps.users.models import User
 from apps.changelog.signals import journal_delete_handler, journal_save_handler
+from apps.users.models import User
 from utils.models import DateModelMixin, DeleteModelMixin
 
 
@@ -12,7 +12,8 @@ class Company(ChangeloggableMixin, DeleteModelMixin, DateModelMixin, models.Mode
     title = models.CharField(max_length=255)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True, blank=True)
-    employees = models.ManyToManyField(User, related_name='companies')
+    employees = models.ManyToManyField(User, related_name="companies")
+    is_active = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Company")
