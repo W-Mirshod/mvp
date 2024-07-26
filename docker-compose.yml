@@ -4,22 +4,17 @@ x-backend-environment: &backend-environment
   DJANGO_SETTINGS_MODULE: settings.settings.prod
   CELERY_BROKER_URL: redis://redis:6379/0
   CELERY_RESULT_BACKEND: redis://redis:6379/0
-  SQL_DATABASE: mega_mailer
-  SQL_USER: postgres
-  SQL_PASSWORD: postgres
-  SQL_HOST: localhost
-  SQL_PORT: 5432
 
 x-backend-base: &backend-base
   build:
     context: .
     dockerfile: ./Dockerfile
   volumes:
-    - ./:/mm
-    - ./logs:/mm/logs/
-    - ./scripts:/mm/scripts/
-    - ./src/static:/mm/src/static/
-    - ./src/media:/mm/src/media/
+    - ./:/mmb
+    - ./logs:/mmb/logs/
+    - ./scripts:/mmb/scripts/
+    - ./src/static:/mmb/src/static/
+    - ./src/media:/mmb/src/media/
 
 x-backend: &backend
   image: app:django
@@ -44,18 +39,25 @@ services:
     links:
       - redis
     container_name: mm_wsgi
+    environment:
+      - RUN_IN_DOCKER=True
+      - SQL_HOST=93.123.72.66
+      - SQL_PORT=5432
     command: >
-     sh -c "./scripts/entrypoint-wsgi-web.sh"
+     sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-wsgi-web.sh"
 
   # Celery
   celery-worker-beat:
     restart: always
     <<: *backend
     command: >
-      sh -c "./scripts/entrypoint-worker.sh"
+      sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-worker.sh"
     volumes:
-      - .:/mm
+      - .:/mmb
     container_name: mm_celery
+    environment:
+      - SQL_HOST=93.123.72.66
+      - SQL_PORT=5432
     links:
       - redis
     depends_on:
@@ -66,9 +68,9 @@ services:
   flower:
     <<: *backend
     command: >
-      sh -c "./scripts/entrypoint-flower.sh"
+      sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-flower.sh"
     volumes:
-      - .:/mm
+      - .:/mmb
     ports:
       - 5555:5555
     links:
