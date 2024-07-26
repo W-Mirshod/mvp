@@ -1,1 +1,1 @@
-from .company import Company
+from .company import Company  # noqa: F401
