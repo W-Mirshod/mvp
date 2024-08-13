@@ -8,6 +8,7 @@ urlpatterns = [
     path("products/", include("apps.products.urls.urls_products")),
     path("tariffs/", include("apps.products.urls.urls_tariffs")),
     path("messages/", include("apps.mailers.urls.message")),
+    path("companies/", include("apps.companies.urls.urls_companies")),
     path(
         "docs/",
         include_docs_urls(title="API Documents", authentication_classes=[], permission_classes=[]),

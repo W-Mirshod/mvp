@@ -111,6 +111,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "is_active",
             "date_joined",
             "email",
+            "role",
             "is_verified",
             "is_staff",
             "user_tariff",

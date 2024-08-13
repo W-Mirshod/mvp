@@ -15,6 +15,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = (
         "id",
         "email",
+        "role",
         "is_active",
         "is_verified",
         "jwt_max_out",
@@ -31,6 +32,7 @@ class CustomUserAdmin(UserAdmin):
                     "password",
                     "first_name",
                     "last_name",
+                    "role",
                 )
             },
         ),
