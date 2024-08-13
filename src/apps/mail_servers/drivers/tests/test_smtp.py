@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import smtplib
+
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework_simplejwt.tokens import RefreshToken

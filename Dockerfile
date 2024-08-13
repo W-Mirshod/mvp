@@ -3,38 +3,37 @@ FROM python:3.12-slim-bullseye
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+# Установка зависимостей
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
         libpython3-dev \
         libpq-dev \
-        gcc && \
+        gcc \
+        gettext && \
     rm -rf /var/lib/apt/lists/*
 
+# Обновление pip
 RUN pip install --upgrade pip
 
-ENV APP__HOME_DIR=/mm
-ENV PYTHONPATH=/mm/src
+# Настройка переменных окружения
+ENV APP_HOME_DIR=/mm
+ENV PYTHONPATH=$APP_HOME_DIR/src
 
-# set work directory
-WORKDIR $APP__HOME_DIR
+# Создание необходимых директорий
+RUN mkdir -p $APP_HOME_DIR/src $APP_HOME_DIR/logs $APP_HOME_DIR/src/media/attachments
 
-# set work directory
-RUN mkdir -p $APP__HOME_DIR
-RUN mkdir -p $APP__HOME_DIR/logs
-RUN mkdir -p $APP__HOME_DIR/src
-# RUN mkdir -p $APP__HOME_DIR/docker/backend
-RUN mkdir -p $APP__HOME_DIR/src/media/attachments/
+# Установка зависимостей Python
+COPY ./requirements.txt $APP_HOME_DIR/requirements.txt
+RUN pip install -r $APP_HOME_DIR/requirements.txt
 
-# install dependences
-COPY ./requirements.txt /mm/requirements.txt
-RUN pip install -r /mm/requirements.txt
+# Копирование исходного кода в контейнер
+COPY . $APP_HOME_DIR/src
 
-RUN apt-get -y update
-RUN apt-get install gettext -y
+# Установка рабочего каталога
+WORKDIR $APP_HOME_DIR/src
 
-# set display port to avoid crash
-ENV DISPLAY=:99
-
-# set open port
+# Открытие порта
 EXPOSE 8000
 
+# Команда по умолчанию для запуска
+CMD ["sh", "./scripts/entrypoint-wsgi-web.sh"]

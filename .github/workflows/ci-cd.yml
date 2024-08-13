@@ -1,0 +1,56 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy project files to server
+        run: |
+          rsync -avz --exclude '.git' --exclude '.github' -e "ssh -o StrictHostKeyChecking=no" ./ root@93.123.72.45:/root/mmb/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and start Docker containers on server
+        run: |
+          ssh -o StrictHostKeyChecking=no root@93.123.72.45 'cd /root/mmb/ && docker-compose pull && docker-compose up -d'
+
+      - name: Add .env
+        run: |
+          ssh -o StrictHostKeyChecking=no root@93.123.72.45 'touch /root/node/src/settings/settings/.env && \
+            echo DEBUG=False >> /root/node/src/settings/settings/.env && \
+            echo SQL_DEBUG=False >> /root/node/src/settings/settings/.env && \
+            echo SECRET_KEY=secrets.SECRET_KEY >> /root/node/src/settings/settings/.env && \
+            echo DJANGO_ALLOWED_HOSTS="*" >> /root/node/src/settings/settings/.env && \
+            echo STATIC_ROOT=var/www/staticfiles >> /root/node/src/settings/settings/.env && \
+            echo SQL_ENGINE=django.db.backends.postgresql >> /root/node/src/settings/settings/.env && \
+            echo SQL_USER=postgres >> /root/node/src/settings/settings/.env && \
+            echo SQL_PASSWORD=postgres >> /root/node/src/settings/settings/.env && \
+            echo SQL_DATABASE=mega_mailer >> /root/node/src/settings/settings/.env && \
+            echo SQL_PORT=5432 >> /root/node/src/settings/settings/.env && \
+            echo RUN_IN_DOCKER=False >> /root/node/src/settings/settings/.env && \
+            echo BROKER_URL=redis://localhost:6385/0 >> /root/node/src/settings/settings/.env && \
+            echo REDIS_HOST=redis >> /root/node/src/settings/settings/.env && \
+            echo REDIS_HOST_LOCAL=localhost >> /root/node/src/settings/settings/.env && \
+            echo REDIS_PORT=6379 >> /root/node/src/settings/settings/.env && \
+            echo REDIS_PORT_LOCAL=6385 >> /root/node/src/settings/settings/.env && \
+            echo CELERY_BROKER_URL=redis://redis:6379/0 >> /root/node/src/settings/settings/.env && \
+            echo CELERY_RESULT_BACKEND=redis://redis:6379/0 >> /root/node/src/settings/settings/.env && \
+            echo CELERY_ACCEPT_CONTENT=application/json >> /root/node/src/settings/settings/.env'

@@ -10,11 +10,11 @@ x-backend-base: &backend-base
     context: .
     dockerfile: ./Dockerfile
   volumes:
-    - ./:/mm
-    - ./logs:/mm/logs/
-    - ./scripts:/mm/scripts/
-    - ./src/static:/mm/src/static/
-    - ./src/media:/mm/src/media/
+    - ./:/mmb
+    - ./logs:/mmb/logs/
+    - ./scripts:/mmb/scripts/
+    - ./src/static:/mmb/src/static/
+    - ./src/media:/mmb/src/media/
 
 x-backend: &backend
   image: app:django
@@ -31,75 +31,20 @@ services:
     ports:
       - 6380:6379
 
-  # Database Postgres
-  db:
-    image: postgres:15.4
-    restart: always
-    command:
-      - "postgres"
-      - "-c"
-      - "max_connections=50"
-      - "-c"
-      - "shared_buffers=1GB"
-      - "-c"
-      - "effective_cache_size=4GB"
-      - "-c"
-      - "work_mem=16MB"
-      - "-c"
-      - "maintenance_work_mem=512MB"
-      - "-c"
-      - "random_page_cost=1.1"
-      - "-c"
-      - "temp_file_limit=10GB"
-      - "-c"
-      - "log_min_duration_statement=200ms"
-      - "-c"
-      - "idle_in_transaction_session_timeout=10s"
-      - "-c"
-      - "lock_timeout=1s"
-      - "-c"
-      - "statement_timeout=60s"
-      - "-c"
-      - "shared_preload_libraries=pg_stat_statements"
-      - "-c"
-      - "pg_stat_statements.max=10000"
-      - "-c"
-      - "pg_stat_statements.track=all"
-    volumes:
-      - ./data/db:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=mega_mailer
-    ports:
-      - ${POSTGRES_PORT:-5433}:5432
-    container_name: mm_postgres
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d mega_mailer" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 4G
-
   # Django WSGI App
   wsgi-server:
     <<: *backend
     ports:
       - 8000:8000
     links:
-      - db
       - redis
     container_name: mm_wsgi
+    environment:
+      - RUN_IN_DOCKER=True
+      - SQL_HOST=93.123.72.66
+      - SQL_PORT=5432
     command: >
      sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-wsgi-web.sh"
-    depends_on:
-      db:
-        condition: service_healthy
 
   # Celery
   celery-worker-beat:
@@ -108,12 +53,14 @@ services:
     command: >
       sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-worker.sh"
     volumes:
-      - .:/mm
+      - .:/mmb
     container_name: mm_celery
+    environment:
+      - SQL_HOST=93.123.72.66
+      - SQL_PORT=5432
     links:
       - redis
     depends_on:
-      - db
       - redis
       - wsgi-server
 
@@ -123,7 +70,7 @@ services:
     command: >
       sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-flower.sh"
     volumes:
-      - .:/mm
+      - .:/mmb
     ports:
       - 5555:5555
     links:
