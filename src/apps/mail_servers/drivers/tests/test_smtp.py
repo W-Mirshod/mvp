@@ -23,6 +23,7 @@ class SMTPDriverTests(unittest.TestCase):
     def setUp(self):
         self.driver = SMTPDriver(server_name='http://smtp.example.com')
         self.driver.server_name = 'http://smtp.example.com'
+        self.driver.settings = SMTPServerFactory.build()
         config.ENABLE_SMTP_SENDING = True
 
     def tearDown(self):
@@ -57,7 +58,7 @@ class SMTPDriverTests(unittest.TestCase):
     def test_check_connection_success(self, mock_get):
         mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        with patch('smtplib.SMTP_SSL') as mock_smtp:
+        with patch('smtplib.SMTP') as mock_smtp:
             mock_client = MagicMock()
             mock_client.login.return_value = ('OK', [])
             mock_smtp.return_value = mock_client
@@ -67,7 +68,7 @@ class SMTPDriverTests(unittest.TestCase):
     def test_check_connection_failure(self, mock_get):
         mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        with patch('smtplib.SMTP_SSL') as mock_smtp:
+        with patch('smtplib.SMTP') as mock_smtp:
             mock_client = MagicMock()
             mock_client.login.side_effect = smtplib.SMTPAuthenticationError(
                 535, 'authentication failed'
@@ -79,9 +80,9 @@ class SMTPDriverTests(unittest.TestCase):
     def test_login(self, mock_get):
         mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        with patch('smtplib.SMTP_SSL') as mock_smtp:
+        with patch('smtplib.SMTP') as mock_smtp:
             mock_client = MagicMock()
-            mock_client.login.return_value = ('OK', [])
+            mock_client.login.return_value = (235, '2.7.0 Authentication successful')
             mock_smtp.return_value = mock_client
             self.assertTrue(self.driver.login())
 
@@ -89,9 +90,9 @@ class SMTPDriverTests(unittest.TestCase):
     def test_logout(self, mock_get):
         mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        with patch('smtplib.SMTP_SSL') as mock_smtp:
+        with patch('smtplib.SMTP') as mock_smtp:
             mock_client = MagicMock()
-            mock_client.quit.return_value = ('BYE', [])
+            mock_client.quit.return_value = (221, '2.0.0 Bye')
             mock_smtp.return_value = mock_client
             self.assertTrue(self.driver.logout())
 
