@@ -18,7 +18,8 @@ Faker==26.0.0
 flower==2.0.1
 inflection==0.5.1
 packaging==24.1
-psycopg2-binary==2.9.9
+psycopg2==2.9.10
+psycopg2-binary==2.9.10
 PyJWT==2.8.0
 python-dateutil==2.9.0.post0
 pytz==2024.1

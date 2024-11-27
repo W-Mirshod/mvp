@@ -1,16 +1,17 @@
-from datetime import timedelta
-from pathlib import Path
-
+import os
 import environ
+from pathlib import Path
+from datetime import timedelta
 from celery.schedules import crontab
 from django.utils.crypto import get_random_string
 
-env = environ.Env(
-    # set casting, default value
-    DEBUG=(bool, False)
-)
-environ.Env.read_env()
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+ROOT_DIR = environ.Path(__file__) - 2
 
+
+env = environ.Env(DEBUG=(bool, True))
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 def get_secret_key():
     if not env.str("SECRET_KEY"):
@@ -20,10 +21,6 @@ def get_secret_key():
 
 
 SECRET_KEY = get_secret_key()
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-ROOT_DIR = environ.Path(__file__) - 2
 
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 
@@ -214,3 +211,14 @@ CORS_ALLOWED_ORIGINS = [
 # endregion
 
 MAIN_HOST = "http://localhost:8000/"
+
+DATABASES = {
+    'default': {
+        'ENGINE': env.str('SQL_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': BASE_DIR / env.str('SQL_DATABASE', 'db.sqlite3'),
+        'USER': env.str('SQL_USER', ''),
+        'PASSWORD': env.str('SQL_PASSWORD', ''),
+        'HOST': env.str('SQL_HOST', ''),
+        'PORT': env.str('SQL_PORT', ''),
+    }
+}

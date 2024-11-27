@@ -48,7 +48,8 @@ class UserManager(BaseUserManager):
 class User(ChangeloggableMixin, AbstractUser):
     """User`s model"""
 
-    email = models.EmailField(_("e-mail"), unique=True)
+
+    email = models.EmailField(_("e-mail"), unique=True, db_index=True)
     is_verified = models.BooleanField(_("Email verified"), default=False)
     is_active = models.BooleanField(
         _("active"),
@@ -61,7 +62,7 @@ class User(ChangeloggableMixin, AbstractUser):
     is_one_time_jwt_created = models.BooleanField(_("One-time JWT created"), default=False)
     jwt_max_out = models.DateTimeField(blank=True, null=True)
 
-    role = models.CharField(choices=UserRoles.CHOICES, default=UserRoles.USER)
+    role = models.CharField(max_length=255, choices=UserRoles.CHOICES, default=UserRoles.USER)
 
     username = None
 
@@ -71,8 +72,8 @@ class User(ChangeloggableMixin, AbstractUser):
     objects = UserManager()
 
     class Meta(AbstractUser.Meta):
-        ordering = ("-id",)
 
+        ordering = ("-id",)
     def restore_password(self, new_password: str):
         self.set_password(new_password)
         self.save(update_fields=("password",))

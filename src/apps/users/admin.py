@@ -81,8 +81,8 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
     list_display_links = (
-        "id",
-        "email",
+        'email',
+        'id',
     )
     list_filter = (
         "is_active",

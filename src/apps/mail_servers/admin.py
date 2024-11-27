@@ -82,3 +82,15 @@ class ProxyServerAdmin(admin.ModelAdmin):
         "port",
     )
     ordering = ("-id",)
+
+    fieldsets = (
+        ('Basic Info', {
+            'fields': ('type', 'url', 'port')
+        }),
+        ('Authentication', {
+            'fields': ('username', 'password', 'email_use_tls')
+        }),
+        ('Status', {
+            'fields': ('is_active',)
+        })
+    )
