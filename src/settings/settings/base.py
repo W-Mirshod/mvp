@@ -13,6 +13,8 @@ ROOT_DIR = environ.Path(__file__) - 2
 env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
+DEBUG = env.bool('DEBUG', True)
+
 def get_secret_key():
     if not env.str("SECRET_KEY"):
         print("[agents_portal] No setting found for SECRET_KEY. Generating a random key...")
@@ -149,10 +151,11 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = "/static/"
-STATIC_ROOT = "/var/www/static/"
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 STATICFILES_DIRS = [
-    str(BASE_DIR / "static"),
+    os.path.join(BASE_DIR, 'static'),
 ]
 
 MEDIA_ROOT = str(BASE_DIR / "media")
