@@ -19,6 +19,8 @@ class ChangeLogAdmin(admin.ModelAdmin):
         "model",
         "action_on_model",
     )
+    
+    date_hierarchy = "changed"
 
     def has_add_permission(self, request):
         return False

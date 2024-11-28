@@ -9,3 +9,4 @@ class CompanyAdmin(admin.ModelAdmin):
     list_filter = ('is_deleted', 'start_date', 'end_date')
     search_fields = ('title',)
     filter_horizontal = ('employees',)
+    list_per_page = 25
