@@ -10,7 +10,8 @@ x-backend-base: &backend-base
     context: .
     dockerfile: ./Dockerfile
   volumes:
-    - ./:/mmb
+    - ./src:/mmb/src
+   #  - ./:/mmb
     - ./logs:/mmb/logs/
     - ./scripts:/mmb/scripts/
     - ./src/static:/mmb/src/static/
@@ -23,6 +24,37 @@ x-backend: &backend
     <<: *backend-environment
 
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/mega_mailer
+      - SQL_ENGINE=django.db.backends.postgresql
+      - SQL_DATABASE=mega_mailer
+      - SQL_USER=postgres
+      - SQL_PASSWORD=postgres
+      - SQL_HOST=db
+      - SQL_PORT=5432
+    depends_on:
+      - db
+    ports:
+      - "8001:8001"
+    networks:
+      - default
+
+  db:
+    image: postgres:latest
+    container_name: db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mega_mailer
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
   # Redis
   redis:
@@ -41,7 +73,7 @@ services:
     container_name: mm_wsgi
     environment:
       - RUN_IN_DOCKER=True
-      - SQL_HOST=93.123.72.66
+      - SQL_HOST=db
       - SQL_PORT=5432
     command: >
      sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-wsgi-web.sh"
@@ -56,8 +88,9 @@ services:
       - .:/mmb
     container_name: mm_celery
     environment:
-      - SQL_HOST=93.123.72.66
+      - SQL_HOST=db
       - SQL_PORT=5432
+      - DJANGO_SETTINGS_MODULE=settings.settings.prod
     links:
       - redis
     depends_on:
@@ -81,3 +114,11 @@ services:
       - wsgi-server
       - redis
       - celery-worker-beat
+
+networks:
+  default:
+    name: mega_mailer_network
+    driver: bridge
+
+volumes:
+  db_data:
