@@ -2,8 +2,8 @@ from django.db import transaction
 from rest_framework import permissions
 from rest_framework_simplejwt.exceptions import InvalidToken
 
-from apps.users.models.jwt import BlackListedAccessToken
-from apps.users.serializers import RestorePasswordSerializer
+from src.apps.users.models.jwt import BlackListedAccessToken
+from src.apps.users.serializers import RestorePasswordSerializer
 
 
 class IsTokenValid(permissions.BasePermission):

@@ -5,7 +5,7 @@ from django.test import override_settings
 from django.urls import reverse_lazy
 from rest_framework.test import APITestCase
 
-from apps.users.models import User
+from src.apps.users.models.users import User
 
 
 @override_settings(SQL_DEBUG=False)
@@ -45,7 +45,9 @@ class WithLoginTestCase(TestCaseBase):
         r = self.client.post(self.login_url, data)
         self.jwt_body = r.json()
         if "access" in self.jwt_body:
-            self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.jwt_body['access']}")
+            self.client.credentials(
+                HTTP_AUTHORIZATION=f"Bearer {self.jwt_body['access']}"
+            )
         return r.status_code, self.jwt_body
 
     @classmethod
@@ -82,7 +84,9 @@ class CustomViewTestCase(WithLoginTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         rows = response.data["results"]
-        self.assertEqual([row["id"] for row in rows if row["id"] == object.pk], [object.pk])
+        self.assertEqual(
+            [row["id"] for row in rows if row["id"] == object.pk], [object.pk]
+        )
 
     def _test_create(self, url_name, model, check_field, status_code=201):
         url = reverse_lazy(url_name)
@@ -103,11 +107,15 @@ class CustomViewTestCase(WithLoginTestCase):
         self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(getattr(object, check_field), response.data[check_field])
 
-    def _test_edit(self, url_name: str, object: "Model", check_field: str = None, data=None):
+    def _test_edit(
+        self, url_name: str, object: "Model", check_field: str = None, data=None
+    ):
         url = reverse_lazy(url_name, kwargs=dict(pk=object.pk))
         if data is None:
             data = self._generate_data()
-        response = self.client.put(url, data=json.dumps(data), content_type=self.CONTENT_TYPE_JSON)
+        response = self.client.put(
+            url, data=json.dumps(data), content_type=self.CONTENT_TYPE_JSON
+        )
         self.assertEqual(response.status_code, 200, response.data)
         object = type(object).objects.filter(pk=response.data["id"]).first()
         if check_field:
