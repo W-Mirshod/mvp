@@ -1,1 +1,1 @@
-from .v1.views_companies import CompanyView  # noqa: F401
+from src.apps.companies.views.v1.views_companies import CompanyView

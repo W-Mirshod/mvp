@@ -1,9 +1,9 @@
 from rest_framework.permissions import IsAuthenticated
 
-from apps.companies.models import Company
-from apps.companies.serializers import CompanyActivitySerializer, CompanySerializer
-from utils.permissions import IsTokenValid
-from utils.views import MultiSerializerViewSet
+from src.apps.companies.models import Company
+from src.apps.companies.serializers import CompanyActivitySerializer, CompanySerializer
+from src.utils.permissions import IsTokenValid
+from src.utils.views import MultiSerializerViewSet
 
 
 class CompanyView(MultiSerializerViewSet):

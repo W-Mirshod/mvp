@@ -1,1 +1,1 @@
-from .company import Company  # noqa: F401
+from src.apps.companies.models.company import Company
