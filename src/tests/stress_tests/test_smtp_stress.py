@@ -14,10 +14,10 @@ def connect_smtp(server, port, username, password):
 
 class SMTPStressTest(unittest.TestCase):
     def test_smtp_stress(self):
-        server = 'smtp.example.com'
+        server = "smtp.example.com"
         port = 587
-        username = 'user@example.com'
-        password = 'password'
+        username = "user@example.com"
+        password = "password"
         num_connections = 100
 
         with ThreadPoolExecutor(max_workers=10) as executor:
@@ -29,5 +29,5 @@ class SMTPStressTest(unittest.TestCase):
                 future.result()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

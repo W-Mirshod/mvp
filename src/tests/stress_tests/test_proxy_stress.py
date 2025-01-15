@@ -13,8 +13,8 @@ def connect_proxy(url, proxy):
 
 class ProxyStressTest(unittest.TestCase):
     def test_proxy_stress(self):
-        url = 'http://example.com'
-        proxy = 'http://proxy.example.com:8080'
+        url = "http://example.com"
+        proxy = "http://proxy.example.com:8080"
         num_connections = 100
 
         with ThreadPoolExecutor(max_workers=10) as executor:
@@ -26,5 +26,5 @@ class ProxyStressTest(unittest.TestCase):
                 future.result()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

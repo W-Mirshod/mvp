@@ -7,7 +7,7 @@ def connect_imap(server, username, password):
     try:
         with IMAP4_SSL(server) as imap:
             imap.login(username, password)
-            imap.select('inbox')
+            imap.select("inbox")
             imap.logout()
     except Exception as e:
         raise AssertionError(f"IMAP connection failed: {e}")
@@ -15,9 +15,9 @@ def connect_imap(server, username, password):
 
 class IMAPStressTest(unittest.TestCase):
     def test_imap_stress(self):
-        server = 'imap.example.com'
-        username = 'user@example.com'
-        password = 'password'
+        server = "imap.example.com"
+        username = "user@example.com"
+        password = "password"
         num_connections = 100
 
         with ThreadPoolExecutor(max_workers=10) as executor:
@@ -29,5 +29,5 @@ class IMAPStressTest(unittest.TestCase):
                 future.result()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
