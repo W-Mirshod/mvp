@@ -2,9 +2,9 @@ import logging
 
 from django.core.exceptions import ImproperlyConfigured
 
-from apps.mail_servers.models.servers import Server
-from apps.mailers.choices import StatusType
-from apps.mailers.models import Event
+from src.apps.mail_servers.models.servers import Server
+from src.apps.mailers.choices import StatusType
+from src.apps.mailers.models import Event
 
 from .utils import chunks
 

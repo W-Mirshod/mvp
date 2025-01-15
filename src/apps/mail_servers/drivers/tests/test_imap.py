@@ -6,101 +6,103 @@ from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.mail_servers.choices import ServerType
-from apps.mail_servers.models.servers import IMAPServer
-from apps.mail_servers.tests.factories import IMAPServerFactory
-from apps.users.tests.factories import UserFactory
-from utils.tests import CustomViewTestCase
+from src.apps.mail_servers.choices import ServerType
+from src.apps.mail_servers.models.servers import IMAPServer
+from src.apps.mail_servers.tests.factories import IMAPServerFactory
+from src.apps.users.tests.factories import UserFactory
+from src.utils.tests import CustomViewTestCase
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage
-from apps.mail_servers.drivers.driver_imap import IMAPDriver
+from src.apps.mail_servers.drivers.driver_imap import IMAPDriver
 from constance import config
 
 
 class IMAPDriverTests(unittest.TestCase):
 
     def setUp(self):
-        self.driver = IMAPDriver(server_name='http://imap.example.com')
-        self.driver.server_name = 'http://imap.example.com'
+        self.driver = IMAPDriver(server_name="http://imap.example.com")
+        self.driver.server_name = "http://imap.example.com"
         config.ENABLE_IMAP_SENDING = True
 
     def tearDown(self):
         config.ENABLE_IMAP_SENDING = False
 
-    @patch('apps.mail_servers.models.IMAPServer.objects.get')
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_get_server_settings(self, mock_get):
         mock_get.return_value = IMAPServerFactory.build()
         settings = self.driver.get_server_settings()
         self.assertIsNotNone(settings)
         self.assertEqual(settings.url, mock_get.return_value.url)
 
-    @patch('apps.mail_servers.models.IMAPServer.objects.get')
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_get_server_settings_raises_exception(self, mock_get):
         mock_get.side_effect = IMAPServer.DoesNotExist
         with self.assertRaises(ObjectDoesNotExist):
             self.driver.get_server_settings()
 
-    @patch('apps.mail_servers.drivers.driver_imap.get_connection', autospec=True)
-    @patch('apps.mail_servers.models.IMAPServer.objects.get')
+    @patch("apps.mail_servers.drivers.driver_imap.get_connection", autospec=True)
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_send_mail(self, mock_get, mock_get_connection):
         mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
         mock_connection = MagicMock()
         mock_get_connection.return_value.__enter__.return_value = mock_connection
 
-        with patch.object(EmailMessage, 'send') as mock_send:
-            self.driver.send_mail('Test Subject', 'Test Message', ['recipient@test.com'])
+        with patch.object(EmailMessage, "send") as mock_send:
+            self.driver.send_mail(
+                "Test Subject", "Test Message", ["recipient@test.com"]
+            )
             mock_send.assert_called_once()
 
-    @patch('apps.mail_servers.models.IMAPServer.objects.get')
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_check_connection_success(self, mock_get):
         mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        with patch('imaplib.IMAP4_SSL') as mock_imap:
+        with patch("imaplib.IMAP4_SSL") as mock_imap:
             mock_client = MagicMock()
-            mock_client.login.return_value = ('OK', [])
+            mock_client.login.return_value = ("OK", [])
             mock_imap.return_value = mock_client
             self.assertTrue(self.driver.check_connection())
 
-    @patch('apps.mail_servers.models.IMAPServer.objects.get')
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_check_connection_failure(self, mock_get):
         mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        with patch('imaplib.IMAP4_SSL') as mock_imap:
+        with patch("imaplib.IMAP4_SSL") as mock_imap:
             mock_client = MagicMock()
-            mock_client.login.side_effect = imaplib.IMAP4.error('login failed')
+            mock_client.login.side_effect = imaplib.IMAP4.error("login failed")
             mock_imap.return_value = mock_client
             self.assertFalse(self.driver.check_connection())
 
-    @patch('apps.mail_servers.models.IMAPServer.objects.get')
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_login(self, mock_get):
         mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        with patch('imaplib.IMAP4_SSL') as mock_imap:
+        with patch("imaplib.IMAP4_SSL") as mock_imap:
             mock_client = MagicMock()
-            mock_client.login.return_value = ('OK', [])
+            mock_client.login.return_value = ("OK", [])
             mock_imap.return_value = mock_client
             self.assertTrue(self.driver.login())
 
-    @patch('apps.mail_servers.models.IMAPServer.objects.get')
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_logout(self, mock_get):
         mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        with patch('imaplib.IMAP4_SSL') as mock_imap:
+        with patch("imaplib.IMAP4_SSL") as mock_imap:
             mock_client = MagicMock()
-            mock_client.logout.return_value = ('BYE', [])
+            mock_client.logout.return_value = ("BYE", [])
             mock_imap.return_value = mock_client
             self.assertTrue(self.driver.logout())
 
-    @patch('apps.mail_servers.models.IMAPServer.objects.get')
-    @patch.object(IMAPDriver, 'send_mail')
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
+    @patch.object(IMAPDriver, "send_mail")
     def test_send_message(self, mock_send_mail, mock_get):
         mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        self.driver.send_message('Test Subject', 'Test Message', 'recipient@test.com')
+        self.driver.send_message("Test Subject", "Test Message", "recipient@test.com")
         mock_send_mail.assert_called_once_with(
-            'Test Subject', 'Test Message', ['recipient@test.com']
+            "Test Subject", "Test Message", ["recipient@test.com"]
         )
 
 
@@ -111,7 +113,10 @@ class IMAPServerViewTests(CustomViewTestCase):
 
     def setUp(self):
         self.user = UserFactory(
-            email="testuser@example.com", password="Qwerty123", is_verified=True, is_active=True
+            email="testuser@example.com",
+            password="Qwerty123",
+            is_verified=True,
+            is_active=True,
         )
         refresh = RefreshToken.for_user(self.user)
         access = refresh.access_token
@@ -154,12 +159,16 @@ class IMAPServerViewTests(CustomViewTestCase):
 
     def test_server_by_id(self):
         response = self.client.get(
-            reverse_lazy("servers_api:imap-server_by_id", kwargs={"pk": 1}))
+            reverse_lazy("servers_api:imap-server_by_id", kwargs={"pk": 1})
+        )
 
         self.assertEqual(response.data["type"], ServerType.IMAP)
 
     def test_wrong_id(self):
         response = self.client.get(
-            reverse_lazy("servers_api:imap-server_by_id", kwargs={"pk": 10}))
+            reverse_lazy("servers_api:imap-server_by_id", kwargs={"pk": 10})
+        )
 
-        self.assertEqual(response.data["detail"], "No IMAPServer matches the given query.")
+        self.assertEqual(
+            response.data["detail"], "No IMAPServer matches the given query."
+        )

@@ -2,8 +2,8 @@ from factory import Faker
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyInteger, FuzzyText
 
-from apps.mail_servers.choices import ServerType
-from apps.mail_servers.models import (
+from src.apps.mail_servers.choices import ServerType
+from src.apps.mail_servers.models import (
     IMAPServer,
     ProxyServer,
     SMTPServer,

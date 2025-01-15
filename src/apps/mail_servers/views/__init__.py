@@ -1,4 +1,4 @@
-from .v1.views_mail_servers import (  # noqa: F401
+from src.apps.mail_servers.views.v1.views_mail_servers import (
     IMAPServerView,
     ProxyServerView,
     SMTPServerView,

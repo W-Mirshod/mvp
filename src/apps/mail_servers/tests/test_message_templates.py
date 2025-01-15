@@ -2,10 +2,10 @@ from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.mail_servers.models import MessageTemplate
-from apps.mail_servers.tests.factories import MessageTemplateFactory
-from apps.users.tests.factories import UserFactory
-from utils.tests import CustomViewTestCase
+from src.apps.mail_servers.models import MessageTemplate
+from src.apps.mail_servers.tests.factories import MessageTemplateFactory
+from src.apps.users.tests.factories import UserFactory
+from src.utils.tests import CustomViewTestCase
 
 
 class MessageTemplateViewTests(CustomViewTestCase):
@@ -15,7 +15,10 @@ class MessageTemplateViewTests(CustomViewTestCase):
 
     def setUp(self):
         self.user = UserFactory(
-            email="testuser@example.com", password="Qwerty123", is_verified=True, is_active=True
+            email="testuser@example.com",
+            password="Qwerty123",
+            is_verified=True,
+            is_active=True,
         )
         refresh = RefreshToken.for_user(self.user)
         access = refresh.access_token
@@ -47,7 +50,9 @@ class MessageTemplateViewTests(CustomViewTestCase):
         self.assertEqual(template, MessageTemplate.objects.get(id=2))
 
     def test_template_list(self):
-        response = self.client.get(reverse_lazy("servers_api:message-template_list")).json()
+        response = self.client.get(
+            reverse_lazy("servers_api:message-template_list")
+        ).json()
 
         self.assertTrue(len(response) > 0)
         self.assertEqual(response[0]["from_address"], "template@example.com")
@@ -64,4 +69,6 @@ class MessageTemplateViewTests(CustomViewTestCase):
             reverse_lazy("servers_api:message-template_by_id", kwargs={"pk": 10})
         )
 
-        self.assertEqual(response.data["detail"], "No MessageTemplate matches the given query.")
+        self.assertEqual(
+            response.data["detail"], "No MessageTemplate matches the given query."
+        )

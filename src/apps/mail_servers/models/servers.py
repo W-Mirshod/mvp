@@ -2,10 +2,10 @@ from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.utils.translation import gettext_lazy as _
 
-from apps.changelog.mixins import ChangeloggableMixin
-from apps.changelog.signals import journal_delete_handler, journal_save_handler
-from apps.mail_servers.choices import ServerType
-from utils.models import DateModelMixin, DeleteModelMixin
+from src.apps.changelog.mixins import ChangeloggableMixin
+from src.apps.changelog.signals import journal_delete_handler, journal_save_handler
+from src.apps.mail_servers.choices import ServerType
+from src.utils.models import DateModelMixin, DeleteModelMixin
 
 
 class Server(ChangeloggableMixin, DeleteModelMixin, DateModelMixin, models.Model):
@@ -13,7 +13,9 @@ class Server(ChangeloggableMixin, DeleteModelMixin, DateModelMixin, models.Model
     url = models.URLField()
     port = models.IntegerField()
     password = models.CharField(max_length=255, blank=True, null=True)
-    username = models.EmailField(default="default_smtp@example.com", blank=True, null=True)
+    username = models.EmailField(
+        default="default_smtp@example.com", blank=True, null=True
+    )
     email_use_tls = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
 

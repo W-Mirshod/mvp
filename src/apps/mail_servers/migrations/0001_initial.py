@@ -7,68 +7,101 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Server',
+            name="Server",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Date of creation')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Update date')),
-                ('is_deleted', models.BooleanField(default=False, verbose_name='Deleted')),
-                ('type', models.CharField(choices=[('smpt', 'SMTP'), ('imap', 'IMAP'), ('proxy', 'PROXY')], max_length=255)),
-                ('url', models.URLField()),
-                ('port', models.IntegerField()),
-                ('password', models.CharField(blank=True, max_length=255, null=True)),
-                ('username', models.EmailField(blank=True, default='default_smtp@example.com', max_length=254, null=True)),
-                ('email_use_tls', models.BooleanField(default=True)),
-                ('is_active', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Date of creation"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Update date"),
+                ),
+                (
+                    "is_deleted",
+                    models.BooleanField(default=False, verbose_name="Deleted"),
+                ),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("smpt", "SMTP"),
+                            ("imap", "IMAP"),
+                            ("proxy", "PROXY"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                ("url", models.URLField()),
+                ("port", models.IntegerField()),
+                ("password", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "username",
+                    models.EmailField(
+                        blank=True,
+                        default="default_smtp@example.com",
+                        max_length=254,
+                        null=True,
+                    ),
+                ),
+                ("email_use_tls", models.BooleanField(default=True)),
+                ("is_active", models.BooleanField(default=True)),
             ],
             options={
-                'verbose_name': 'Server',
-                'verbose_name_plural': 'Servers',
-                'ordering': ('-id',),
+                "verbose_name": "Server",
+                "verbose_name_plural": "Servers",
+                "ordering": ("-id",),
             },
         ),
         migrations.CreateModel(
-            name='IMAPServer',
-            fields=[
-            ],
+            name="IMAPServer",
+            fields=[],
             options={
-                'verbose_name': 'IMAP server',
-                'verbose_name_plural': 'IMAP servers',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "IMAP server",
+                "verbose_name_plural": "IMAP servers",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('mail_servers.server',),
+            bases=("mail_servers.server",),
         ),
         migrations.CreateModel(
-            name='ProxyServer',
-            fields=[
-            ],
+            name="ProxyServer",
+            fields=[],
             options={
-                'verbose_name': 'Proxy server',
-                'verbose_name_plural': 'Proxy servers',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Proxy server",
+                "verbose_name_plural": "Proxy servers",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('mail_servers.server',),
+            bases=("mail_servers.server",),
         ),
         migrations.CreateModel(
-            name='SMTPServer',
-            fields=[
-            ],
+            name="SMTPServer",
+            fields=[],
             options={
-                'verbose_name': 'SMTP server',
-                'verbose_name_plural': 'SMTP servers',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "SMTP server",
+                "verbose_name_plural": "SMTP servers",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('mail_servers.server',),
+            bases=("mail_servers.server",),
         ),
     ]

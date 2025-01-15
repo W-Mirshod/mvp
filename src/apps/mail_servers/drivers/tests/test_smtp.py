@@ -6,104 +6,106 @@ from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.mail_servers.choices import ServerType
-from apps.mail_servers.models.servers import SMTPServer
-from apps.mail_servers.tests.factories import SMTPServerFactory
-from apps.users.tests.factories import UserFactory
-from utils.tests import CustomViewTestCase
+from src.apps.mail_servers.choices import ServerType
+from src.apps.mail_servers.models.servers import SMTPServer
+from src.apps.mail_servers.tests.factories import SMTPServerFactory
+from src.apps.users.tests.factories import UserFactory
+from src.utils.tests import CustomViewTestCase
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage
-from apps.mail_servers.drivers.driver_smtp import SMTPDriver
+from src.apps.mail_servers.drivers.driver_smtp import SMTPDriver
 from constance import config
 
 
 class SMTPDriverTests(unittest.TestCase):
 
     def setUp(self):
-        self.driver = SMTPDriver(server_name='http://smtp.example.com')
-        self.driver.server_name = 'http://smtp.example.com'
+        self.driver = SMTPDriver(server_name="http://smtp.example.com")
+        self.driver.server_name = "http://smtp.example.com"
         self.driver.settings = SMTPServerFactory.build()
         config.ENABLE_SMTP_SENDING = True
 
     def tearDown(self):
         config.ENABLE_SMTP_SENDING = False
 
-    @patch('apps.mail_servers.models.SMTPServer.objects.get')
+    @patch("apps.mail_servers.models.SMTPServer.objects.get")
     def test_get_server_settings(self, mock_get):
         mock_get.return_value = SMTPServerFactory.build()
         settings = self.driver.get_server_settings()
         self.assertIsNotNone(settings)
         self.assertEqual(settings.url, mock_get.return_value.url)
 
-    @patch('apps.mail_servers.models.SMTPServer.objects.get')
+    @patch("apps.mail_servers.models.SMTPServer.objects.get")
     def test_get_server_settings_raises_exception(self, mock_get):
         mock_get.side_effect = SMTPServer.DoesNotExist
         with self.assertRaises(ObjectDoesNotExist):
             self.driver.get_server_settings()
 
-    @patch('apps.mail_servers.drivers.driver_smtp.get_connection', autospec=True)
-    @patch('apps.mail_servers.models.SMTPServer.objects.get')
+    @patch("apps.mail_servers.drivers.driver_smtp.get_connection", autospec=True)
+    @patch("apps.mail_servers.models.SMTPServer.objects.get")
     def test_send_mail(self, mock_get, mock_get_connection):
         mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
         mock_connection = MagicMock()
         mock_get_connection.return_value.__enter__.return_value = mock_connection
 
-        with patch.object(EmailMessage, 'send') as mock_send:
-            self.driver.send_mail('Test Subject', 'Test Message', ['recipient@test.com'])
+        with patch.object(EmailMessage, "send") as mock_send:
+            self.driver.send_mail(
+                "Test Subject", "Test Message", ["recipient@test.com"]
+            )
             mock_send.assert_called_once()
 
-    @patch('apps.mail_servers.models.SMTPServer.objects.get')
+    @patch("apps.mail_servers.models.SMTPServer.objects.get")
     def test_check_connection_success(self, mock_get):
         mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        with patch('smtplib.SMTP') as mock_smtp:
+        with patch("smtplib.SMTP") as mock_smtp:
             mock_client = MagicMock()
-            mock_client.login.return_value = ('OK', [])
+            mock_client.login.return_value = ("OK", [])
             mock_smtp.return_value = mock_client
             self.assertTrue(self.driver.check_connection())
 
-    @patch('apps.mail_servers.models.SMTPServer.objects.get')
+    @patch("apps.mail_servers.models.SMTPServer.objects.get")
     def test_check_connection_failure(self, mock_get):
         mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        with patch('smtplib.SMTP') as mock_smtp:
+        with patch("smtplib.SMTP") as mock_smtp:
             mock_client = MagicMock()
             mock_client.login.side_effect = smtplib.SMTPAuthenticationError(
-                535, 'authentication failed'
+                535, "authentication failed"
             )
             mock_smtp.return_value = mock_client
             self.assertFalse(self.driver.check_connection())
 
-    @patch('apps.mail_servers.models.SMTPServer.objects.get')
+    @patch("apps.mail_servers.models.SMTPServer.objects.get")
     def test_login(self, mock_get):
         mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        with patch('smtplib.SMTP') as mock_smtp:
+        with patch("smtplib.SMTP") as mock_smtp:
             mock_client = MagicMock()
-            mock_client.login.return_value = (235, '2.7.0 Authentication successful')
+            mock_client.login.return_value = (235, "2.7.0 Authentication successful")
             mock_smtp.return_value = mock_client
             self.assertTrue(self.driver.login())
 
-    @patch('apps.mail_servers.models.SMTPServer.objects.get')
+    @patch("apps.mail_servers.models.SMTPServer.objects.get")
     def test_logout(self, mock_get):
         mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        with patch('smtplib.SMTP') as mock_smtp:
+        with patch("smtplib.SMTP") as mock_smtp:
             mock_client = MagicMock()
-            mock_client.quit.return_value = (221, '2.0.0 Bye')
+            mock_client.quit.return_value = (221, "2.0.0 Bye")
             mock_smtp.return_value = mock_client
             self.assertTrue(self.driver.logout())
 
-    @patch('apps.mail_servers.models.SMTPServer.objects.get')
-    @patch.object(SMTPDriver, 'send_mail')
+    @patch("apps.mail_servers.models.SMTPServer.objects.get")
+    @patch.object(SMTPDriver, "send_mail")
     def test_send_message(self, mock_send_mail, mock_get):
         mock_get.return_value = SMTPServerFactory.build()
         self.driver.settings = mock_get.return_value
-        self.driver.send_message('Test Subject', 'Test Message', 'recipient@test.com')
+        self.driver.send_message("Test Subject", "Test Message", "recipient@test.com")
         mock_send_mail.assert_called_once_with(
-            'Test Subject', 'Test Message', ['recipient@test.com']
+            "Test Subject", "Test Message", ["recipient@test.com"]
         )
 
 
@@ -114,7 +116,10 @@ class SMTPServerViewTests(CustomViewTestCase):
 
     def setUp(self):
         self.user = UserFactory(
-            email="testuser@example.com", password="Qwerty123", is_verified=True, is_active=True
+            email="testuser@example.com",
+            password="Qwerty123",
+            is_verified=True,
+            is_active=True,
         )
         refresh = RefreshToken.for_user(self.user)
         access = refresh.access_token
@@ -157,12 +162,16 @@ class SMTPServerViewTests(CustomViewTestCase):
 
     def test_server_by_id(self):
         response = self.client.get(
-            reverse_lazy("servers_api:smtp-server_by_id", kwargs={"pk": 1}))
+            reverse_lazy("servers_api:smtp-server_by_id", kwargs={"pk": 1})
+        )
 
         self.assertEqual(response.data["type"], ServerType.SMTP)
 
     def test_wrong_id(self):
         response = self.client.get(
-            reverse_lazy("servers_api:smtp-server_by_id", kwargs={"pk": 10}))
+            reverse_lazy("servers_api:smtp-server_by_id", kwargs={"pk": 10})
+        )
 
-        self.assertEqual(response.data["detail"], "No SMTPServer matches the given query.")
+        self.assertEqual(
+            response.data["detail"], "No SMTPServer matches the given query."
+        )

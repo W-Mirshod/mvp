@@ -1,14 +1,14 @@
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from apps.mailers.models import Event
+from src.apps.mailers.models import Event
 from django.core.exceptions import ObjectDoesNotExist
 
-from apps.mail_servers.choices import ServerType
-from apps.mail_servers.drivers.driver_imap import IMAPDriver
-from apps.mail_servers.drivers.driver_smtp import SMTPDriver
-from apps.mail_servers.drivers.driver_proxy import ProxyDriver
-from apps.mail_servers.models.servers import Server
-from apps.mailers.choices import StatusType
+from src.apps.mail_servers.choices import ServerType
+from src.apps.mail_servers.drivers.driver_imap import IMAPDriver
+from src.apps.mail_servers.drivers.driver_smtp import SMTPDriver
+from src.apps.mail_servers.drivers.driver_proxy import ProxyDriver
+from src.apps.mail_servers.models.servers import Server
+from src.apps.mailers.choices import StatusType
 
 logger = get_task_logger(__name__)
 
@@ -31,9 +31,11 @@ def test_periodic_task():
 
 @shared_task
 def process_events():
-    events = Event.objects.select_related('server').filter(
-        status=StatusType.NEW
-    ).only('server__type', 'sent_message')
+    events = (
+        Event.objects.select_related("server")
+        .filter(status=StatusType.NEW)
+        .only("server__type", "sent_message")
+    )
 
     for event in events:
         try:
@@ -45,8 +47,8 @@ def process_events():
 
                 driver.send_mail(
                     subject=event.sent_message.template,
-                    message=event.sent_message.results.get('message', ''),
-                    recipient_list=[event.sent_message.user.email]
+                    message=event.sent_message.results.get("message", ""),
+                    recipient_list=[event.sent_message.user.email],
                 )
             else:
                 event.status = StatusType.FAILED

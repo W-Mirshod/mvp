@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import IMAPServer, ProxyServer, SMTPServer
+from src.apps.mail_servers.models import SMTPServer, IMAPServer, ProxyServer
 
 
 @admin.register(SMTPServer)
@@ -84,13 +84,7 @@ class ProxyServerAdmin(admin.ModelAdmin):
     ordering = ("-id",)
 
     fieldsets = (
-        ('Basic Info', {
-            'fields': ('type', 'url', 'port')
-        }),
-        ('Authentication', {
-            'fields': ('username', 'password', 'email_use_tls')
-        }),
-        ('Status', {
-            'fields': ('is_active',)
-        })
+        ("Basic Info", {"fields": ("type", "url", "port")}),
+        ("Authentication", {"fields": ("username", "password", "email_use_tls")}),
+        ("Status", {"fields": ("is_active",)}),
     )

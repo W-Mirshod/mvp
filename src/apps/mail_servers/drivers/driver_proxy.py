@@ -6,9 +6,9 @@ from constance import config
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.core.mail import EmailMessage, get_connection
 
-from apps.mail_servers.models import ProxyServer
+from src.apps.mail_servers.drivers import BaseDriver
+from src.apps.mail_servers.models import ProxyServer
 
-from .base_driver import BaseDriver
 
 logger = logging.getLogger(__name__)
 
