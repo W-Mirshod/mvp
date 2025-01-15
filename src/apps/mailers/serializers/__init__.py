@@ -1,2 +1,5 @@
-from .message import SentMessageCreateSerializer, SentMessageSerializer  # noqa: F401
-from .template import MessageTemplateSerializer  # noqa: F401
+from src.apps.mailers.serializers.message import (
+    SentMessageCreateSerializer,
+    SentMessageSerializer,
+)
+from src.apps.mailers.serializers.template import MessageTemplateSerializer

@@ -1,14 +1,16 @@
 from django.test import TestCase
 
-from apps.mail_servers.models.servers import Server
-from apps.mailers.choices import StatusType
-from apps.mailers.models import Event, SentMessage
-from apps.users.models import User
+from src.apps.mail_servers.models.servers import Server
+from src.apps.mailers.choices import StatusType
+from src.apps.mailers.models import Event, SentMessage
+from src.apps.users.models.users import User
 
 
 class EventModelTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create(email="testuser@example.com", password="password")
+        self.user = User.objects.create(
+            email="testuser@example.com", password="password"
+        )
         self.server = Server.objects.create(
             type="SMTP",
             url="smtp.example.com",
@@ -21,7 +23,10 @@ class EventModelTests(TestCase):
 
     def test_create_new_event(self):
         event = Event.create_new_event(
-            user=self.user, server=self.server, template="Test Template", results={"key": "value"}
+            user=self.user,
+            server=self.server,
+            template="Test Template",
+            results={"key": "value"},
         )
         self.assertIsNotNone(event)
         self.assertEqual(event.server, self.server)

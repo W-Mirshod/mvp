@@ -10,58 +10,165 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('mail_servers', '0001_initial'),
+        ("mail_servers", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MessageTemplate',
+            name="MessageTemplate",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Date of creation')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Update date')),
-                ('is_deleted', models.BooleanField(default=False, verbose_name='Deleted')),
-                ('from_address', models.CharField(blank=True, max_length=255, null=True)),
-                ('template', models.TextField(blank=True, null=True)),
-                ('message', models.JSONField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Date of creation"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Update date"),
+                ),
+                (
+                    "is_deleted",
+                    models.BooleanField(default=False, verbose_name="Deleted"),
+                ),
+                (
+                    "from_address",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("template", models.TextField(blank=True, null=True)),
+                ("message", models.JSONField(blank=True, null=True)),
             ],
             options={
-                'verbose_name': 'Message template',
-                'verbose_name_plural': 'Message templates',
+                "verbose_name": "Message template",
+                "verbose_name_plural": "Message templates",
             },
         ),
         migrations.CreateModel(
-            name='SentMessage',
+            name="SentMessage",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Date of creation')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Update date')),
-                ('is_deleted', models.BooleanField(default=False, verbose_name='Deleted')),
-                ('message', models.TextField(blank=True, null=True, verbose_name='Message')),
-                ('results', models.JSONField(blank=True, null=True)),
-                ('server', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='messages', to='mail_servers.server')),
-                ('template', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='messages', to='mailers.messagetemplate')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='messages', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Date of creation"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Update date"),
+                ),
+                (
+                    "is_deleted",
+                    models.BooleanField(default=False, verbose_name="Deleted"),
+                ),
+                (
+                    "message",
+                    models.TextField(blank=True, null=True, verbose_name="Message"),
+                ),
+                ("results", models.JSONField(blank=True, null=True)),
+                (
+                    "server",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="messages",
+                        to="mail_servers.server",
+                    ),
+                ),
+                (
+                    "template",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="messages",
+                        to="mailers.messagetemplate",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="messages",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Sent message',
-                'verbose_name_plural': 'Sent messages',
+                "verbose_name": "Sent message",
+                "verbose_name_plural": "Sent messages",
             },
         ),
         migrations.CreateModel(
-            name='Event',
+            name="Event",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('is_deleted', models.BooleanField(default=False, verbose_name='Deleted')),
-                ('status', models.CharField(choices=[('new', 'New'), ('finished', 'Finished'), ('in_process', 'In Process'), ('failed', 'Failed'), ('canceled', 'Canceled')], default='new', max_length=10)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('server', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mail_servers.server')),
-                ('sent_message', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mailers.sentmessage')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "is_deleted",
+                    models.BooleanField(default=False, verbose_name="Deleted"),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("new", "New"),
+                            ("finished", "Finished"),
+                            ("in_process", "In Process"),
+                            ("failed", "Failed"),
+                            ("canceled", "Canceled"),
+                        ],
+                        default="new",
+                        max_length=10,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "server",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="mail_servers.server",
+                    ),
+                ),
+                (
+                    "sent_message",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="mailers.sentmessage",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

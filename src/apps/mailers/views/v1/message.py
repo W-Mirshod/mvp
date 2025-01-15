@@ -1,9 +1,12 @@
 from rest_framework.permissions import IsAuthenticated
 
-from apps.mailers.models import SentMessage
-from apps.mailers.serializers import SentMessageCreateSerializer, SentMessageSerializer
-from utils.permissions import IsTokenValid
-from utils.views import MultiSerializerViewSet
+from src.apps.mailers.models import SentMessage
+from src.apps.mailers.serializers import (
+    SentMessageCreateSerializer,
+    SentMessageSerializer,
+)
+from src.utils.permissions import IsTokenValid
+from src.utils.views import MultiSerializerViewSet
 
 
 class SentMessageView(MultiSerializerViewSet):

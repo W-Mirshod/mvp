@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from .models import Event, SentMessage
-from .models.template import MessageTemplate
+from src.apps.mailers.models import SentMessage, Event, MessageTemplate
 
 
 @admin.register(SentMessage)
@@ -13,7 +12,14 @@ class SentMessageAdmin(admin.ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("id", "server", "status", "sent_message", "created_at", "updated_at")
+    list_display = (
+        "id",
+        "server",
+        "status",
+        "sent_message",
+        "created_at",
+        "updated_at",
+    )
     search_fields = ("server__type", "status", "sent_message__template")
     list_filter = ("status", "server")
 
