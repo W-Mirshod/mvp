@@ -3,8 +3,8 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.users.models.users import User
-from apps.users.views.v1.views_users import RefreshTokenView
+from src.apps.users.models.users import User
+from src.apps.users.views.v1.views_users import RefreshTokenView
 
 
 class UserCreationTestCase(TestCase):

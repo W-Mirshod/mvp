@@ -14,7 +14,9 @@ def create_one_time_jwt(user: User) -> tuple[dict, str]:
             user.save()
             from ..serializers import TokenSerializer
 
-            refresh = TokenSerializer(data={"username_field": user.USERNAME_FIELD}).get_token(user)
+            refresh = TokenSerializer(
+                data={"username_field": user.USERNAME_FIELD}
+            ).get_token(user)
     except Exception:
         user.is_one_time_jwt_created = False
         user.save()

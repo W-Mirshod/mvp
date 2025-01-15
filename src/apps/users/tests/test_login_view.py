@@ -3,7 +3,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 
-from utils.tests import CustomViewTestCase
+from src.utils.tests import CustomViewTestCase
 
 from .factories import UserFactory
 

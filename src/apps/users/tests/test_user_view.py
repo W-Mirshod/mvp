@@ -1,5 +1,5 @@
-from apps.users.tests.factories import UserFactory, UserTariffFactory
-from utils.tests import CustomViewTestCase
+from src.apps.users.tests.factories import UserFactory, UserTariffFactory
+from src.utils.tests import CustomViewTestCase
 
 
 class UserViewTest(CustomViewTestCase):

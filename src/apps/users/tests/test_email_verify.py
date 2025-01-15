@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 
-from utils.tests import CustomViewTestCase
+from src.utils.tests import CustomViewTestCase
 
 User = get_user_model()
 
@@ -26,7 +26,9 @@ class EmailVerificationViewTests(CustomViewTestCase):
         self.assertEqual(response.data["error"], "Missing token")
 
     def test_invalid_token(self):
-        response = self.client.post(reverse_lazy("users_api:email_verify") + "?token=invalid_token")
+        response = self.client.post(
+            reverse_lazy("users_api:email_verify") + "?token=invalid_token"
+        )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.data["error"], "Invalid token")
 

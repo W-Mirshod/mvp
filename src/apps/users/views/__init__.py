@@ -1,4 +1,4 @@
-from .v1.views_users import (  # noqa: F401
+from src.apps.users.views.v1.views_users import (
     BlacklistTokenView,
     EmailVerificationView,
     LoginTokenView,

@@ -21,18 +21,19 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from apps.users.models.jwt import BlackListedAccessToken
-from apps.users.serializers import (
+
+from src.apps.users.models.jwt import BlackListedAccessToken
+from src.apps.users.serializers import (
     EmailTokenGenerationSerializer,
     RestorePasswordSerializer,
     TokenSerializer,
     UserDetailSerializer,
     UserRegistrationSerializer,
 )
-from apps.users.services.jwt import create_one_time_jwt
-from apps.users.tasks import send_one_time_jwt_task, send_verification_email_task
-from utils.permissions import IsOneTimeTokenValid, IsTokenValid
-from utils.views import MultiSerializerViewSet
+from src.apps.users.services.jwt import create_one_time_jwt
+from src.apps.users.tasks import send_one_time_jwt_task, send_verification_email_task
+from src.utils.permissions import IsOneTimeTokenValid, IsTokenValid
+from src.utils.views import MultiSerializerViewSet
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -112,10 +113,14 @@ class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
 
         except TokenError as ex:
             logger.error(f"Can`t logout (token error): {ex.args[0]}")
-            return Response("Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                "Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         except Exception as ex:
             logger.error(f"Can`t logout: {ex}")
-            return Response("Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                "Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
         context = serializer.validated_data
         context["logout"] = "success"
@@ -172,7 +177,8 @@ class RegistrationViewSet(MultiSerializerViewSet):
                 if isinstance(ex.args[0], str):
                     logger.error("Error: %s", ex.args[0])
                     return Response(
-                        {"error": ex.args[0]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                        {"error": ex.args[0]},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     )
                 for errors in ex.args[0].values():
                     val = {}
@@ -213,7 +219,9 @@ class RegistrationViewSet(MultiSerializerViewSet):
                 context.get("access"),
             )
 
-        return Response("Successfully regenerated the new JWT.", status=status.HTTP_200_OK)
+        return Response(
+            "Successfully regenerated the new JWT.", status=status.HTTP_200_OK
+        )
 
     def _generate_access_token(self, user):
         refresh = RefreshToken.for_user(user)
@@ -231,13 +239,17 @@ class EmailVerificationView(MultiSerializerViewSet):
         raw_token = request.GET.get("token")
 
         if raw_token is None:
-            return Response({"error": "Missing token"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"error": "Missing token"}, status=status.HTTP_401_UNAUTHORIZED
+            )
 
         try:
             validated_token = jwt_authenticator.get_validated_token(raw_token)
             user = jwt_authenticator.get_user(validated_token)
         except InvalidToken:
-            return Response({"error": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"error": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED
+            )
         except Exception:
             return Response(
                 {"error": "An error occurred during verification"},

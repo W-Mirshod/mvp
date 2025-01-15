@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .users import User
+from src.apps.users.models.users import User
 
 
 class BlackListedAccessToken(models.Model):

@@ -17,5 +17,5 @@ class UserRoles:
         (STUFF, _("STUFF")),
         (ADMIN, _("ADMIN")),
         (USER, _("USER")),
-        (OWNER_COMPANY, _("OWNER_COMPANY"))
+        (OWNER_COMPANY, _("OWNER_COMPANY")),
     )

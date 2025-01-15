@@ -8,7 +8,9 @@ from rest_framework.reverse import reverse_lazy
 def send_verification_email_task(from_email, user_email, token):
     subject = "Email verification"
     message = "Thank you for registering on our website. Please verify your email:\n"
-    link = settings.MAIN_HOST + reverse_lazy("users_api:email_verify") + "?token=" + token
+    link = (
+        settings.MAIN_HOST + reverse_lazy("users_api:email_verify") + "?token=" + token
+    )
     recipient_list = (user_email,)
     send_mail(subject, message + link, from_email, recipient_list)
 
@@ -17,6 +19,11 @@ def send_verification_email_task(from_email, user_email, token):
 def send_one_time_jwt_task(from_email: str, user_email: str, token: str):
     subject = "Reset password"
     message = "The link for reset password:\n"
-    link = settings.MAIN_HOST + reverse_lazy("users_api:restore_password") + "?token=" + token
+    link = (
+        settings.MAIN_HOST
+        + reverse_lazy("users_api:restore_password")
+        + "?token="
+        + token
+    )
     recipient_list = (user_email,)
     send_mail(subject, message + link, from_email, recipient_list)

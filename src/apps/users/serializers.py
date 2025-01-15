@@ -12,9 +12,9 @@ from rest_framework.serializers import as_serializer_error
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
 
-from utils import password_validation
-
-from .models import User, UserTariff
+from src.apps.users.models import UserTariff
+from src.apps.users.models.users import User
+from src.utils import password_validation
 
 
 class TokenSerializer(TokenObtainPairSerializer):
@@ -55,7 +55,9 @@ class TokenSerializer(TokenObtainPairSerializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password]
+    )
 
     class Meta:
         model = User

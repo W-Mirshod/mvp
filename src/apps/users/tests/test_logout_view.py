@@ -1,8 +1,8 @@
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 
-from apps.users.tests.factories import UserFactory
-from utils.tests import CustomViewTestCase
+from src.apps.users.tests.factories import UserFactory
+from src.utils.tests import CustomViewTestCase
 
 
 class LogoutViewTests(CustomViewTestCase):
@@ -29,7 +29,9 @@ class LogoutViewTests(CustomViewTestCase):
         headers = {
             "Authorization": f'Bearer {response.data["access"]}',
         }
-        response_logout = self.client.post(reverse_lazy("users_api:logout"), data, headers=headers)
+        response_logout = self.client.post(
+            reverse_lazy("users_api:logout"), data, headers=headers
+        )
         self.assertEqual(response_logout.status_code, status.HTTP_200_OK)
 
     def test_logout_unauthenticated(self):

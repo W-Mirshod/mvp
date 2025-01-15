@@ -4,9 +4,9 @@ from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.utils.translation import gettext_lazy as _
 
-from apps.changelog.mixins import ChangeloggableMixin
-from apps.changelog.signals import journal_delete_handler, journal_save_handler
-from apps.users.choices import UserRoles
+from src.apps.changelog.mixins import ChangeloggableMixin
+from src.apps.changelog.signals import journal_delete_handler, journal_save_handler
+from src.apps.users.choices import UserRoles
 
 
 class UserManager(BaseUserManager):
@@ -48,7 +48,6 @@ class UserManager(BaseUserManager):
 class User(ChangeloggableMixin, AbstractUser):
     """User`s model"""
 
-
     email = models.EmailField(_("e-mail"), unique=True, db_index=True)
     is_verified = models.BooleanField(_("Email verified"), default=False)
     is_active = models.BooleanField(
@@ -59,10 +58,14 @@ class User(ChangeloggableMixin, AbstractUser):
             "Unselect this instead of deleting accounts."
         ),
     )
-    is_one_time_jwt_created = models.BooleanField(_("One-time JWT created"), default=False)
+    is_one_time_jwt_created = models.BooleanField(
+        _("One-time JWT created"), default=False
+    )
     jwt_max_out = models.DateTimeField(blank=True, null=True)
 
-    role = models.CharField(max_length=255, choices=UserRoles.CHOICES, default=UserRoles.USER)
+    role = models.CharField(
+        max_length=255, choices=UserRoles.CHOICES, default=UserRoles.USER
+    )
 
     username = None
 
@@ -74,6 +77,7 @@ class User(ChangeloggableMixin, AbstractUser):
     class Meta(AbstractUser.Meta):
 
         ordering = ("-id",)
+
     def restore_password(self, new_password: str):
         self.set_password(new_password)
         self.save(update_fields=("password",))
