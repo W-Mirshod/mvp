@@ -11,6 +11,8 @@ urlpatterns = [
     path("companies/", include("apps.companies.urls.urls_companies")),
     path(
         "docs/",
-        include_docs_urls(title="API Documents", authentication_classes=[], permission_classes=[]),
+        include_docs_urls(
+            title="API Documents", authentication_classes=[], permission_classes=[]
+        ),
     ),
 ]
