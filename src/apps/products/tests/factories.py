@@ -2,7 +2,7 @@ from factory import SubFactory
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyFloat, FuzzyText
 
-from apps.products.models import Product, Tariff
+from src.apps.products.models import Product, Tariff
 
 
 class ProductFactory(DjangoModelFactory):

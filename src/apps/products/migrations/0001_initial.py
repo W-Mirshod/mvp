@@ -8,38 +8,82 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Product',
+            name="Product",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Date of creation')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Update date')),
-                ('is_deleted', models.BooleanField(default=False, verbose_name='Deleted')),
-                ('title', models.CharField(max_length=255)),
-                ('description', models.TextField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Date of creation"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Update date"),
+                ),
+                (
+                    "is_deleted",
+                    models.BooleanField(default=False, verbose_name="Deleted"),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("description", models.TextField()),
             ],
             options={
-                'verbose_name': 'Product',
-                'verbose_name_plural': 'Products',
+                "verbose_name": "Product",
+                "verbose_name_plural": "Products",
             },
         ),
         migrations.CreateModel(
-            name='Tariff',
+            name="Tariff",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Date of creation')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Update date')),
-                ('is_deleted', models.BooleanField(default=False, verbose_name='Deleted')),
-                ('title', models.CharField(max_length=255)),
-                ('rate', models.DecimalField(decimal_places=2, max_digits=5)),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tariffs', to='products.product')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Date of creation"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Update date"),
+                ),
+                (
+                    "is_deleted",
+                    models.BooleanField(default=False, verbose_name="Deleted"),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("rate", models.DecimalField(decimal_places=2, max_digits=5)),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="tariffs",
+                        to="products.product",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

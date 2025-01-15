@@ -2,9 +2,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.products.tests.factories import TariffFactory
-from apps.users.tests.factories import UserFactory
-from utils.tests import CustomViewTestCase
+from src.apps.products.tests.factories import TariffFactory
+from src.apps.users.tests.factories import UserFactory
+from src.utils.tests import CustomViewTestCase
 
 
 class TariffViewTests(CustomViewTestCase):
@@ -38,9 +38,13 @@ class TariffViewTests(CustomViewTestCase):
         self.assertEqual(response[0]["title"], "Tariff 1")
 
     def test_product_by_id(self):
-        response = self.client.get(reverse_lazy("tariffs_api:tariff_by_id", kwargs={"pk": 1}))
+        response = self.client.get(
+            reverse_lazy("tariffs_api:tariff_by_id", kwargs={"pk": 1})
+        )
         self.assertEqual(response.data["title"], "Tariff 1")
 
     def test_wrong_id(self):
-        response = self.client.get(reverse_lazy("tariffs_api:tariff_by_id", kwargs={"pk": 3}))
+        response = self.client.get(
+            reverse_lazy("tariffs_api:tariff_by_id", kwargs={"pk": 3})
+        )
         self.assertEqual(response.data["detail"], "No Tariff matches the given query.")
