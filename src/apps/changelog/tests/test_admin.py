@@ -1,11 +1,11 @@
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory
 
-from apps.changelog.admin import ChangeLogAdmin
-from apps.changelog.models import ChangeLog
-from apps.changelog.tests.factories import ChangeLogFactory
-from apps.users.tests.factories import UserFactory
-from utils.tests import CustomViewTestCase
+from src.apps.changelog.admin import ChangeLogAdmin
+from src.apps.changelog.models import ChangeLog
+from src.apps.changelog.tests.factories import ChangeLogFactory
+from src.apps.users.tests.factories import UserFactory
+from src.utils.tests import CustomViewTestCase
 
 
 class ChangeLogAdminTest(CustomViewTestCase):
@@ -32,7 +32,15 @@ class ChangeLogAdminTest(CustomViewTestCase):
     def test_list_display(self):
         self.assertEqual(
             self.admin.list_display,
-            ("changed", "model", "user", "record_id", "data", "ipaddress", "action_on_model"),
+            (
+                "changed",
+                "model",
+                "user",
+                "record_id",
+                "data",
+                "ipaddress",
+                "action_on_model",
+            ),
         )
 
     def test_readonly_fields(self):

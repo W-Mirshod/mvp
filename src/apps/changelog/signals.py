@@ -2,10 +2,10 @@ import datetime
 import json
 import time
 
-from .choices import ActionsType
-from .middleware import LoggedInUser
-from .mixins import ChangeloggableMixin
-from .models import ChangeLog
+from src.apps.changelog.choices import ActionsType
+from src.apps.changelog.middleware import LoggedInUser
+from src.apps.changelog.mixins import ChangeloggableMixin
+from src.apps.changelog.models import ChangeLog
 
 
 def journal_save_handler(sender, instance, created, **kwargs):
@@ -69,7 +69,12 @@ def get_last_saved(request, instance):
         or last_saved["instance"].__class__ != instance.__class__
         or last_saved["instance"].id != instance.id
     ):
-        last_saved = {"instance": instance, "changed": {}, "id": None, "timestamp": time.time()}
+        last_saved = {
+            "instance": instance,
+            "changed": {},
+            "id": None,
+            "timestamp": time.time(),
+        }
         _last_saved[request] = last_saved
     return last_saved
 

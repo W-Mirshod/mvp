@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ChangeLog
+from src.apps.changelog.models import ChangeLog
 
 
 @admin.register(ChangeLog)
@@ -19,7 +19,7 @@ class ChangeLogAdmin(admin.ModelAdmin):
         "model",
         "action_on_model",
     )
-    
+
     date_hierarchy = "changed"
 
     def has_add_permission(self, request):

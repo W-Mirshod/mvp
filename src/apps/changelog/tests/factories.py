@@ -1,8 +1,8 @@
 from factory import Sequence, SubFactory
 from factory.django import DjangoModelFactory
 
-from apps.changelog.models import ChangeLog
-from apps.users.tests.factories import UserFactory
+from src.apps.changelog.models import ChangeLog
+from src.apps.users.tests.factories import UserFactory
 
 
 class ChangeLogFactory(DjangoModelFactory):

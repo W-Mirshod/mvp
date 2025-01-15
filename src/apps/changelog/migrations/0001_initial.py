@@ -15,21 +15,68 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='ChangeLog',
+            name="ChangeLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('changed', models.DateTimeField(auto_now=True, verbose_name='Date/time of change')),
-                ('model', models.CharField(max_length=255, null=True, verbose_name='Table')),
-                ('record_id', models.IntegerField(null=True, verbose_name='ID of the record')),
-                ('action_on_model', models.CharField(choices=[('create', 'Create'), ('update', 'Update'), ('delete', 'Delete')], max_length=50, null=True, verbose_name='Action')),
-                ('data', models.JSONField(default=dict, verbose_name='Variable model data')),
-                ('ipaddress', models.CharField(max_length=15, null=True, verbose_name='IP address')),
-                ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='Author of the change')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "changed",
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="Date/time of change"
+                    ),
+                ),
+                (
+                    "model",
+                    models.CharField(max_length=255, null=True, verbose_name="Table"),
+                ),
+                (
+                    "record_id",
+                    models.IntegerField(null=True, verbose_name="ID of the record"),
+                ),
+                (
+                    "action_on_model",
+                    models.CharField(
+                        choices=[
+                            ("create", "Create"),
+                            ("update", "Update"),
+                            ("delete", "Delete"),
+                        ],
+                        max_length=50,
+                        null=True,
+                        verbose_name="Action",
+                    ),
+                ),
+                (
+                    "data",
+                    models.JSONField(default=dict, verbose_name="Variable model data"),
+                ),
+                (
+                    "ipaddress",
+                    models.CharField(
+                        max_length=15, null=True, verbose_name="IP address"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Author of the change",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Change log',
-                'verbose_name_plural': 'Change logs',
-                'ordering': ('changed',),
+                "verbose_name": "Change log",
+                "verbose_name_plural": "Change logs",
+                "ordering": ("changed",),
             },
         ),
     ]
