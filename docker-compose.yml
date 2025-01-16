@@ -1,46 +1,20 @@
 version: "3.9"
 
-x-backend-environment: &backend-environment
-  DJANGO_SETTINGS_MODULE: settings.settings.prod
-  CELERY_BROKER_URL: redis://redis:6379/0
-  CELERY_RESULT_BACKEND: redis://redis:6379/0
-
-x-backend-base: &backend-base
-  build:
-    context: .
-    dockerfile: ./Dockerfile
-  volumes:
-    - ./src:/mmb/src
-   #  - ./:/mmb
-    - ./logs:/mmb/logs/
-    - ./scripts:/mmb/scripts/
-    - ./src/static:/mmb/src/static/
-    - ./src/media:/mmb/src/media/
-
-x-backend: &backend
-  image: app:django
-  <<: *backend-base
-  environment:
-    <<: *backend-environment
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: app
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/mega_mailer
-      - SQL_ENGINE=django.db.backends.postgresql
-      - SQL_DATABASE=mega_mailer
-      - SQL_USER=postgres
-      - SQL_PASSWORD=postgres
-      - SQL_HOST=db
-      - SQL_PORT=5432
+    volumes:
+      - .:/mm-back
     depends_on:
       - db
+      - redis
+    restart: always
     ports:
-      - "8001:8001"
+      - "8000:8000"
+    command: ./scripts/start_django.sh
     networks:
       - default
 
@@ -48,72 +22,56 @@ services:
     image: postgres:latest
     container_name: db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: mega_mailer
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - default
 
-  # Redis
   redis:
-    image: redis:alpine
+    image: redis:7.2
     container_name: mm_redis
     ports:
-      - 6380:6379
+      - "6379:6379"
+    restart: always
+    command: >
+      --requirepass ${REDIS_PASS}
+    networks:
+      - default
 
   # Django WSGI App
-  wsgi-server:
-    <<: *backend
-    ports:
-      - 8000:8000
-    links:
-      - redis
-    container_name: mm_wsgi
-    environment:
-      - RUN_IN_DOCKER=True
-      - SQL_HOST=db
-      - SQL_PORT=5432
-    command: >
-     sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-wsgi-web.sh"
+  asgi-server:
+    image: mm-back-app:latest
+    container_name: mm_asgi
 
-  # Celery
-  celery-worker-beat:
-    restart: always
-    <<: *backend
-    command: >
-      sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-worker.sh"
+    ports:
+      - "8001:8001"
     volumes:
-      - .:/mmb
-    container_name: mm_celery
-    environment:
-      - SQL_HOST=db
-      - SQL_PORT=5432
-      - DJANGO_SETTINGS_MODULE=settings.settings.prod
-    links:
-      - redis
+      - .:/mm-back
     depends_on:
+      - db
       - redis
-      - wsgi-server
+    command: ./scripts/start_dj_sockets.sh
+    networks:
+      - default
+
 
   # Flower
   flower:
-    <<: *backend
-    command: >
-      sh -c "./scripts/wait-for-it.sh db:5432 -- sh ./scripts/entrypoint-flower.sh"
+    image: mm-back-app:latest
+    command: ./scripts/entrypoint-flower.sh
     volumes:
       - .:/mmb
     ports:
       - 5555:5555
-    links:
-      - redis
-      - celery-worker-beat
     container_name: mm_flower
     depends_on:
-      - wsgi-server
+      - app
       - redis
-      - celery-worker-beat
 
 networks:
   default:
