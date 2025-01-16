@@ -5,9 +5,8 @@ from constance import config
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.core.mail import EmailMessage, get_connection
 
-from src.apps.mail_servers.drivers import BaseDriver
-from src.apps.mail_servers.models import IMAPServer
-
+from apps.mail_servers.drivers.base_driver import BaseDriver
+from apps.mail_servers.models import IMAPServer
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +21,8 @@ class IMAPDriver(BaseDriver):
         try:
             settings = IMAPServer.objects.get(url=self.server_name, is_active=True)
         except IMAPServer.DoesNotExist:
-            logger.error("Active IMAP settings for the server not found")
-            raise ObjectDoesNotExist("Active IMAP settings for the server not found")
+            logger.error("Active IMAP config for the server not found")
+            raise ObjectDoesNotExist("Active IMAP config for the server not found")
         return settings
 
     def send_mail(self, subject, message, recipient_list):

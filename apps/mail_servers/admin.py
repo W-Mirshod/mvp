@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from src.apps.mail_servers.models import SMTPServer, IMAPServer, ProxyServer
+from apps.mail_servers.models import SMTPServer, IMAPServer, ProxyServer
 
 
 @admin.register(SMTPServer)

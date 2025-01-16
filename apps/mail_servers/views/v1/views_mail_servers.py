@@ -1,13 +1,13 @@
 from rest_framework.permissions import IsAuthenticated
 
-from src.apps.mail_servers.models import IMAPServer, ProxyServer, SMTPServer
-from src.apps.mail_servers.serializers import (
+from apps.mail_servers.models import IMAPServer, ProxyServer, SMTPServer
+from apps.mail_servers.serializers import (
     IMAPServerSerializer,
     ProxyServerSerializer,
     SMTPServerSerializer,
 )
-from src.utils.permissions import IsTokenValid
-from src.utils.views import MultiSerializerViewSet
+from utils.permissions import IsTokenValid
+from utils.views import MultiSerializerViewSet
 
 
 class SMTPServerView(MultiSerializerViewSet):

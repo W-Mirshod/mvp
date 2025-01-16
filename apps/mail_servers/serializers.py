@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from src.apps.mail_servers.models import SMTPServer, IMAPServer, ProxyServer
+from apps.mail_servers.models import SMTPServer, IMAPServer, ProxyServer
 
 
 class SMTPServerSerializer(serializers.ModelSerializer):

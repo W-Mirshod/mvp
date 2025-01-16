@@ -1,14 +1,15 @@
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from src.apps.mailers.models import Event
+
 from django.core.exceptions import ObjectDoesNotExist
 
-from src.apps.mail_servers.choices import ServerType
-from src.apps.mail_servers.drivers.driver_imap import IMAPDriver
-from src.apps.mail_servers.drivers.driver_smtp import SMTPDriver
-from src.apps.mail_servers.drivers.driver_proxy import ProxyDriver
-from src.apps.mail_servers.models.servers import Server
-from src.apps.mailers.choices import StatusType
+from apps.mail_servers.choices import ServerType
+from apps.mail_servers.drivers.driver_imap import IMAPDriver
+from apps.mail_servers.drivers.driver_proxy import ProxyDriver
+from apps.mail_servers.drivers.driver_smtp import SMTPDriver
+from apps.mail_servers.models.servers import Server
+from apps.mailers.choices import StatusType
+from apps.mailers.models.event import Event
 
 logger = get_task_logger(__name__)
 

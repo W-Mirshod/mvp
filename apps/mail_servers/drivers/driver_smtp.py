@@ -5,9 +5,8 @@ from constance import config
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.core.mail import EmailMessage, get_connection
 
-from src.apps.mail_servers.drivers import BaseDriver
-from src.apps.mail_servers.models import SMTPServer
-
+from apps.mail_servers.drivers.base_driver import BaseDriver
+from apps.mail_servers.models import SMTPServer
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +21,8 @@ class SMTPDriver(BaseDriver):
         try:
             settings = SMTPServer.objects.get(url=self.server_name, is_active=True)
         except SMTPServer.DoesNotExist:
-            logger.error("Active SMTP settings for the server not found")
-            raise ObjectDoesNotExist("Active SMTP settings for the server not found")
+            logger.error("Active SMTP config for the server not found")
+            raise ObjectDoesNotExist("Active SMTP config for the server not found")
         return settings
 
     def send_mail(self, subject, message, recipient_list):

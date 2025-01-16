@@ -6,9 +6,8 @@ from constance import config
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.core.mail import EmailMessage, get_connection
 
-from src.apps.mail_servers.drivers import BaseDriver
-from src.apps.mail_servers.models import ProxyServer
-
+from apps.mail_servers.drivers.base_driver import BaseDriver
+from apps.mail_servers.models import ProxyServer
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +22,8 @@ class ProxyDriver(BaseDriver):
         try:
             settings = ProxyServer.objects.get(url=self.server_name, is_active=True)
         except ProxyServer.DoesNotExist:
-            logger.error("Active Proxy settings for the server not found")
-            raise ObjectDoesNotExist("Active Proxy settings for the server not found")
+            logger.error("Active Proxy config for the server not found")
+            raise ObjectDoesNotExist("Active Proxy config for the server not found")
         return settings
 
     def send_mail(self, subject, message, recipient_list):

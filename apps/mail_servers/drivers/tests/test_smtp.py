@@ -6,15 +6,17 @@ from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from src.apps.mail_servers.choices import ServerType
-from src.apps.mail_servers.models.servers import SMTPServer
-from src.apps.mail_servers.tests.factories import SMTPServerFactory
-from src.apps.users.tests.factories import UserFactory
-from src.utils.tests import CustomViewTestCase
+from apps.mail_servers.choices import ServerType
+from apps.mail_servers.drivers.driver_smtp import SMTPDriver
+from apps.mail_servers.models.servers import SMTPServer
+from apps.mail_servers.tests.factories import SMTPServerFactory
+from apps.users.tests.factories import UserFactory
+
+from utils.tests import CustomViewTestCase
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage
-from src.apps.mail_servers.drivers.driver_smtp import SMTPDriver
+
 from constance import config
 
 
@@ -111,7 +113,7 @@ class SMTPDriverTests(unittest.TestCase):
 
 class SMTPServerViewTests(CustomViewTestCase):
     """
-    ./manage.py test apps.mail_servers.tests.test_smtp.SMTPServerViewTests --settings=_dev.settings_test      # noqa: E501
+    ./manage.py test apps.mail_servers.tests.test_smtp.SMTPServerViewTests --config=_dev.settings_test      # noqa: E501
     """
 
     def setUp(self):

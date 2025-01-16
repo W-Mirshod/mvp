@@ -6,45 +6,47 @@ from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from src.apps.mail_servers.choices import ServerType
-from src.apps.mail_servers.models import ProxyServer
-from src.apps.mail_servers.tests.factories import ProxyServerFactory
-from src.apps.users.tests.factories import UserFactory
-from src.utils.tests import CustomViewTestCase
+from apps.mail_servers.choices import ServerType
+from apps.mail_servers.drivers.driver_imap import IMAPDriver
+from apps.mail_servers.models.servers import IMAPServer
+from apps.mail_servers.tests.factories import IMAPServerFactory
+from apps.users.tests.factories import UserFactory
+
+from utils.tests import CustomViewTestCase
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage
-from src.apps.mail_servers.drivers.driver_proxy import ProxyDriver
+
 from constance import config
 
 
-class ProxyDriverTests(unittest.TestCase):
+class IMAPDriverTests(unittest.TestCase):
 
     def setUp(self):
-        self.driver = ProxyDriver(server_name="http://proxy.example.com")
-        self.driver.server_name = "http://proxy.example.com"
-        config.ENABLE_PROXY_SENDING = True
+        self.driver = IMAPDriver(server_name="http://imap.example.com")
+        self.driver.server_name = "http://imap.example.com"
+        config.ENABLE_IMAP_SENDING = True
 
     def tearDown(self):
-        config.ENABLE_PROXY_SENDING = False
+        config.ENABLE_IMAP_SENDING = False
 
-    @patch("apps.mail_servers.models.ProxyServer.objects.get")
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_get_server_settings(self, mock_get):
-        mock_get.return_value = ProxyServerFactory.build()
+        mock_get.return_value = IMAPServerFactory.build()
         settings = self.driver.get_server_settings()
         self.assertIsNotNone(settings)
         self.assertEqual(settings.url, mock_get.return_value.url)
 
-    @patch("apps.mail_servers.models.ProxyServer.objects.get")
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_get_server_settings_raises_exception(self, mock_get):
-        mock_get.side_effect = ProxyServer.DoesNotExist
+        mock_get.side_effect = IMAPServer.DoesNotExist
         with self.assertRaises(ObjectDoesNotExist):
             self.driver.get_server_settings()
 
-    @patch("apps.mail_servers.drivers.driver_proxy.get_connection", autospec=True)
-    @patch("apps.mail_servers.models.ProxyServer.objects.get")
+    @patch("apps.mail_servers.drivers.driver_imap.get_connection", autospec=True)
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_send_mail(self, mock_get, mock_get_connection):
-        mock_get.return_value = ProxyServerFactory.build()
+        mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
         mock_connection = MagicMock()
         mock_get_connection.return_value.__enter__.return_value = mock_connection
@@ -55,9 +57,9 @@ class ProxyDriverTests(unittest.TestCase):
             )
             mock_send.assert_called_once()
 
-    @patch("apps.mail_servers.models.ProxyServer.objects.get")
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_check_connection_success(self, mock_get):
-        mock_get.return_value = ProxyServerFactory.build()
+        mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
         with patch("imaplib.IMAP4_SSL") as mock_imap:
             mock_client = MagicMock()
@@ -65,9 +67,9 @@ class ProxyDriverTests(unittest.TestCase):
             mock_imap.return_value = mock_client
             self.assertTrue(self.driver.check_connection())
 
-    @patch("apps.mail_servers.models.ProxyServer.objects.get")
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_check_connection_failure(self, mock_get):
-        mock_get.return_value = ProxyServerFactory.build()
+        mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
         with patch("imaplib.IMAP4_SSL") as mock_imap:
             mock_client = MagicMock()
@@ -75,9 +77,9 @@ class ProxyDriverTests(unittest.TestCase):
             mock_imap.return_value = mock_client
             self.assertFalse(self.driver.check_connection())
 
-    @patch("apps.mail_servers.models.ProxyServer.objects.get")
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_login(self, mock_get):
-        mock_get.return_value = ProxyServerFactory.build()
+        mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
         with patch("imaplib.IMAP4_SSL") as mock_imap:
             mock_client = MagicMock()
@@ -85,9 +87,9 @@ class ProxyDriverTests(unittest.TestCase):
             mock_imap.return_value = mock_client
             self.assertTrue(self.driver.login())
 
-    @patch("apps.mail_servers.models.ProxyServer.objects.get")
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
     def test_logout(self, mock_get):
-        mock_get.return_value = ProxyServerFactory.build()
+        mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
         with patch("imaplib.IMAP4_SSL") as mock_imap:
             mock_client = MagicMock()
@@ -95,10 +97,10 @@ class ProxyDriverTests(unittest.TestCase):
             mock_imap.return_value = mock_client
             self.assertTrue(self.driver.logout())
 
-    @patch("apps.mail_servers.models.ProxyServer.objects.get")
-    @patch.object(ProxyDriver, "send_mail")
+    @patch("apps.mail_servers.models.IMAPServer.objects.get")
+    @patch.object(IMAPDriver, "send_mail")
     def test_send_message(self, mock_send_mail, mock_get):
-        mock_get.return_value = ProxyServerFactory.build()
+        mock_get.return_value = IMAPServerFactory.build()
         self.driver.settings = mock_get.return_value
         self.driver.send_message("Test Subject", "Test Message", "recipient@test.com")
         mock_send_mail.assert_called_once_with(
@@ -106,9 +108,9 @@ class ProxyDriverTests(unittest.TestCase):
         )
 
 
-class ProxyServerViewTests(CustomViewTestCase):
+class IMAPServerViewTests(CustomViewTestCase):
     """
-    ./manage.py test apps.mail_servers.tests.test_proxy.ProxyServerViewTests --settings=_dev.settings_test      # noqa: E501
+    ./manage.py test apps.mail_servers.tests.test_imap.IMAPServerViewTests --config=_dev.settings_test      # noqa: E501
     """
 
     def setUp(self):
@@ -122,53 +124,53 @@ class ProxyServerViewTests(CustomViewTestCase):
         access = refresh.access_token
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + str(access))
 
-        ProxyServerFactory(
+        IMAPServerFactory(
             id=1,
-            type=ServerType.PROXY,
-            url="http://proxy.example.com",
+            type=ServerType.IMAP,
+            url="http://imap.example.com",
             port=465,
             password="password",
-            username="proxy@example.com",
+            username="imap@example.com",
         )
 
     def test_url_exists_at_desired_location(self):
-        response = self.client.get("/api/1.0/servers/proxy-servers/")
+        response = self.client.get("/api/1.0/servers/imap-servers/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_url_accessible_by_name(self):
-        response = self.client.get(reverse_lazy("servers_api:proxy-server_list"))
+        response = self.client.get(reverse_lazy("servers_api:imap-server_list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_create_server(self):
-        proxy_server = ProxyServerFactory(
+        imap_server = IMAPServerFactory(
             id=2,
-            type=ServerType.PROXY,
-            url="http://proxy.creation.com",
+            type=ServerType.IMAP,
+            url="http://imap.creation.com",
             port=465,
             password="password",
-            username="proxy_creation@example.com",
+            username="imap_creation@example.com",
         )
 
-        self.assertEqual(proxy_server, ProxyServer.objects.get(id=2))
+        self.assertEqual(imap_server, IMAPServer.objects.get(id=2))
 
     def test_server_list(self):
-        response = self.client.get(reverse_lazy("servers_api:proxy-server_list")).json()
+        response = self.client.get(reverse_lazy("servers_api:imap-server_list")).json()
 
         self.assertTrue(len(response) > 0)
-        self.assertEqual(response[0]["type"], ServerType.PROXY)
+        self.assertEqual(response[0]["type"], ServerType.IMAP)
 
     def test_server_by_id(self):
         response = self.client.get(
-            reverse_lazy("servers_api:proxy-server_by_id", kwargs={"pk": 1})
+            reverse_lazy("servers_api:imap-server_by_id", kwargs={"pk": 1})
         )
 
-        self.assertEqual(response.data["type"], ServerType.PROXY)
+        self.assertEqual(response.data["type"], ServerType.IMAP)
 
     def test_wrong_id(self):
         response = self.client.get(
-            reverse_lazy("servers_api:proxy-server_by_id", kwargs={"pk": 10})
+            reverse_lazy("servers_api:imap-server_by_id", kwargs={"pk": 10})
         )
 
         self.assertEqual(
-            response.data["detail"], "No ProxyServer matches the given query."
+            response.data["detail"], "No IMAPServer matches the given query."
         )

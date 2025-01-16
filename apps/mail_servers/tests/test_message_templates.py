@@ -2,15 +2,15 @@ from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from src.apps.mail_servers.models import MessageTemplate
-from src.apps.mail_servers.tests.factories import MessageTemplateFactory
-from src.apps.users.tests.factories import UserFactory
-from src.utils.tests import CustomViewTestCase
+from apps.mail_servers import MessageTemplate
+from apps.mail_servers import MessageTemplateFactory
+from apps import UserFactory
+from utils.tests import CustomViewTestCase
 
 
 class MessageTemplateViewTests(CustomViewTestCase):
     """
-    ./manage.py test apps.mail_servers.tests.test_message_templates.MessageTemplateViewTests --settings=_dev.settings_test      # noqa: E501
+    ./manage.py test apps.mail_servers.tests.test_message_templates.MessageTemplateViewTests --config=_dev.settings_test      # noqa: E501
     """
 
     def setUp(self):
