@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from src.apps.changelog.models import ChangeLog
+from apps.changelog.models.models import ChangeLog
 
 
 @admin.register(ChangeLog)

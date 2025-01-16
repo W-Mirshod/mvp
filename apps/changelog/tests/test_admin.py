@@ -1,11 +1,11 @@
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory
 
-from src.apps.changelog.admin import ChangeLogAdmin
-from src.apps.changelog.models import ChangeLog
-from src.apps.changelog.tests.factories import ChangeLogFactory
-from src.apps.users.tests.factories import UserFactory
-from src.utils.tests import CustomViewTestCase
+from apps.changelog.admin import ChangeLogAdmin
+from apps.changelog.models.models import ChangeLog
+from apps.changelog.tests.factories import ChangeLogFactory
+from apps.users.tests.factories import UserFactory
+from utils.tests import CustomViewTestCase
 
 
 class ChangeLogAdminTest(CustomViewTestCase):

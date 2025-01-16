@@ -2,10 +2,10 @@ import datetime
 import json
 import time
 
-from src.apps.changelog.choices import ActionsType
-from src.apps.changelog.middleware import LoggedInUser
-from src.apps.changelog.mixins import ChangeloggableMixin
-from src.apps.changelog.models import ChangeLog
+from apps.changelog.choices import ActionsType
+from apps.changelog.middleware import LoggedInUser
+from apps.changelog.mixins import ChangeloggableMixin
+from apps.changelog.models.models import ChangeLog
 
 
 def journal_save_handler(sender, instance, created, **kwargs):
