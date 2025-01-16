@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import update_last_login, User
+from django.contrib.auth.models import update_last_login
 from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -12,6 +12,7 @@ from rest_framework.serializers import as_serializer_error
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
 
+from apps.users.models import User
 from apps.users.models.tariffs import UserTariff
 from utils import password_validation
 
