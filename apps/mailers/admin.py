@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from src.apps.mailers.models import SentMessage, Event, MessageTemplate
+from apps.mailers.models import MessageTemplate
+from apps.mailers.models.event import Event
+from apps.mailers.models.message import SentMessage
 
 
 @admin.register(SentMessage)

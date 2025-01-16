@@ -1,9 +1,10 @@
 from django.test import TestCase
 
-from src.apps.mail_servers.models.servers import Server
-from src.apps.mailers.choices import StatusType
-from src.apps.mailers.models import Event, SentMessage
-from src.apps.users.models.users import User
+from apps.mail_servers.models.servers import Server
+from apps.mailers.choices import StatusType
+from apps.mailers.models.event import Event
+from apps.mailers.models.message import SentMessage
+from apps.users.models import User
 
 
 class EventModelTests(TestCase):

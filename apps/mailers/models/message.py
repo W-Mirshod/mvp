@@ -1,10 +1,11 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from src.apps.mail_servers.models.servers import Server
-from src.apps.mailers.models.template import MessageTemplate
-from src.apps.users.models.users import User
-from src.utils.models import DateModelMixin, DeleteModelMixin
+from apps.mail_servers.models.servers import Server
+from apps.mailers.models.template import MessageTemplate
+from apps.users.models import User
+
+from utils.models import DateModelMixin, DeleteModelMixin
 
 
 class SentMessage(DeleteModelMixin, DateModelMixin, models.Model):

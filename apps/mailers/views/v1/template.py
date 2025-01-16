@@ -1,9 +1,10 @@
 from rest_framework.permissions import IsAuthenticated
 
-from src.apps.mailers.models.template import MessageTemplate
-from src.apps.mailers.serializers import MessageTemplateSerializer
-from src.utils.permissions import IsTokenValid
-from src.utils.views import MultiSerializerViewSet
+from apps.mailers.models.template import MessageTemplate
+from apps.mailers.serializers.template import MessageTemplateSerializer
+
+from utils.permissions import IsTokenValid
+from utils.views import MultiSerializerViewSet
 
 
 class MessageTemplateView(MultiSerializerViewSet):

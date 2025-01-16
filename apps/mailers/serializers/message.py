@@ -1,7 +1,8 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from src.apps.mailers.models import Event, SentMessage
+from apps.mailers.models.event import Event
+from apps.mailers.models.message import SentMessage
 
 
 class SentMessageSerializer(serializers.ModelSerializer):

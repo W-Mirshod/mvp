@@ -1,6 +1,7 @@
 from django.urls import path
 
-from src.apps.mailers.views import SentMessageView, MessageTemplateView
+from apps.mailers.views.v1.message import SentMessageView
+from apps.mailers.views.v1.template import MessageTemplateView
 
 app_name = "message_api"
 

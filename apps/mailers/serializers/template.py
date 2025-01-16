@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from src.apps.mailers.models.template import MessageTemplate
+from apps.mailers.models.template import MessageTemplate
 
 
 class MessageTemplateSerializer(serializers.ModelSerializer):

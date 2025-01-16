@@ -1,10 +1,12 @@
 from django.db import models
 
-from src.apps.mail_servers.models.servers import Server
-from src.apps.mailers.choices import StatusType
-from src.utils.models import DateModelMixin, DeleteModelMixin
+from apps.mail_servers.models.servers import Server
+from apps.mailers.choices import StatusType
+from apps.mailers.models.message import SentMessage
 
-from .message import SentMessage
+from utils.models import DateModelMixin, DeleteModelMixin
+
+
 
 
 class Event(DeleteModelMixin, DateModelMixin, models.Model):
