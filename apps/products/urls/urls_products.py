@@ -1,6 +1,6 @@
 from django.urls import path
 
-from src.apps.products.views.v1.views_products import ProductView
+from apps.products.views.v1.views_products import ProductView
 
 app_name = "products_api"
 

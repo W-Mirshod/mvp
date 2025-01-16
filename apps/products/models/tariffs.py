@@ -1,10 +1,10 @@
 from django.db import models
 from django.db.models.signals import post_delete, post_save
 
-from src.apps.changelog.mixins import ChangeloggableMixin
-from src.apps.changelog.signals import journal_delete_handler, journal_save_handler
-from src.apps.products.models import Product
-from src.utils.models import DateModelMixin, DeleteModelMixin
+from apps.changelog.mixins import ChangeloggableMixin
+from apps.changelog.signals import journal_delete_handler, journal_save_handler
+from apps.products.models.products import Product
+from utils.models import DateModelMixin, DeleteModelMixin
 
 
 class Tariff(ChangeloggableMixin, DateModelMixin, DeleteModelMixin):

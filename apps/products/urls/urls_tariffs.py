@@ -1,6 +1,6 @@
 from django.urls import path
 
-from src.apps.products.views.v1.views_tariffs import TariffView
+from apps.products.views.v1.views_tariffs import TariffView
 
 app_name = "tariffs_api"
 

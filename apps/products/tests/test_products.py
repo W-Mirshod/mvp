@@ -2,14 +2,14 @@ from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from src.apps.products.tests.factories import ProductFactory
-from src.apps.users.tests.factories import UserFactory
-from src.utils.tests import CustomViewTestCase
+from apps.products.tests.factories import ProductFactory
+from apps.users.tests.factories import UserFactory
+from utils.tests import CustomViewTestCase
 
 
 class ProductViewTests(CustomViewTestCase):
     """
-    ./manage.py test apps.products.tests.test_products.ProductViewTests --settings=_dev.settings_test      # noqa: E501
+    ./manage.py test apps.products.tests.test_products.ProductViewTests --config=_dev.settings_test      # noqa: E501
     """
 
     def setUp(self):

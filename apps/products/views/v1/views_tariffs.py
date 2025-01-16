@@ -1,9 +1,9 @@
 from rest_framework.permissions import IsAuthenticated
 
-from src.apps.products.models import Tariff
-from src.apps.products.serializers import TariffSerializer
-from src.utils.permissions import IsTokenValid
-from src.utils.views import MultiSerializerViewSet
+from apps.products.models.tariffs import Tariff
+from apps.products.serializers import TariffSerializer
+from utils.permissions import IsTokenValid
+from utils.views import MultiSerializerViewSet
 
 
 class TariffView(MultiSerializerViewSet):
