@@ -8,24 +8,15 @@ from dotenv import dotenv_values
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-environ_values = dotenv_values(".env")
+environ_values = dotenv_values(BASE_DIR / ".env")
 
-
-env = environ.Env(DEBUG=(bool, True))
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 DEBUG = environ_values.get("DEBUG")
 
-def get_secret_key():
-    if not environ_values.get("SECRET_KEY"):
-        print("[agents_portal] No setting found for SECRET_KEY. Generating a random key...")
-        return get_random_string(length=50)
-    return environ_values.get("SECRET_KEY")
 
-
-SECRET_KEY = get_secret_key()
+SECRET_KEY = environ_values.get("SECRET_KEY")
 
 ALLOWED_HOSTS = environ_values.get("ALLOWED_HOSTS").split(",")
 
@@ -44,12 +35,12 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "django_celery_results",
     "django_celery_beat",
-    "src.apps.users",
-    "src.apps.changelog",
-    "src.apps.mail_servers",
-    "src.apps.mailers",
-    "src.apps.products",
-    "src.apps.companies",
+    "apps.users",
+    "apps.changelog",
+    "apps.mail_servers",
+    "apps.mailers",
+    "apps.products",
+    "apps.companies",
     "drf_yasg",
     "admin_extra_buttons",
     "constance",
@@ -68,7 +59,7 @@ MIDDLEWARE = [
     "apps.changelog.middleware.LoggedInUserMiddleware",
 ]
 
-ROOT_URLCONF = "settings.urls"
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
@@ -86,7 +77,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "settings.wsgi.application"
+WSGI_APPLICATION = "config.wsgi.application"
 
 # region REST
 REST_FRAMEWORK = {
@@ -174,13 +165,13 @@ REDIS_PASS = environ_values.get("REDIS_PASS")
 REDIS_HOST = environ_values.get("REDIS_HOST")
 REDIS_PORT = environ_values.get("REDIS_PORT")
 
-#REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
+REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
 REDIS_DB = "0"
 # endregion
 
-# celery settings
-CELERY_BROKER_URL = environ_values.get("CELERY_BROKER_URL")
-CELERY_RESULT_BACKEND = environ_values.get("CELERY_RESULT_BACKEND")
+# celery config
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -233,3 +224,56 @@ DATABASES = {
         "CONN_HEALTH_CHECKS": True,
     }
 }
+
+
+
+# SECURITY WARNING: don't run with debug turned on in production!
+
+SQL_DEBUG = environ_values.get("SQL_DEBUG")
+
+if SQL_DEBUG:
+    MIDDLEWARE += ["utils.middleware.DebugQuerysetsWare"]
+if DEBUG:
+    INSTALLED_APPS += ["debug_toolbar"]
+    MIDDLEWARE += [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    ]
+
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+CSRF_TRUSTED_ORIGINS = environ_values.get("CSRF_TRUSTED_ORIGINS").split(",")
+
+
+if DEBUG:
+    import socket
+
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
+
+# region SWAGGER
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Basic": {"type": "basic"},
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"},
+    },
+}
+# endregion
+
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+
+"""Email config ->"""
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_PORT = 587  # 587 for TLS, 465 for SSL
+EMAIL_HOST_USER = environ_values.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = environ_values.get("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = environ_values.get("DEFAULT_FROM_EMAIL", "")
+"""<- Email config"""
+
