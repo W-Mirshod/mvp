@@ -145,7 +145,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
@@ -208,7 +207,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 # endregion
 
-MAIN_HOST = "http://localhost:8000/"
+MAIN_HOST = environ_values.get("MAIN_HOST","http://localhost:8000/" )
 
 DATABASES = {
     'default': {
