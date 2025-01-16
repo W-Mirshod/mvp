@@ -3,13 +3,13 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.test import APIRequestFactory
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from src.apps.users.models.users import User
-from src.utils.permissions import IsOneTimeTokenValid, IsOwner, IsTokenValid
+from apps.users.models.users import User
+from utils.permissions import IsOneTimeTokenValid, IsOwner, IsTokenValid
 
 
 class TestIsOneTimeTokenValid(TestCase):
     """
-    python manage.py test tests.test_permissions --settings=_dev.settings_test
+    python manage.py test tests.test_permissions --config=_dev.settings_test
 
     """
 
