@@ -1,8 +1,8 @@
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 
-from src.apps.users.tests.factories import UserFactory
-from src.utils.tests import CustomViewTestCase
+from apps.users.tests.factories import UserFactory
+from utils.tests import CustomViewTestCase
 
 
 class LogoutViewTests(CustomViewTestCase):

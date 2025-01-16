@@ -5,15 +5,15 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 
-from src.apps.users.tests.factories import UserFactory
-from src.utils.tests import CustomViewTestCase
+from apps.users.tests.factories import UserFactory
+from utils.tests import CustomViewTestCase
 
 User = get_user_model()
 
 
 class TestGetOneTimeJWT(CustomViewTestCase):
     """
-    ./manage.py test apps.users.tests.test_get_one_time_jwt_view.TestGetOneTimeJWT --settings=_dev.settings_test        # noqa: E501
+    ./manage.py test apps.users.tests.test_get_one_time_jwt_view.TestGetOneTimeJWT --config=_dev.settings_test        # noqa: E501
     """
 
     def setUp(self):

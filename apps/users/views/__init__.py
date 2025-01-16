@@ -1,4 +1,4 @@
-from src.apps.users.views.v1.views_users import (
+from apps.users.views.v1.views_users import (
     BlacklistTokenView,
     EmailVerificationView,
     LoginTokenView,

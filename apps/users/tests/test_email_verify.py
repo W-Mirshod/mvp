@@ -2,14 +2,14 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 
-from src.utils.tests import CustomViewTestCase
+from utils.tests import CustomViewTestCase
 
 User = get_user_model()
 
 
 class EmailVerificationViewTests(CustomViewTestCase):
     """
-    ./manage.py test apps.users.tests.test_email_verify.EmailVerificationViewTests --settings=_dev.settings_test      # noqa: E501
+    ./manage.py test apps.users.tests.test_email_verify.EmailVerificationViewTests --config=_dev.settings_test      # noqa: E501
     """
 
     def setUp(self):

@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from src.apps.products.models import Tariff
-from src.apps.users.models.users import User
-from src.utils.models import DateModelMixin, DeleteModelMixin
+from apps.products.models.tariffs import Tariff
+from apps.users.models.users import User
+from utils.models import DateModelMixin, DeleteModelMixin
 
 
 class UserTariff(DateModelMixin, DeleteModelMixin):

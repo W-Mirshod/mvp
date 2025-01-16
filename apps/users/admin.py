@@ -4,9 +4,9 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from src.apps.users.forms import UserCreationForm
-from src.apps.users.models import UserTariff
-from src.apps.users.models.users import User
+from apps.users.forms import UserCreationForm
+from apps.users.models.tariffs import UserTariff
+from apps.users.models.users import User
 
 logger = logging.getLogger(__name__)
 

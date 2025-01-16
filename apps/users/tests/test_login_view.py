@@ -3,16 +3,17 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 
-from src.utils.tests import CustomViewTestCase
+from apps.users.tests.factories import UserFactory
+from utils.tests import CustomViewTestCase
 
-from .factories import UserFactory
+
 
 User = get_user_model()
 
 
 class UserViewTest(TestCase):
     """
-    ./manage.py test apps.users.tests.test_view.UserViewTest --settings=_dev.settings_test      # noqa: E501
+    ./manage.py test apps.users.tests.test_view.UserViewTest --config=_dev.settings_test      # noqa: E501
     """
 
     CONTENT_TYPE_JSON = "application/json"
@@ -43,7 +44,7 @@ class UserViewTest(TestCase):
 
 class LoginTokenViewTests(CustomViewTestCase):
     """
-    ./manage.py test apps.users.tests.test_test_login_view.LoginTokenViewTests --settings=_dev.settings_test    # noqa: E501
+    ./manage.py test apps.users.tests.test_test_login_view.LoginTokenViewTests --config=_dev.settings_test    # noqa: E501
     """
 
     def setUp(self):

@@ -21,20 +21,13 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-
-from src.apps.users.models.jwt import BlackListedAccessToken
-from src.apps.users.serializers import (
-    EmailTokenGenerationSerializer,
-    RestorePasswordSerializer,
-    TokenSerializer,
-    UserDetailSerializer,
-    UserRegistrationSerializer,
-)
-from src.apps.users.services.jwt import create_one_time_jwt
-from src.apps.users.tasks import send_one_time_jwt_task, send_verification_email_task
-from src.utils.permissions import IsOneTimeTokenValid, IsTokenValid
-from src.utils.views import MultiSerializerViewSet
-
+from apps.users.models.jwt import BlackListedAccessToken
+from apps.users.serializers import TokenSerializer, UserRegistrationSerializer, EmailTokenGenerationSerializer, \
+    UserDetailSerializer, RestorePasswordSerializer
+from apps.users.services.jwt import create_one_time_jwt
+from utils.permissions import IsOneTimeTokenValid, IsTokenValid
+from utils.views import MultiSerializerViewSet
+from apps.users.tasks import send_verification_email_task, send_one_time_jwt_task
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
@@ -152,21 +145,23 @@ class RegistrationViewSet(MultiSerializerViewSet):
                 if response.status_code == status.HTTP_201_CREATED:
                     new_user = User.objects.get(email=response.data["email"])
                     new_user.is_active = True
+                    new_user.is_verified = True
+                    new_user.is_superuser = True
                     new_user.save()
                     token = create_one_time_jwt(new_user)
 
-                    if settings.CELERY_BROKER_URL:
-                        send_verification_email_task.delay(
-                            settings.DEFAULT_FROM_EMAIL,
-                            data.get("email"),
-                            token,
-                        )
-                    else:
-                        send_verification_email_task(
-                            settings.DEFAULT_FROM_EMAIL,
-                            data.get("email"),
-                            token,
-                        )
+                    # if config.CELERY_BROKER_URL:
+                    #     send_verification_email_task.delay(
+                    #         config.DEFAULT_FROM_EMAIL,
+                    #         data.get("email"),
+                    #         token,
+                    #     )
+                    # else:
+                    #     send_verification_email_task(
+                    #         config.DEFAULT_FROM_EMAIL,
+                    #         data.get("email"),
+                    #         token,
+                    #     )
 
         except ValidationError as ex:
             return Response({"error": str(ex)}, status=status.HTTP_400_BAD_REQUEST)

@@ -3,9 +3,9 @@ from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.fuzzy import FuzzyText
 
-from src.apps.products.tests.factories import TariffFactory
-from src.apps.users.models import UserTariff
-from src.apps.users.models.users import User
+from apps.products.tests.factories import TariffFactory
+from apps.users.models import User
+from apps.users.models.tariffs import UserTariff
 
 
 class UserFactory(DjangoModelFactory):

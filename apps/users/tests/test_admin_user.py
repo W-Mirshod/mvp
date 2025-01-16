@@ -2,15 +2,15 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 
-from src.apps.users.tests.factories import UserFactory
-from src.utils.tests import CustomViewTestCase
+from apps.users.tests.factories import UserFactory
+from utils.tests import CustomViewTestCase
 
 User = get_user_model()
 
 
 class TestUserAdmin(CustomViewTestCase):
     """
-    ./manage.py test apps.users.tests.test_admin_user.TestUserAdmin --settings=_dev.settings_test
+    ./manage.py test apps.users.tests.test_admin_user.TestUserAdmin --config=_dev.settings_test
     """
 
     model = User

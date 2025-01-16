@@ -3,13 +3,13 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from src.apps.users.models.users import User
-from src.apps.users.views.v1.views_users import RefreshTokenView
+from apps.users.models import User
+from apps.users.views import RefreshTokenView
 
 
 class UserCreationTestCase(TestCase):
     """
-    ./manage.py test apps.users.tests.test_models.UserCreationTestCase --settings=_dev.settings_test        # noqa: E501
+    ./manage.py test apps.users.tests.test_models.UserCreationTestCase --config=_dev.settings_test        # noqa: E501
     """
 
     def test_create_user(self):

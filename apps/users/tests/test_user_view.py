@@ -1,10 +1,10 @@
-from src.apps.users.tests.factories import UserFactory, UserTariffFactory
-from src.utils.tests import CustomViewTestCase
+from apps.users.tests.factories import UserFactory, UserTariffFactory
+from utils.tests import CustomViewTestCase
 
 
 class UserViewTest(CustomViewTestCase):
     """
-    ./manage.py test apps.users.tests.test_user_view.UserViewTest --settings=_dev.settings_test
+    ./manage.py test apps.users.tests.test_user_view.UserViewTest --config=_dev.settings_test
     """
 
     @classmethod

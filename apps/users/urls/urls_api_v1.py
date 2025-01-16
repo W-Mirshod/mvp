@@ -1,14 +1,7 @@
 from django.urls import path
 
-from src.apps.users.views.v1.views_users import (
-    OneTimeJWTFunctionsViewSet,
-    RegistrationViewSet,
-    RefreshTokenView,
-    BlacklistTokenView,
-    LoginTokenView,
-    EmailVerificationView,
-    UserViewSet,
-)
+from apps.users.views.v1.views_users import UserViewSet, EmailVerificationView, LoginTokenView, BlacklistTokenView, \
+    RefreshTokenView, RegistrationViewSet, OneTimeJWTFunctionsViewSet
 
 app_name = "users_api"
 
