@@ -4,27 +4,30 @@ from pathlib import Path
 from datetime import timedelta
 from celery.schedules import crontab
 from django.utils.crypto import get_random_string
+from dotenv import dotenv_values
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-ROOT_DIR = environ.Path(__file__) - 2
+
+environ_values = dotenv_values(".env")
 
 
 env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-DEBUG = env.bool('DEBUG', True)
+DEBUG = environ_values.get("DEBUG")
 
 def get_secret_key():
-    if not env.str("SECRET_KEY"):
+    if not environ_values.get("SECRET_KEY"):
         print("[agents_portal] No setting found for SECRET_KEY. Generating a random key...")
         return get_random_string(length=50)
-    return env.str("SECRET_KEY")
+    return environ_values.get("SECRET_KEY")
 
 
 SECRET_KEY = get_secret_key()
 
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
+ALLOWED_HOSTS = environ_values.get("ALLOWED_HOSTS").split(",")
 
 # Application definition
 
@@ -41,12 +44,12 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "django_celery_results",
     "django_celery_beat",
-    "apps.users",
-    "apps.changelog",
-    "apps.mail_servers",
-    "apps.mailers",
-    "apps.products",
-    "apps.companies",
+    "src.apps.users",
+    "src.apps.changelog",
+    "src.apps.mail_servers",
+    "src.apps.mailers",
+    "src.apps.products",
+    "src.apps.companies",
     "drf_yasg",
     "admin_extra_buttons",
     "constance",
@@ -101,8 +104,8 @@ REST_FRAMEWORK = {
 
 # region JWT
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=env.int("ACCESS_TOKEN_LIFETIME_MINUTES", 15)),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=env.int("REFRESH_TOKEN_LIFETIME_DAYS", 1)),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(environ_values.get("ACCESS_TOKEN_LIFETIME", 15))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=int(environ_values.get("REFRESH_TOKEN_LIFETIME_DAYS", 1))),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
@@ -167,14 +170,17 @@ MEDIA_URL = "/media/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # region Redis
-REDIS_HOST = env.str("REDIS_HOST", "redis")
-REDIS_PORT = env.str("REDIS_PORT", "6379")
+REDIS_PASS = environ_values.get("REDIS_PASS")
+REDIS_HOST = environ_values.get("REDIS_HOST")
+REDIS_PORT = environ_values.get("REDIS_PORT")
+
+#REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
 REDIS_DB = "0"
 # endregion
 
 # celery settings
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/0")
+CELERY_BROKER_URL = environ_values.get("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = environ_values.get("CELERY_RESULT_BACKEND")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -217,11 +223,13 @@ MAIN_HOST = "http://localhost:8000/"
 
 DATABASES = {
     'default': {
-        'ENGINE': env.str('SQL_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': BASE_DIR / env.str('SQL_DATABASE', 'db.sqlite3'),
-        'USER': env.str('SQL_USER', ''),
-        'PASSWORD': env.str('SQL_PASSWORD', ''),
-        'HOST': env.str('SQL_HOST', ''),
-        'PORT': env.str('SQL_PORT', ''),
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": environ_values.get("DB_NAME"),
+        "USER": environ_values.get("DB_USER"),
+        "PASSWORD": environ_values.get("DB_PASSWORD"),
+        "HOST": environ_values.get("DB_HOST"),
+        "PORT": environ_values.get("DB_PORT"),
+        "CONN_MAX_AGE": 30,
+        "CONN_HEALTH_CHECKS": True,
     }
 }
