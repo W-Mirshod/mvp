@@ -1,6 +1,6 @@
 from django.urls import path
 
-from src.apps.companies.views.v1.views_companies import CompanyView
+from apps.companies.views.v1.views_companies import CompanyView
 
 app_name = "companies_api"
 

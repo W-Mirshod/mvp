@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from src.apps.companies.models import Company
+from apps.companies.models.company import Company
 
 
 class CompanySerializer(serializers.ModelSerializer):
