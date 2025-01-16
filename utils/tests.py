@@ -5,7 +5,7 @@ from django.test import override_settings
 from django.urls import reverse_lazy
 from rest_framework.test import APITestCase
 
-from src.apps.users.models.users import User
+from apps.users.models.users import User
 
 
 @override_settings(SQL_DEBUG=False)
