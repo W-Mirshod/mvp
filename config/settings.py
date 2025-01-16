@@ -1,9 +1,7 @@
 import os
-import environ
 from pathlib import Path
 from datetime import timedelta
 from celery.schedules import crontab
-from django.utils.crypto import get_random_string
 from dotenv import dotenv_values
 
 
@@ -81,14 +79,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # region REST
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "DEFAULT_AUTHENTICATION_CLASSES": [
         "utils.authentication.CustomJWTAuthentication",
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
-    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
 }
 # endregion
