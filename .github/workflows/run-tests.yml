@@ -37,7 +37,7 @@ jobs:
           - 6379:6379
 
     env:
-      DJANGO_SETTINGS_MODULE: settings.settings.prod
+      DJANGO_SETTINGS_MODULE: config.config.prod
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/mega_mailer
       CELERY_BROKER_URL: redis://localhost:6379/0
       CELERY_RESULT_BACKEND: redis://localhost:6379/0
