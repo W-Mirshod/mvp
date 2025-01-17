@@ -17,6 +17,7 @@ DEBUG = environ_values.get("DEBUG")
 SECRET_KEY = environ_values.get("SECRET_KEY")
 
 ALLOWED_HOSTS = environ_values.get("ALLOWED_HOSTS").split(",")
+CORS_ORIGIN_WHITELIST = environ_values.get("CORS_ORIGIN_WHITELIST").split(",")
 
 # Application definition
 
@@ -241,7 +242,8 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
 CSRF_TRUSTED_ORIGINS = environ_values.get("CSRF_TRUSTED_ORIGINS").split(",")
-
+CSRF_COOKIE_SECURE = environ_values.get("CSRF_COOKIE_SECURE")
+CSRF_COOKIE_HTTPONLY = environ_values.get("CSRF_COOKIE_HTTPONLY")
 
 if DEBUG:
     import socket
