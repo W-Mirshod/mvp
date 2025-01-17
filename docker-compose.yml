@@ -17,11 +17,12 @@ services:
       - "8000:8000"
     command: ./scripts/start_django.sh
     networks:
-      - default
+      - mega_mailer_network
 
   db:
     image: postgres:latest
     container_name: db
+    restart: always
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -29,7 +30,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - default
+      - mega_mailer_network
 
   redis:
     image: redis:7.2
@@ -40,13 +41,13 @@ services:
     command: >
       --requirepass ${REDIS_PASS}
     networks:
-      - default
+      - mega_mailer_network
 
   # Django WSGI App
   asgi-server:
     image: mm-back-app:latest
     container_name: mm_asgi
-
+    restart: always
     ports:
       - "8001:8001"
     volumes:
@@ -56,7 +57,7 @@ services:
       - redis
     command: ./scripts/start_dj_sockets.sh
     networks:
-      - default
+      - mega_mailer_network
 
 
   # Flower
@@ -68,14 +69,16 @@ services:
     ports:
       - "5555:5555"
     container_name: mm_flower
+    restart: always
     depends_on:
       - app
       - redis
+    networks:
+      - mega_mailer_network
 
 networks:
-  default:
-    name: mega_mailer_network
-    driver: bridge
+  mega_mailer_network:
+    external: true
 
 volumes:
   db_data:
