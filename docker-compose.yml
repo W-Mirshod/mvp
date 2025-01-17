@@ -7,7 +7,7 @@ services:
     container_name: mm-back-web
     volumes:
       - .:/mm-back
-      - /home/mm-back_static:/mm-back/static
+      - /home/mm-back_static:/mm-back/staticfiles
       - /home/mm-back_logs:/mm-back/logs
     depends_on:
       - db
