@@ -1,0 +1,16 @@
+variables:
+  DEPLOY_DEV_SECRETS: $ENV_SECRETS_DEV
+
+
+deploy_dev:
+  stage: deploy
+  only:
+    - dev
+  tags:
+    - mm_back_dev
+  timeout: 10 minutes
+  script:
+    - echo "${DEPLOY_DEV_SECRETS}" | base64 -d > .env
+    - ls -alh
+    - ./deploy_docker_script.sh
+  environment: production
