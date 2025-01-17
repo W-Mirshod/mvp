@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   mm-back-web:
@@ -45,7 +44,7 @@ services:
 
   # Django WSGI App
   mm_back-socket:
-    image: mm-back_mm-back-web:latest
+    image: mm-back-mm-back-web:latest
     container_name: mm_back-socket
     restart: always
     ports:
@@ -62,7 +61,7 @@ services:
 
   # Flower
   flower:
-    image: mm-back_mm-back-web:latest
+    image: mm-back-mm-back-web:latest
     command: ["sh", "./scripts/entrypoint-flower.sh"]
     volumes:
       - .:/mmb
