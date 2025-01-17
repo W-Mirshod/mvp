@@ -62,15 +62,16 @@ services:
   # Flower
   flower:
     image: mm-back-app:latest
-    command: ./scripts/entrypoint-flower.sh
+    command: ["sh", "./scripts/entrypoint-flower.sh"]
     volumes:
       - .:/mmb
     ports:
-      - 5555:5555
+      - "5555:5555"
     container_name: mm_flower
     depends_on:
       - app
       - redis
+    working_dir: /mmb
 
 networks:
   default:
