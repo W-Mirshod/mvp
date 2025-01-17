@@ -234,6 +234,28 @@ class EmailVerificationView(MultiSerializerViewSet):
     authentication_classes = []
     permission_classes = []
 
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_200_OK: openapi.Response(
+                description="Email has been successfully verified",
+                examples={"application/json": {"detail": "Email verified"}},
+            ),
+            status.HTTP_401_UNAUTHORIZED: openapi.Response(
+                description="Authentication error",
+                examples={"application/json": {"error": "Invalid or missing token"}},
+            ),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response(
+                description="Internal Server Error",
+                examples={"application/json": {"error": "An error occurred during verification"}},
+            ),
+        },
+        operation_description=(
+                "This endpoint verifies a user's email using a JWT token passed as a query parameter.\n\n"
+                "**Example request :**"
+                "`http://127.0.0.1:8000/api/1.0/users/email_verify/?token=your_token`\n\n"
+                "Replace `your_token` with the actual token received."
+        ),
+    )
     @transaction.atomic
     def email_verify(self, request, *args, **kwargs):
         jwt_authenticator = JWTAuthentication()
