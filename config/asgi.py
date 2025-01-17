@@ -11,7 +11,7 @@ install:
     - !!! DRF DO NOT SUPPORT ASYNC !!!
 
 run:
-    gunicorn -w 4 --log-level warning -k uvicorn.workers.UvicornWorker dj_config.asgi:application
+    gunicorn -w 4 --log-level warning -k uvicorn.workers.UvicornWorker config.asgi:application
 or:
     gunicorn -c ./server_config/gunicorn/gunicorn_sockets.py
 
@@ -19,6 +19,7 @@ or:
 
 import os
 
+from channels.routing import ProtocolTypeRouter
 from django.core.asgi import get_asgi_application
 
 
@@ -26,4 +27,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 django_asgi_app = get_asgi_application()
 
-
+application = ProtocolTypeRouter(
+    {
+        "http": django_asgi_app,
+    }
+)
