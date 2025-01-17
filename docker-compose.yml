@@ -42,38 +42,38 @@ services:
     networks:
       - mega_mailer_network
 
-#  # Django WSGI App
-#  mm_back-socket:
-#    image: mm-back_mm-back-web:latest
-#    container_name: mm_back-socket
-#    restart: always
-#    ports:
-#      - "8001:8001"
-#    volumes:
-#      - .:/mm-back
-#    depends_on:
-#      - db
-#      - redis
-#    command: ./scripts/start_dj_sockets.sh
-#    networks:
-#      - mega_mailer_network
-#
-#
-#  # Flower
-#  flower:
-#    image: mm-back-mm_back-web:latest
-#    command: ["sh", "./scripts/entrypoint-flower.sh"]
-#    volumes:
-#      - .:/mmb
-#    ports:
-#      - "5555:5555"
-#    container_name: mm_flower
-#    restart: always
-#    depends_on:
-#      - mm-back-web
-#      - redis
-#    networks:
-#      - mega_mailer_network
+  # Django WSGI App
+  mm_back-socket:
+    image: mm-back-mm-back-web:latest
+    container_name: mm_back-socket
+    restart: always
+    ports:
+      - "8001:8001"
+    volumes:
+      - .:/mm-back
+    depends_on:
+      - db
+      - redis
+    command: ./scripts/start_dj_sockets.sh
+    networks:
+      - mega_mailer_network
+
+
+  # Flower
+  flower:
+    image: mm-back-mm-back-web:latest
+    command: ["sh", "./scripts/entrypoint-flower.sh"]
+    volumes:
+      - .:/mmb
+    ports:
+      - "5555:5555"
+    container_name: mm_flower
+    restart: always
+    depends_on:
+      - mm-back-web
+      - redis
+    networks:
+      - mega_mailer_network
 
 networks:
   mega_mailer_network:
