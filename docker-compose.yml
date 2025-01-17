@@ -6,8 +6,9 @@ services:
       dockerfile: Dockerfile
     container_name: mm-back-web
     volumes:
-      - ./static:/mm-back/static
       - .:/mm-back
+      - /home/mm-back_static:/mm-back/static
+      - /home/mm-back_logs:/mm-back/logs
     depends_on:
       - db
       - redis
