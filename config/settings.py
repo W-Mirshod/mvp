@@ -276,3 +276,15 @@ EMAIL_HOST_PASSWORD = environ_values.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = environ_values.get("DEFAULT_FROM_EMAIL", "")
 """<- Email config"""
 
+"""Django channels ->"""
+ASGI_APPLICATION = "config.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL],
+        },
+    },
+}
+"""<- Django channels"""
