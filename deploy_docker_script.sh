@@ -5,7 +5,7 @@ docker pull python:3.12
 sleep 0.1
 
 echo "--- Update Redis image ---"
-docker pull redis:7.2
+docker pull redis:latest
 sleep 0.1
 
 echo "--- Update Postgres image ---"

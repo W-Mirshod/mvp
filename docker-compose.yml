@@ -33,7 +33,7 @@ services:
       - mega_mailer_network
 
   redis:
-    image: redis:7.2
+    image: redis:latest
     container_name: mm_redis
     ports:
       - "6379:6379"
@@ -71,7 +71,7 @@ services:
     container_name: mm_flower
     restart: always
     depends_on:
-      - app
+      - mm-back-web
       - redis
     networks:
       - mega_mailer_network
