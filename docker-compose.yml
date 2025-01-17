@@ -71,7 +71,6 @@ services:
     depends_on:
       - app
       - redis
-    working_dir: /mmb
 
 networks:
   default:
