@@ -1,11 +1,11 @@
 version: "3.9"
 
 services:
-  app:
+  mm-back-web:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: app
+    container_name: mm-back-web
     volumes:
       - ./static:/mm-back/static
       - .:/mm-back
@@ -44,9 +44,9 @@ services:
       - mega_mailer_network
 
   # Django WSGI App
-  asgi-server:
-    image: mm-back-app:latest
-    container_name: mm_asgi
+  mm_back-socket:
+    image: mm-back_mm-back-web:latest
+    container_name: mm_back-socket
     restart: always
     ports:
       - "8001:8001"
@@ -62,7 +62,7 @@ services:
 
   # Flower
   flower:
-    image: mm-back-app:latest
+    image: mm-back_mm-back-web:latest
     command: ["sh", "./scripts/entrypoint-flower.sh"]
     volumes:
       - .:/mmb
