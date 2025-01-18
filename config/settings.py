@@ -254,12 +254,10 @@ SESSION_CACHE_ALIAS = "default"
 
 """CASH ->"""
 CACHES = {
-    "default": {
+   "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": REDIS_URL,
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
+        "KEY_PREFIX": "mm-back-main",
     }
 }
 
