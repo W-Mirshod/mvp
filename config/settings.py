@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions",
-   # "corsheaders",
+    "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "django_celery_results",
@@ -47,7 +47,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-  #  "corsheaders.middleware.CorsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -236,13 +236,19 @@ if DEBUG:
     ]
 
 
+"""Security->"""
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = environ_values.get("CSRF_TRUSTED_ORIGINS").split(",")
+SESSION_COOKIE_DOMAIN = environ_values.get("DOMAIN", None)
+SECURE_HSTS_SECONDS = 3600  # 1h
+SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+"""<-Security"""
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
-CSRF_TRUSTED_ORIGINS = environ_values.get("CSRF_TRUSTED_ORIGINS").split(",")
-#CSRF_COOKIE_SECURE = environ_values.get("CSRF_COOKIE_SECURE")
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_HTTPONLY = environ_values.get("CSRF_COOKIE_HTTPONLY")
 
 if DEBUG:
     import socket
