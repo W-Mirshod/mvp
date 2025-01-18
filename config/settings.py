@@ -239,7 +239,8 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
 CSRF_TRUSTED_ORIGINS = environ_values.get("CSRF_TRUSTED_ORIGINS").split(",")
-CSRF_COOKIE_SECURE = environ_values.get("CSRF_COOKIE_SECURE")
+#CSRF_COOKIE_SECURE = environ_values.get("CSRF_COOKIE_SECURE")
+CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_HTTPONLY = environ_values.get("CSRF_COOKIE_HTTPONLY")
 
 if DEBUG:
