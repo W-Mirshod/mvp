@@ -202,10 +202,7 @@ CONSTANCE_CONFIG = {
 # endregion
 
 # region CORS
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+CORS_ALLOWED_ORIGINS = environ_values.get("CORS_ALLOWED_ORIGINS").split(",")
 # endregion
 
 MAIN_HOST = environ_values.get("MAIN_HOST","http://localhost:8000/" )
