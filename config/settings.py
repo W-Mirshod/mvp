@@ -80,7 +80,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # region REST
 REST_FRAMEWORK = {
-        "DEFAULT_AUTHENTICATION_CLASSES": [
+    "DEFAULT_AUTHENTICATION_CLASSES": [
         "utils.authentication.CustomJWTAuthentication",
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.BasicAuthentication",
@@ -94,8 +94,12 @@ REST_FRAMEWORK = {
 
 # region JWT
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(environ_values.get("ACCESS_TOKEN_LIFETIME", 15))),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=int(environ_values.get("REFRESH_TOKEN_LIFETIME_DAYS", 1))),
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=int(environ_values.get("ACCESS_TOKEN_LIFETIME", 15))
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=int(environ_values.get("REFRESH_TOKEN_LIFETIME_DAYS", 1))
+    ),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
@@ -144,10 +148,10 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, "static"),
 ]
 
 MEDIA_ROOT = str(BASE_DIR / "media")
@@ -180,13 +184,13 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.mail_servers.tasks.test_periodic_task",
         "schedule": crontab(minute="*/1"),
     },
-    'process-new-mail-queue-every-3-seconds': {
-        'task': 'apps.mail_servers.tasks.process_new_mail_queue',
-        'schedule': 3.0,
+    "process-new-mail-queue-every-3-seconds": {
+        "task": "apps.mail_servers.tasks.process_new_mail_queue",
+        "schedule": 3.0,
     },
-    'process-in-process-mail-queue-every-3-seconds': {
-        'task': 'apps.mail_servers.tasks.process_in_process_mail_queue',
-        'schedule': 3.0,
+    "process-in-process-mail-queue-every-3-seconds": {
+        "task": "apps.mail_servers.tasks.process_in_process_mail_queue",
+        "schedule": 3.0,
     },
 }
 
@@ -206,10 +210,10 @@ CONSTANCE_CONFIG = {
 CORS_ALLOWED_ORIGINS = environ_values.get("CORS_ALLOWED_ORIGINS").split(",")
 # endregion
 
-MAIN_HOST = environ_values.get("MAIN_HOST","http://localhost:8000/" )
+MAIN_HOST = environ_values.get("MAIN_HOST", "http://localhost:8000/")
 
 DATABASES = {
-    'default': {
+    "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": environ_values.get("DB_NAME"),
         "USER": environ_values.get("DB_USER"),
@@ -220,7 +224,6 @@ DATABASES = {
         "CONN_HEALTH_CHECKS": True,
     }
 }
-
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -249,12 +252,28 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
+"""CASH ->"""
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
+
+""" <- CASH"""
+
 
 if DEBUG:
     import socket
 
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
+    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + [
+        "127.0.0.1",
+        "10.0.2.2",
+    ]
 
 # region SWAGGER
 SWAGGER_SETTINGS = {
