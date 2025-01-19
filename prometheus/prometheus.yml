@@ -1,0 +1,36 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+
+  - job_name: 'mvp-back-prometheus'
+    static_configs:
+      - targets: [ "mvp-back-prometheus:9090" ]
+        labels:
+          alias: "mvp-back-prometheus"
+
+
+  - job_name: 'node_exporter'
+    static_configs:
+          - targets: [ "95.215.108.108:9100" ]
+
+
+  - job_name: 'mvp-back-back-web'
+    metrics_path: '/api/1.0/monitoring/metrics/'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['mm-back-web:8000']
+        labels:
+          alias: "mm-back-web"
+
+
+  - job_name: 'mvp-back-sockets'
+    metrics_path: '/api/1.0/monitoring/metrics/'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['mm-back-socket:8001']
+        labels:
+          alias: "mm_back-socket"
+
+
