@@ -46,7 +46,7 @@ services:
   # Django WSGI App
   mm_back-socket:
     image: mm-back-mm-back-web:latest
-    container_name: mm_back-socket
+    container_name: mm-back-socket
     restart: always
     ports:
       - "8001:8001"
