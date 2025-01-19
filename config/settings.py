@@ -28,25 +28,29 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    #
     "django_extensions",
+    "django_prometheus",
+    "django_celery_results",
+    "django_celery_beat",
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
-    "django_celery_results",
-    "django_celery_beat",
+    "drf_yasg",
+    "admin_extra_buttons",
+    "constance",
+    "constance.backends.database",
+    #
     "apps.users",
     "apps.changelog",
     "apps.mail_servers",
     "apps.mailers",
     "apps.products",
     "apps.companies",
-    "drf_yasg",
-    "admin_extra_buttons",
-    "constance",
-    "constance.backends.database",
 ]
 
 MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -56,6 +60,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.changelog.middleware.LoggedInUserMiddleware",
+    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -214,7 +219,7 @@ MAIN_HOST = environ_values.get("MAIN_HOST", "http://localhost:8000/")
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django_prometheus.db.backends.postgresql",
         "NAME": environ_values.get("DB_NAME"),
         "USER": environ_values.get("DB_USER"),
         "PASSWORD": environ_values.get("DB_PASSWORD"),
@@ -255,7 +260,7 @@ SESSION_CACHE_ALIAS = "default"
 """CASH ->"""
 CACHES = {
    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "BACKEND": "django_prometheus.cache.backends.redis.RedisCache",
         "LOCATION": REDIS_URL,
         "KEY_PREFIX": "mm-back-main",
     }
