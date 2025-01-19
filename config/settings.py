@@ -259,7 +259,7 @@ SESSION_CACHE_ALIAS = "default"
 
 """CASH ->"""
 CACHES = {
-   "default": {
+    "default": {
         "BACKEND": "django_prometheus.cache.backends.redis.RedisCache",
         "LOCATION": REDIS_URL,
         "KEY_PREFIX": "mm-back-main",
