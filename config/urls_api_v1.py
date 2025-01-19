@@ -9,6 +9,7 @@ urlpatterns = [
     path("tariffs/", include("apps.products.urls.urls_tariffs")),
     path("messages/", include("apps.mailers.urls.message")),
     path("companies/", include("apps.companies.urls.urls_companies")),
+    path("monitoring/", include("apps.metrics.urls")),
     path(
         "docs/",
         include_docs_urls(
