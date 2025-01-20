@@ -1,0 +1,15 @@
+class SentryConstants:
+    """Sentry ->"""
+    SENTRY_MSG_DEBUG = "debug"
+    SENTRY_MSG_INFO = "info"
+    SENTRY_MSG_WARNING = "warning"
+    SENTRY_MSG_ERROR = "error"
+    SENTRY_MSG_EXCEPTION = "exception"
+
+    SENTRY_TAG_GENERAL = "General"
+    SENTRY_TAG_PROCESSING = "Processing"
+    SENTRY_TAG_REQUEST = "Request"
+    SENTRY_TAG_DB_MODEL = "DB model"
+    SENTRY_TAG_ML = "ML"
+    SENTRY_TAG_CELERY_TASK = "Celery task"
+    """<- Sentry"""
