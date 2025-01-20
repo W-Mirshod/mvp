@@ -12,6 +12,9 @@ import redis
 from apps.metrics.constants import MonitoringConstants
 from celery_scripts.celery_app import celery_app
 from config.settings import REDIS_URL
+from apps.sentry.sentry_scripts import SendToSentry
+from apps.sentry.sentry_constants import SentryConstants
+
 
 logger = logging.getLogger("app")
 
@@ -60,6 +63,15 @@ class SystemStatusView(APIView):
                 cursor.execute("SELECT 1;")
             components["database"] = MonitoringConstants.CONNECTED_SYSTEM_STATUS
         except Exception as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"SystemStatusView.get() database: Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": "Database connection failed",
+                    "extra_detail": f"{ex = }",
+                }
+            )
             logger.error(f"Database connection failed:{ex=}")
             components["database"] = MonitoringConstants.DISCONNECTED_SYSTEM_STATUS
 
@@ -68,6 +80,15 @@ class SystemStatusView(APIView):
             redis_client.ping()
             components["redis"] = MonitoringConstants.CONNECTED_SYSTEM_STATUS
         except Exception as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"SystemStatusView.get() redis: Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": "Redis connection failed",
+                    "extra_detail": f"{ex = }",
+                }
+            )
             logger.error(f"Redis connection failed: {ex=}")
             components["redis"] = MonitoringConstants.DISCONNECTED_SYSTEM_STATUS
 
@@ -78,6 +99,15 @@ class SystemStatusView(APIView):
             else:
                 components["celery"] = MonitoringConstants.DISCONNECTED_SYSTEM_STATUS
         except Exception as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"SystemStatusView.get() celery: Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": "Celery status check failed",
+                    "extra_detail": f"{ex = }",
+                }
+            )
             logger.error(f"Celery status check failed: {ex=}")
             components["celery"] = MonitoringConstants.DISCONNECTED_SYSTEM_STATUS
 
