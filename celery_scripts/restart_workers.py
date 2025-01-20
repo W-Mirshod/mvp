@@ -13,6 +13,8 @@ from time import sleep
 
 from django.utils.timezone import now
 
+from apps.sentry.sentry_constants import SentryConstants
+from apps.sentry.sentry_scripts import SendToSentry
 from celery_scripts.constants import CeleryConstants, time_it
 
 from config.settings import DEBUG
@@ -104,7 +106,15 @@ class RestartWorkers:
                     os.system(f"kill -HUP {pid_id}")
                     pid_file.close()
         except Exception as ex:
-           pass
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"kill_celery_worker(): kill -HUP Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_GENERAL,
+                    "detail": f"{worker_name = }",
+                    "extra_detail": f"{ex = }",
+                }
+            )
         else:
             logger.info(f"celery worker stopped; {worker_name = }")
             """ wait server to stop precess """
@@ -115,7 +125,15 @@ class RestartWorkers:
                     """remove worker pid file if not self-deleted"""
                     os.system(f"rm {worker_pid_file[0]}")
                 except Exception as ex:
-                   pass
+                    SendToSentry.send_scope_msg(
+                        scope_data={
+                            "message": f"kill_celery_worker(): rm worker_pid_file Ex",
+                            "level": SentryConstants.SENTRY_MSG_ERROR,
+                            "tag": SentryConstants.SENTRY_TAG_GENERAL,
+                            "detail": f"{worker_name = }",
+                            "extra_detail": f"{ex = }",
+                        }
+                    )
 
         return None
 
@@ -148,7 +166,15 @@ class RestartWorkers:
                 f" --logfile=./logs/{worker_name}_%n_{log_date}.log"
             )
         except Exception as ex:
-            pass
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"start_celery_worker(): celery multi start worker Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_GENERAL,
+                    "detail": f"{worker_name = }, {queue_name = }",
+                    "extra_detail": f"{ex = }",
+                }
+            )
         else:
             logger.info(f"celery worker started")
 
