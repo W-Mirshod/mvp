@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 from datetime import timedelta
+
+import sentry_sdk
 from celery.schedules import crontab
 from dotenv import dotenv_values
 
@@ -172,8 +174,8 @@ REDIS_PASS = environ_values.get("REDIS_PASS")
 REDIS_HOST = environ_values.get("REDIS_HOST")
 REDIS_PORT = environ_values.get("REDIS_PORT")
 
-REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
-
+#REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
+REDIS_URL = "redis://localhost:6379/0"
 REDIS_DB = "0"
 # endregion
 
@@ -315,3 +317,23 @@ CHANNEL_LAYERS = {
     },
 }
 """<- Django channels"""
+
+"""sentry.io settings ->"""
+USE_SENTRY = environ_values.get("USE_SENTRY", "true") == "true"
+SENTRY_ENVIRONMENT_NAME = environ_values.get("SENTRY_ENVIRONMENT_NAME", "unknown")
+if USE_SENTRY:
+
+    def traces_sampler(sampling_context: dict) -> float:
+        if "celery_job" in sampling_context.keys():
+            return 0
+        return 0.1
+
+    sentry_sdk.init(
+        dsn=environ_values.get("SENTRY_DSN", ""),
+        traces_sampler=traces_sampler,
+        traces_sample_rate=0.1,
+        profiles_sample_rate=0.1,
+        send_default_pii=True,
+        environment=SENTRY_ENVIRONMENT_NAME,
+    )
+"""<- sentry.io settings"""
