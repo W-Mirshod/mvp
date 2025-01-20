@@ -15,6 +15,13 @@ from rest_framework_simplejwt.settings import api_settings
 from apps.users.models import User
 from apps.users.models.tariffs import UserTariff
 from utils import password_validation
+from apps.sentry.sentry_scripts import SendToSentry
+from apps.sentry.sentry_constants import SentryConstants
+
+import logging
+
+
+logger = logging.getLogger(__file__)
 
 
 class TokenSerializer(TokenObtainPairSerializer):
@@ -26,7 +33,17 @@ class TokenSerializer(TokenObtainPairSerializer):
         }
         try:
             authenticate_kwargs["request"] = self.context["request"]
-        except KeyError:
+        except KeyError as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"TokenSerializer.validate(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": "KeyError",
+                    "extra_detail": f"{ex = }",
+                }
+            )
+            logger.error(f"KeyError in TokenSerializer.validate {ex=}")
             pass
 
         self.user = authenticate(**authenticate_kwargs)
@@ -140,6 +157,16 @@ class RestorePasswordSerializer(serializers.Serializer):
             try:
                 password_validation.validate_password(new_password, user)
             except ValidationError as exc:
+                SendToSentry.send_scope_msg(
+                    scope_data={
+                        "message": f"RestorePasswordSerializer.validate(): Ex",
+                        "level": SentryConstants.SENTRY_MSG_ERROR,
+                        "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                        "detail": f"Password doesn't valid {new_password=}",
+                        "extra_detail": f"{exc = }",
+                    }
+                )
+                logger.error(f"Password doesn't valid {new_password=}")
                 raise ValidationError(detail=as_serializer_error(exc))
 
         return super().validate(attrs)
@@ -166,7 +193,17 @@ class EmailTokenGenerationSerializer(serializers.Serializer):
         # checking the existence of the user
         try:
             user = User.objects.get(email=attrs["email"], is_verified=is_verified)
-        except Exception:
+        except Exception as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"EmailTokenGenerationSerializer.check_existence_user_by_email(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": f"Invalid email",
+                    "extra_detail": f"{ex = }",
+                }
+            )
+            logger.error("Invalid email")
             raise ValidationError(
                 {"error": _("Invalid email.")},
                 code="invalid_email",
