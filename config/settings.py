@@ -338,3 +338,85 @@ if USE_SENTRY:
         environment=SENTRY_ENVIRONMENT_NAME,
     )
 """<- sentry.io settings"""
+
+
+"""Logging settings ->"""
+DJANGO_LOG_LEVEL = "WARNING"
+APP_LOG_LVL = environ_values.get("APP_LOG_LVL", "INFO")
+LOGS_DIR = "logs"
+
+FILE_DJANGO = BASE_DIR / LOGS_DIR / "django.log"
+FILE_APPS_LOGS = BASE_DIR / LOGS_DIR / "apps_logging.log"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} | {asctime} | {filename} ({lineno}) | {funcName} | {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} | {funcName} ({lineno}) | {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "file_django": {
+            "level": DJANGO_LOG_LEVEL,
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "when": "midnight",
+            "interval": 1,
+            "backupCount": 10,
+            "filename": FILE_DJANGO,
+            "formatter": "verbose",
+        },
+        "file": {
+            "level": APP_LOG_LVL,
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "when": "midnight",
+            "interval": 1,
+            "backupCount": 10,
+            "filename": FILE_APPS_LOGS,
+            "formatter": "verbose",
+        },
+        "console": {
+            "level": APP_LOG_LVL,
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ("file_django", "console"),
+            "level": DJANGO_LOG_LEVEL,
+            "propagate": True,
+        },
+        "app": {
+            "handlers": ("file", "console"),
+            "level": APP_LOG_LVL,
+            "propagate": True,
+        },
+        "celery_scripts": {
+            "handlers": ("file", "console"),
+            "level": APP_LOG_LVL,
+            "propagate": True,
+        },
+        "dj_config": {
+            "handlers": ("file", "console"),
+            "level": APP_LOG_LVL,
+            "propagate": True,
+        },
+        "help_scripts": {
+            "handlers": ("file", "console"),
+            "level": APP_LOG_LVL,
+            "propagate": True,
+        },
+        "locust_testing": {
+            "handlers": ("file", "console"),
+            "level": APP_LOG_LVL,
+            "propagate": True,
+        },
+    },
+}
+"""<- Logging settings"""
