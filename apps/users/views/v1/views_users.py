@@ -33,6 +33,9 @@ from apps.users.services.jwt import create_one_time_jwt
 from utils.permissions import IsOneTimeTokenValid, IsTokenValid
 from utils.views import MultiSerializerViewSet
 from apps.users.tasks import send_verification_email_task, send_one_time_jwt_task
+from apps.sentry.sentry_scripts import SendToSentry
+from apps.sentry.sentry_constants import SentryConstants
+
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -76,12 +79,41 @@ class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-        except TokenError:
+        except TokenError as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"LoginTokenView.login(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": "Can`t login to service Token error",
+                    "extra_detail": f"{ex= }",
+                }
+            )
+            logger.error(f"Can`t login to service Token error: {ex}")
             current_status = status.HTTP_401_UNAUTHORIZED
-        except ValidationError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Can`t login to service: {e}")
+        except ValidationError as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"LoginTokenView.login(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": "Can`t login to service Validation error",
+                    "extra_detail": f"{ex= }",
+                }
+            )
+            logger.error(f"Can`t login to service Validation error: {ex}")
+            return Response({"error": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"LoginTokenView.login(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": "Can`t login to service",
+                    "extra_detail": f"{ex= }",
+                }
+            )
+            logger.error(f"Can`t login to service: {ex}")
             current_status = status.HTTP_500_INTERNAL_SERVER_ERROR
         if "error" in serializer.validated_data.keys():
             current_status = status.HTTP_401_UNAUTHORIZED
@@ -111,11 +143,29 @@ class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
                 )
 
         except TokenError as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"BlacklistTokenView.logout(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": "Can`t logout (token error)",
+                    "extra_detail": f"{ex= }",
+                }
+            )
             logger.error(f"Can`t logout (token error): {ex.args[0]}")
             return Response(
                 "Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         except Exception as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"BlacklistTokenView.logout(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": "Can`t logout",
+                    "extra_detail": f"{ex= }",
+                }
+            )
             logger.error(f"Can`t logout: {ex}")
             return Response(
                 "Can`t logout", status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -170,6 +220,16 @@ class RegistrationViewSet(MultiSerializerViewSet):
                         )
 
         except ValidationError as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"BlacklistTokenView.logout(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": "Can`t logout (token error)",
+                    "extra_detail": f"{ex= }",
+                }
+            )
+            logger.error(f"Can`t logout (token error): {ex.args[0]}")
             return Response({"error": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
             logger.error(f"Can`t register a new user: {ex}")
@@ -196,6 +256,16 @@ class RegistrationViewSet(MultiSerializerViewSet):
                 full_text = str(ex.detail)
                 text = full_text.split("ErrorDetail(string='")[1].split("'")[0]
                 logger.error("Error: %s", text)
+
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"RegistrationViewSet.registration(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": "Can`t register a new user",
+                    "extra_detail": f"{text= }",
+                }
+            )
             return Response({"error": text}, status=status.HTTP_400_BAD_REQUEST)
 
         response = Response({"status": "Ok"}, status=status.HTTP_201_CREATED)
@@ -246,14 +316,18 @@ class EmailVerificationView(MultiSerializerViewSet):
             ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response(
                 description="Internal Server Error",
-                examples={"application/json": {"error": "An error occurred during verification"}},
+                examples={
+                    "application/json": {
+                        "error": "An error occurred during verification"
+                    }
+                },
             ),
         },
         operation_description=(
-                "This endpoint verifies a user's email using a JWT token passed as a query parameter.\n\n"
-                "**Example request :**"
-                "`http://127.0.0.1:8000/api/1.0/users/email_verify/?token=your_token`\n\n"
-                "Replace `your_token` with the actual token received."
+            "This endpoint verifies a user's email using a JWT token passed as a query parameter.\n\n"
+            "**Example request :**"
+            "`http://127.0.0.1:8000/api/1.0/users/email_verify/?token=your_token`\n\n"
+            "Replace `your_token` with the actual token received."
         ),
     )
     @transaction.atomic
@@ -269,11 +343,31 @@ class EmailVerificationView(MultiSerializerViewSet):
         try:
             validated_token = jwt_authenticator.get_validated_token(raw_token)
             user = jwt_authenticator.get_user(validated_token)
-        except InvalidToken:
+        except InvalidToken as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"EmailVerificationView.email_verify(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": f"Invalid token {raw_token=}",
+                    "extra_detail": f"{ex= }",
+                }
+            )
+            logger.error("Invalid token: %s", raw_token)
             return Response(
                 {"error": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED
             )
-        except Exception:
+        except Exception as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"EmailVerificationView.email_verify(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": "An error occurred during verification",
+                    "extra_detail": f"{ex= }",
+                }
+            )
+            logger.error("An error occurred during verification: %s", ex)
             return Response(
                 {"error": "An error occurred during verification"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -338,8 +432,18 @@ class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-        except TokenError as e:
-            raise InvalidToken(e.args[0])
+        except TokenError as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"RefreshTokenView.refresh(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": f"Serializer doesn't valid {serializer=}",
+                    "extra_detail": f"{ex= }",
+                }
+            )
+            logger.error("Serializer doesn't valid: %s", ex)
+            raise InvalidToken(ex.args[0])
 
         data = serializer.validated_data
         refresh = serializer.token_class(data["refresh"])
