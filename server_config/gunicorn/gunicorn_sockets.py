@@ -8,4 +8,5 @@ bind = ":8001"
 workers = 4
 raw_env = "DJANGO_SETTINGS_MODULE=config.settings"
 errorlog = "./logs/gunicorn_sockets.log"
-max_requests = 100
+max_requests = 1000
+max_requests_jitter = 100
