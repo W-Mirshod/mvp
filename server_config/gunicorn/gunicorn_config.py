@@ -7,7 +7,7 @@ bind = ":8000"
 workers = multiprocessing.cpu_count() * 2 + 1
 raw_env = "DJANGO_SETTINGS_MODULE=config.settings"
 errorlog = "./logs/gunicorn.log"
-max_requests = 100
-max_requests_jitter = 30
+max_requests = 1000
+max_requests_jitter = 100
 timeout = 30
 graceful_timeout = 30
