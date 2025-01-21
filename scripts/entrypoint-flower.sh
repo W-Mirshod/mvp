@@ -1,6 +1,8 @@
 #!/bin/sh
 
+[ ! -d "logs" ] && mkdir logs/
+[ ! -f "logs/django.log" ] && touch logs/django.log
+[ ! -f "logs/apps_logging.log" ] && touch logs/apps_logging.log
 
 # run a flower
-chmod -R 755 logs/
 celery -A celery_scripts.celery_app flower
