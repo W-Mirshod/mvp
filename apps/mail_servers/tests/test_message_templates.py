@@ -2,9 +2,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.mail_servers import MessageTemplate
-from apps.mail_servers import MessageTemplateFactory
-from apps import UserFactory
+from apps.mail_servers.tests.factories import MessageTemplateFactory
+from apps.mailers.models import MessageTemplate
+from apps.users.tests.factories import UserFactory
 from utils.tests import CustomViewTestCase
 
 
@@ -32,11 +32,11 @@ class MessageTemplateViewTests(CustomViewTestCase):
         )
 
     def test_url_exists_at_desired_location(self):
-        response = self.client.get("/api/1.0/servers/message-templates/")
+        response = self.client.get(reverse_lazy("message_api:message-template_list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_url_accessible_by_name(self):
-        response = self.client.get(reverse_lazy("servers_api:message-template_list"))
+        response = self.client.get(reverse_lazy("message_api:message-template_list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_create_template(self):
@@ -51,7 +51,7 @@ class MessageTemplateViewTests(CustomViewTestCase):
 
     def test_template_list(self):
         response = self.client.get(
-            reverse_lazy("servers_api:message-template_list")
+            reverse_lazy("message_api:message-template_list")
         ).json()
 
         self.assertTrue(len(response) > 0)
@@ -59,14 +59,14 @@ class MessageTemplateViewTests(CustomViewTestCase):
 
     def test_template_by_id(self):
         response = self.client.get(
-            reverse_lazy("servers_api:message-template_by_id", kwargs={"pk": 1})
+            reverse_lazy("message_api:message-template_by_id", kwargs={"pk": 1})
         )
 
         self.assertEqual(response.data["from_address"], "template@example.com")
 
     def test_wrong_id(self):
         response = self.client.get(
-            reverse_lazy("servers_api:message-template_by_id", kwargs={"pk": 10})
+            reverse_lazy("message_api:message-template_by_id", kwargs={"pk": 10})
         )
 
         self.assertEqual(
