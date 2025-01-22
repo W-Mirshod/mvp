@@ -8,6 +8,8 @@ from django.core.mail import EmailMessage, get_connection
 
 from apps.mail_servers.drivers.base_driver import BaseDriver
 from apps.mail_servers.models import ProxyServer
+from apps.sentry.sentry_scripts import SendToSentry
+from apps.sentry.sentry_constants import SentryConstants
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +23,16 @@ class ProxyDriver(BaseDriver):
     def get_server_settings(self):
         try:
             settings = ProxyServer.objects.get(url=self.server_name, is_active=True)
-        except ProxyServer.DoesNotExist:
+        except ProxyServer.DoesNotExist as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"ProxyDriver.get_server_settings(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_GENERAL,
+                    "detail": "Active Proxy config for the server not found",
+                    "extra_detail": f"{ex = }",
+                }
+            )
             logger.error("Active Proxy config for the server not found")
             raise ObjectDoesNotExist("Active Proxy config for the server not found")
         return settings
@@ -47,8 +58,17 @@ class ProxyDriver(BaseDriver):
                     connection=connection,
                 )
                 email.send()
-        except Exception as e:
-            logger.error("Failed to send email: %s", e)
+        except Exception as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"ProxyDriver.send_mail(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_GENERAL,
+                    "detail": "Failed to send email",
+                    "extra_detail": f"{ex = }",
+                }
+            )
+            logger.error("Failed to send email: %s", ex)
             raise
 
     def check_connection(self):
@@ -56,14 +76,41 @@ class ProxyDriver(BaseDriver):
             client = imaplib.IMAP4_SSL(self.settings.url, self.settings.port)
             response, _ = client.login(self.settings.username, self.settings.password)
             client.logout()
-        except (ConnectionRefusedError, TimeoutError) as e:
-            logger.error("Checking connection failed: %s", e)
+        except (ConnectionRefusedError, TimeoutError) as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"ProxyDriver.check_connection(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_GENERAL,
+                    "detail": "Checking connection failed",
+                    "extra_detail": f"{ex = }",
+                }
+            )
+            logger.error("Checking connection failed: %s", ex)
             return False
-        except imaplib.IMAP4.error as e:
-            logger.error("Proxy server error occurred: %s", e)
+        except imaplib.IMAP4.error as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"ProxyDriver.check_connection(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_GENERAL,
+                    "detail": "Proxy server error occurred",
+                    "extra_detail": f"{ex = }",
+                }
+            )
+            logger.error("Proxy server error occurred: %s", ex)
             return False
-        except Exception as e:
-            logger.error("Unexpected error occurred while checking connection: %s", e)
+        except Exception as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"ProxyDriver.check_connection(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_GENERAL,
+                    "detail": "Unexpected error occurred while checking connection",
+                    "extra_detail": f"{ex = }",
+                }
+            )
+            logger.error("Unexpected error occurred while checking connection: %s", ex)
             return False
 
         if response == "OK":
@@ -78,8 +125,17 @@ class ProxyDriver(BaseDriver):
             response, _ = client.login(self.settings.username, self.settings.password)
             client.logout()
             return response == "OK"
-        except Exception as e:
-            logger.error("Login failed: %s", e)
+        except Exception as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"ProxyDriver.login(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_GENERAL,
+                    "detail": "Login failed",
+                    "extra_detail": f"{ex = }",
+                }
+            )
+            logger.error("Login failed: %s", ex)
             raise
 
     def logout(self):
@@ -87,8 +143,17 @@ class ProxyDriver(BaseDriver):
             client = imaplib.IMAP4_SSL(self.settings.url, self.settings.port)
             response, _ = client.logout()
             return response == "BYE"
-        except Exception as e:
-            logger.error("Logout failed: %s", e)
+        except Exception as ex:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"ProxyDriver.logout(): Ex",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_GENERAL,
+                    "detail": "Logout failed",
+                    "extra_detail": f"{ex = }",
+                }
+            )
+            logger.error("Logout failed: %s", ex)
             raise
 
     def send_message(self, subject, message, recipient):
