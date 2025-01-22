@@ -201,8 +201,6 @@ class RegistrationViewSet(MultiSerializerViewSet):
                 if response.status_code == status.HTTP_201_CREATED:
                     new_user = User.objects.get(email=response.data["email"])
                     new_user.is_active = True
-                    new_user.is_verified = True
-                    new_user.is_superuser = True
                     new_user.save()
                     context, _ = create_one_time_jwt(new_user)
 

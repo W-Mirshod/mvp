@@ -2,12 +2,9 @@ from factory import Faker
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyInteger, FuzzyText
 
-from apps.mail_servers import ServerType
-from apps.mail_servers import (
-    IMAPServer,
-    ProxyServer,
-    SMTPServer,
-)
+from apps.mail_servers.choices import ServerType
+from apps.mail_servers.models import SMTPServer, IMAPServer, ProxyServer
+from apps.mailers.models import MessageTemplate
 
 
 class SMTPServerFactory(DjangoModelFactory):
@@ -61,14 +58,14 @@ class ProxyServerFactory(DjangoModelFactory):
         model = ProxyServer
 
 
-# class MessageTemplateFactory(DjangoModelFactory):
-#     """
-#     Message Template Factory
-#     """
-#
-#     from_address = FuzzyText(length=20, suffix="_template@example.com")
-#     template = FuzzyText(length=20, prefix="template_")
-#     message = {"message": FuzzyText(length=20, prefix="message_").fuzz()}
-#
-#     class Meta:
-#         model = MessageTemplate
+class MessageTemplateFactory(DjangoModelFactory):
+    """
+    Message Template Factory
+    """
+
+    from_address = FuzzyText(length=20, suffix="_template@example.com")
+    template = FuzzyText(length=20, prefix="template_")
+    message = {"message": FuzzyText(length=20, prefix="message_").fuzz()}
+
+    class Meta:
+        model = MessageTemplate

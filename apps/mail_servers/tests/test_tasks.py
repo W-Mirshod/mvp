@@ -1,5 +1,5 @@
 from django.test import TestCase
-from apps.mail_servers import test_periodic_task
+from apps.mail_servers.tasks import test_periodic_task
 
 
 class TestPeriodicTask(TestCase):
