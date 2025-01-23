@@ -10,6 +10,7 @@ urlpatterns = [
     path("messages/", include("apps.mailers.urls.message")),
     path("companies/", include("apps.companies.urls.urls_companies")),
     path("monitoring/", include("apps.metrics.urls")),
+    path("proxies/", include("apps.proxies.urls.urls_proxies")),
     path(
         "docs/",
         include_docs_urls(
