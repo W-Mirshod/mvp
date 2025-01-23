@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "apps.mailers",
     "apps.products",
     "apps.companies",
+    "apps.proxies",
 ]
 
 MIDDLEWARE = [
