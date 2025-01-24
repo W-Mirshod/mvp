@@ -6,6 +6,7 @@ import sentry_sdk
 from celery.schedules import crontab
 from dotenv import dotenv_values
 
+from celery_scripts.constants import CeleryConstants
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,6 +43,15 @@ INSTALLED_APPS = [
     "admin_extra_buttons",
     "constance",
     "constance.backends.database",
+    #
+    "health_check",
+    "health_check.db",
+    "health_check.cache",
+    "health_check.storage",
+    "health_check.contrib.migrations",
+    "health_check.contrib.celery",
+    "health_check.contrib.celery_ping",
+    "health_check.contrib.redis",
     #
     "apps.users",
     "apps.changelog",
@@ -180,13 +190,27 @@ REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
 REDIS_DB = "0"
 # endregion
 
-# celery config
+
+"""Celery settings ->"""
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = "UTC"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BROKER_CONNECTION_RETRY = True
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+CELERY_IMPORTS = (
+    "apps.mail_servers.tasks",
+    "apps.users.tasks",
+)
+
+CELERY_DEFAULT_QUEUE = CeleryConstants.DEFAULT_QUEUE
+CELERY_DEFAULT_EXCHANGE = CeleryConstants.DEFAULT_QUEUE
+CELERY_DEFAULT_ROUTING_KEY = CeleryConstants.DEFAULT_QUEUE
+
 CELERY_BEAT_SCHEDULE = {
     "test-periodic-task": {
         "task": "apps.mail_servers.tasks.test_periodic_task",
@@ -201,7 +225,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 3.0,
     },
 }
-
+"""<- Celery settings"""
 # endregion
 
 # region CONSTANCE
@@ -232,20 +256,12 @@ DATABASES = {
         "CONN_HEALTH_CHECKS": True,
     }
 }
-
-
 # SECURITY WARNING: don't run with debug turned on in production!
 
 SQL_DEBUG = environ_values.get("SQL_DEBUG")
 
 if SQL_DEBUG:
     MIDDLEWARE += ["utils.middleware.DebugQuerysetsWare"]
-if DEBUG:
-    INSTALLED_APPS += ["debug_toolbar"]
-    MIDDLEWARE += [
-        "debug_toolbar.middleware.DebugToolbarMiddleware",
-    ]
-
 
 """Security->"""
 SESSION_COOKIE_SECURE = True
@@ -283,7 +299,7 @@ if DEBUG:
 
 # region SWAGGER
 SWAGGER_SETTINGS = {
-    "DEFAULT_API_URL": MAIN_HOST ,
+    "DEFAULT_API_URL": MAIN_HOST,
     "SECURITY_DEFINITIONS": {
         "Basic": {"type": "basic"},
         "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"},
@@ -421,3 +437,43 @@ LOGGING = {
     },
 }
 """<- Logging settings"""
+
+"""DEBUG_TOOLBAR ->"""
+if DEBUG:
+    INTERNAL_IPS = ("127.0.0.1",)
+    DEBUG_TOOLBAR_CONFIG = {
+        "IS_RUNNING_TESTS": False,
+    }
+    DEBUG_TOOLBAR_PANELS = (
+        "debug_toolbar.panels.history.HistoryPanel",
+        "debug_toolbar.panels.versions.VersionsPanel",
+        "debug_toolbar.panels.timer.TimerPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.request.RequestPanel",
+        # "debug_toolbar.panels.sql.SQLPanel",  # ! uncomment if 'sql_debug/'
+        "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+        "debug_toolbar.panels.templates.TemplatesPanel",
+        "debug_toolbar.panels.cache.CachePanel",
+        "debug_toolbar.panels.signals.SignalsPanel",
+        "debug_toolbar.panels.logging.LoggingPanel",
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+        "debug_toolbar.panels.profiling.ProfilingPanel",
+    )
+
+    INSTALLED_APPS = ("debug_toolbar", *INSTALLED_APPS)
+    MIDDLEWARE = (*MIDDLEWARE, "debug_toolbar.middleware.DebugToolbarMiddleware")
+"""<- DEBUG_TOOLBAR"""
+
+""" HEALTH CHECK ->"""
+
+HEALTH_CHECK = {
+    "SUBSETS": {
+        "startup-probe": ["MigrationsHealthCheck", "DatabaseBackend"],
+        "liveness-probe": ["DatabaseBackend", "CacheBackend"],
+        "readiness-probe": ["DatabaseBackend", "CacheBackend", "CeleryHealthCheck"],
+        "custom-checks": ["StorageHealthCheck", "RedisHealthCheck"],
+        # "COMPANIES_CHECKS": ("apps.companies.health_check.v1.health_check_companies.CompaniesHealthCheck",)
+    }
+}
+""" <- HEALTH CHECK """
