@@ -1,7 +1,14 @@
 from django.urls import path
 
-from apps.users.views.v1.views_users import UserViewSet, EmailVerificationView, LoginTokenView, BlacklistTokenView, \
-    RefreshTokenView, RegistrationViewSet, OneTimeJWTFunctionsViewSet
+from apps.users.views.v1.views_users import (
+    UserViewSet,
+    EmailVerificationView,
+    LoginTokenView,
+    BlacklistTokenView,
+    RefreshTokenView,
+    RegistrationViewSet,
+    OneTimeJWTFunctionsViewSet,
+)
 
 app_name = "users_api"
 
@@ -9,7 +16,7 @@ app_name = "users_api"
 urlpatterns = [
     path(
         "<int:pk>/",
-        UserViewSet.as_view({"get": "retrieve"}),
+        UserViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
         name="manage",
     ),
     path(
