@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     "constance",
     "constance.backends.database",
     #
+    "silk",
+    #
     "health_check",
     "health_check.db",
     "health_check.cache",
@@ -67,6 +69,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "silk.middleware.SilkyMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -477,3 +480,24 @@ HEALTH_CHECK = {
     }
 }
 """ <- HEALTH CHECK """
+
+""" SILK CONFIG ->"""
+
+SILKY_MAX_RECORDED_REQUESTS = 10**8
+SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10
+SILKY_MAX_REQUEST_BODY_SIZE = -1
+SILKY_MAX_RESPONSE_BODY_SIZE = 1024
+SILKY_AUTHENTICATION = True
+SILKY_AUTHORISATION = True
+SILKY_META = True
+SILKY_ANALYZE_QUERIES = True
+SILKY_INTERCEPT_PERCENT = 50
+SILKY_SENSITIVE_KEYS = {'username', 'api', 'token', 'key', 'secret', 'password', 'signature'}
+SILKY_PYTHON_PROFILER = True
+SILKY_PYTHON_PROFILER_RESULT_PATH = '/silk_storage/'
+
+SILKY_DYNAMIC_PROFILING = [{
+    'module': 'apps.mail_servers.views.v1.views_mail_servers',
+    'function': 'SMTPServerView.retrieve'
+}]
+"""<-  SILK CONFIG """
