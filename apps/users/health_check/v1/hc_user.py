@@ -14,7 +14,7 @@ class UserHealthCheck(BaseHealthCheckBackend):
 
     def check_status(self) -> bool:
         try:
-            url = MAIN_HOST + reverse_lazy("users_api:manage")
+            url = f"{MAIN_HOST}{reverse_lazy('users_api:manage', kwargs={'pk': 1})}"
             response = requests.get(url=url, timeout=5)
 
             if response.status_code != status.HTTP_401_UNAUTHORIZED:
