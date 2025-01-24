@@ -114,17 +114,40 @@ REST_FRAMEWORK = {
 # endregion
 
 # region JWT
+
+
+"""SIMPLE_JWT ->"""
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
-        minutes=int(environ_values.get("ACCESS_TOKEN_LIFETIME", 15))
+        hours=int(environ_values.get("ACCESS_TOKEN_LIFETIME", 15))
     ),
     "REFRESH_TOKEN_LIFETIME": timedelta(
-        days=int(environ_values.get("REFRESH_TOKEN_LIFETIME_DAYS", 1))
+        days=int(environ_values.get("REFRESH_TOKEN_LIFETIME", 1))
     ),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
+    "ALGORITHM": "HS512",
+    "SIGNING_KEY": environ_values.get("JWT_SECRET"),
+    "VERIFYING_KEY": environ_values.get("JWT_SECRET"),
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "JWK_URL": None,
+    "LEEWAY": 0,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
+    "JTI_CLAIM": "jti",
+    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
+"""<- SIMPLE_JWT"""
 # endregion
 
 AUTH_USER_MODEL = "users.User"
