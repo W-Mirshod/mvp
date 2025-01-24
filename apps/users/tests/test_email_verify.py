@@ -21,12 +21,12 @@ class EmailVerificationViewTests(CustomViewTestCase):
         )
 
     def test_missing_token(self):
-        response = self.client.post(reverse_lazy("users_api:email_verify"))
+        response = self.client.get(reverse_lazy("users_api:email_verify"))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.data["error"], "Missing token")
 
     def test_invalid_token(self):
-        response = self.client.post(
+        response = self.client.get(
             reverse_lazy("users_api:email_verify") + "?token=invalid_token"
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -39,7 +39,7 @@ class EmailVerificationViewTests(CustomViewTestCase):
         }
         login = self.client.post(reverse_lazy("users_api:token_obtain_pair"), data)
         access_token = login.data["access"]
-        response = self.client.post(
+        response = self.client.get(
             reverse_lazy("users_api:email_verify") + f"?token={access_token}"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
