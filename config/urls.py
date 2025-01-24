@@ -8,7 +8,8 @@ urlpatterns = (
     [
         path("admin/", admin.site.urls),
         path("api/1.0/", include("config.urls_api_v1")),
-        path("prometheus/", include("django_prometheus.urls"))
+        path("prometheus/", include("django_prometheus.urls")),
+        path(r"ht/", include("health_check.urls")),
     ]
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     + doc_url
