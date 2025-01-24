@@ -21,7 +21,7 @@ urlpatterns = [
     ),
     path(
         "email_verify/",
-        EmailVerificationView.as_view({"post": "email_verify"}),
+        EmailVerificationView.as_view({"get": "email_verify"}),
         name="email_verify",
     ),
     path(
