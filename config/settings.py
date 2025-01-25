@@ -55,6 +55,9 @@ INSTALLED_APPS = [
     "health_check.contrib.celery_ping",
     "health_check.contrib.redis",
     #
+    "post_office",
+    "anymail",
+    #
     "apps.users",
     "apps.changelog",
     "apps.mail_servers",
@@ -212,7 +215,8 @@ REDIS_PASS = environ_values.get("REDIS_PASS")
 REDIS_HOST = environ_values.get("REDIS_HOST")
 REDIS_PORT = environ_values.get("REDIS_PORT")
 
-REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
+# REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
+REDIS_URL = "redis://localhost:6379/0"
 
 REDIS_DB = "0"
 # endregion
@@ -239,18 +243,18 @@ CELERY_DEFAULT_EXCHANGE = CeleryConstants.DEFAULT_QUEUE
 CELERY_DEFAULT_ROUTING_KEY = CeleryConstants.DEFAULT_QUEUE
 
 CELERY_BEAT_SCHEDULE = {
-    "test-periodic-task": {
-        "task": "apps.mail_servers.tasks.test_periodic_task",
-        "schedule": crontab(minute="*/1"),
-    },
-    "process-new-mail-queue-every-3-seconds": {
-        "task": "apps.mail_servers.tasks.process_new_mail_queue",
-        "schedule": 3.0,
-    },
-    "process-in-process-mail-queue-every-3-seconds": {
-        "task": "apps.mail_servers.tasks.process_in_process_mail_queue",
-        "schedule": 3.0,
-    },
+    # "test-periodic-task": {
+    #     "task": "apps.mail_servers.tasks.test_periodic_task",
+    #     "schedule": crontab(minute="*/1"),
+    # },
+    # "process-new-mail-queue-every-3-seconds": {
+    #     "task": "apps.mail_servers.tasks.process_new_mail_queue",
+    #     "schedule": 3.0,
+    # },
+    # "process-in-process-mail-queue-every-3-seconds": {
+    #     "task": "apps.mail_servers.tasks.process_in_process_mail_queue",
+    #     "schedule": 3.0,
+    # },
 }
 """<- Celery settings"""
 # endregion
@@ -516,12 +520,32 @@ SILKY_AUTHORISATION = True
 SILKY_META = True
 SILKY_ANALYZE_QUERIES = True
 SILKY_INTERCEPT_PERCENT = 50
-SILKY_SENSITIVE_KEYS = {'username', 'api', 'token', 'key', 'secret', 'password', 'signature'}
+SILKY_SENSITIVE_KEYS = {
+    "username",
+    "api",
+    "token",
+    "key",
+    "secret",
+    "password",
+    "signature",
+}
 SILKY_PYTHON_PROFILER = True
-SILKY_PYTHON_PROFILER_RESULT_PATH = '/silk_storage/'
+SILKY_PYTHON_PROFILER_RESULT_PATH = "/silk_storage/"
 
-SILKY_DYNAMIC_PROFILING = [{
-    'module': 'apps.mail_servers.views.v1.views_mail_servers',
-    'function': 'SMTPServerView.retrieve'
-}]
+SILKY_DYNAMIC_PROFILING = [
+    {
+        "module": "apps.mail_servers.views.v1.views_mail_servers",
+        "function": "SMTPServerView.retrieve",
+    }
+]
 """<-  SILK CONFIG """
+
+""" POST OFFICE ->"""
+
+POST_OFFICE = {
+    "BATCH_SIZE": 100,
+    "QUEUE_NAME": "email-queue",
+    "DEFAULT_PRIORITY": "now",
+    "CELERY_ENABLED": True,
+}
+""" <-POST OFFICE"""
