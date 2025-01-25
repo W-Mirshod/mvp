@@ -84,28 +84,39 @@ The project development is being developed using Python 3.12 and Django 5.0.6 (i
 #### Project structure
 
 ```
-mm_backend/
-├── src/
-│   ├── apps/                  # Django applications
-│   │   ├── mailer/
-│   │   ├── users/
-│   │   ├── .../
-│   ├── locale/                # Localization
-│   ├── manage.py              # Django management file
-│   ├── media/                 # Uploaded media files
-│   ├── settings/              # Django settings
-│   │   ├── settings_base.py   # Base Django settings
-│   │   ├── settings_prod.py   # Base Django settings
-│   │   └── settings_test.py   # Test settings
-│   ├── static/                # Static files
-│   └── utils/                 # Utilities and Django mixins
-├── Dockerfile                 # Dockerfile for production
-├── docker-compose.yml         # Docker Compose configuration for production
-├── nginx/                     # Nginx configuration for managing WSGI and ASGI endpoints
-├── logs/                      # Logs
-├── README.md                  # Project description
-├── requirements.txt           # Python dependencies
-└── scripts/                   # Utility scripts
+mvm_backend/
+├── apps/                           # Django applications
+│   ├── mailer/
+│   ├── users/
+│   ├── .../
+│   
+├── celery_scripts/
+│    │    
+│    ├── celery_app.py               # Settings for celery app
+│    └── ...                         # Other file for killing/restart workers
+│       
+├── config/                          # Django settings
+│   ├── settings.py                  # Base Django settings
+│   └── ...                          # Other file for killing/restart workers
+│       
+├── logs/                            # Logs
+├── media/                           # Uploaded media files
+├── prometheus/                      # Config for Prometheus
+├── scripts/                         # Utility scripts
+├── server_config/                   # Config for gunicorn server
+├── staticfiles/                     # Static files
+├── tests/                           # Stress test for app
+├── utils/                           # Utilities and Django mixins
+├── .env.template                    # Example of secrets for .env file
+├── .gitlab-ci.yml                   # Gitlab CI/CD file  
+├── delpoy_docker_script.sh          # Script for deploy app with docker   
+├── docker-compose.yml               # Docker Compose configuration for production
+├── docker-compose-monitoring.yml    # Docker Compose configuration for monitoring
+├── Dockerfile                       # Dockerfile for production
+├── manage.py                        # Entrypoit for Django app
+├── README.md                        # Project description
+└── requirements.txt                 # Python dependencies
+
 ```
 
 #### General installation
@@ -113,7 +124,7 @@ mm_backend/
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/mega-devs/main-beta.git
+   git clone https://gitlab.com/mmdev4/mvp-back.git
    ```
 
 2. Install python:
@@ -143,85 +154,17 @@ mm_backend/
 6. Create and setting up containers in Docker:
 
    ```bash
-   docker compose up -d --build
+   docker network create mega_mailer_network
+   docker compose -f docker-compose.yml -f docker-compose-monitoring.yml build
+   docker compose -f docker-compose.yml -f docker-compose-monitoring.yml up -d
    ```
 
 ## Project development
 
-#### Project structure for development
-
-```
-mm_backend/
-├── src/
-│   ├── _dev/                  # Development artifacts
-│   │   ├── Dockerfile              # Dockerfile for production
-│   │   ├── docker-compose-dev.yml  # Docker Compose configuration for production
-│   │   ├── requirements_dev.txt    # Python dependencies
-│   │   └── settings_dev.py         # Production settings
-│   ├── apps/                  # Django applications
-│   ├── locale/                # Localization
-│   ├── manage.py              # Django management file
-│   ├── media/                 # Uploaded media files
-│   ├── settings/              # Django settings
-│   │   ├── settings_base.py   # Base Django settings
-│   │   ├── settings_prod.py   # Production settings
-│   │   └── settings_test.py   # Test settings
-│   ├── static/                # Static files
-│   └── utils/                 # Utilities and Django mixins
-├── Dockerfile                 # Dockerfile for production
-├── docker-compose.yml         # Docker Compose configuration for production
-├── nginx/                     # Nginx configuration for managing WSGI and ASGI endpoints
-├── logs/                      # Logs
-├── README.md                  # Project description
-├── requirements.txt           # Python dependencies
-└── scripts/                     # Utility scripts
-```
-
 #### Installation for development
 
-1. Execute 1-4 points of the [common installation](#general-installation).
-2. Copy from repository [mm_backend_dev](#https://github.com/Iv-Gorbunov/mm_backend_dev) the "_dev/" folder with all its contents into the "src/" folder.
+1. Execute 1-5 points of the [common installation](#general-installation).
 
-3. Install packages from `requirements_dev.txt`
+2. Create file `.env` by template `.env.template` with you values.
 
-   ```bash
-   pip install -r ./src/_dev/requirements_dev.txt
-   ```
-
-4. Create file `.env` by template `.env.template` with you values.
-
-5. Create and setting up containers in Docker:
-
-   ```bash
-   docker compose -f ./src/_dev/docker-compose-dev.yml up -d --build
-   ```
-
-#### Creating and setting up containers in Docker
-
-**Insatll Docker and docker-compose (for Ubuntu):**
-
-```bash
-sudo apt install apt-transport-https ca-certificates curl software-properties-common 
-
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-sudo apt update
-
-sudo apt install docker-ce -y
-
-sudo systemctl status docker
-```
-
-**Portainer:** - for cofort managing containers
-
-```bash
-docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer:latest
-```
-
-**pgAdmin:**
-
-```bash
-docker run --name pgadmin -p 5050:80 -e "PGADMIN_DEFAULT_EMAIL=admin@admin.com" -e "PGADMIN_DEFAULT_PASSWORD=Admin12345678" -d  dpage/pgadmin4
-```
+3. Execute 6  points of the [common installation](#general-installation).
