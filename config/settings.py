@@ -18,6 +18,7 @@ DEBUG = environ_values.get("DEBUG")
 
 
 SECRET_KEY = environ_values.get("SECRET_KEY")
+FERNET_SECRET_KEY = environ_values.get("FERNET_SECRET_KEY")
 
 ALLOWED_HOSTS = environ_values.get("ALLOWED_HOSTS").split(",")
 CORS_ORIGIN_WHITELIST = environ_values.get("CORS_ORIGIN_WHITELIST").split(",")
@@ -55,7 +56,6 @@ INSTALLED_APPS = [
     "health_check.contrib.celery_ping",
     "health_check.contrib.redis",
     #
-    "post_office",
     "anymail",
     #
     "apps.users",
@@ -65,7 +65,8 @@ INSTALLED_APPS = [
     "apps.products",
     "apps.companies",
     "apps.proxies",
-    "apps.email_analysis"
+    "apps.campaign",
+    "apps.backend_mailer",
 ]
 
 MIDDLEWARE = [
@@ -247,14 +248,14 @@ CELERY_BEAT_SCHEDULE = {
     #     "task": "apps.mail_servers.tasks.test_periodic_task",
     #     "schedule": crontab(minute="*/1"),
     # },
-    # "process-new-mail-queue-every-3-seconds": {
-    #     "task": "apps.mail_servers.tasks.process_new_mail_queue",
-    #     "schedule": 3.0,
-    # },
-    # "process-in-process-mail-queue-every-3-seconds": {
-    #     "task": "apps.mail_servers.tasks.process_in_process_mail_queue",
-    #     "schedule": 3.0,
-    # },
+    "process-new-mail-queue-every-3-seconds": {
+        "task": "apps.mail_servers.tasks.process_new_mail_queue",
+        "schedule": 3.0,
+    },
+    "process-in-process-mail-queue-every-3-seconds": {
+        "task": "apps.mail_servers.tasks.process_in_process_mail_queue",
+        "schedule": 3.0,
+    },
 }
 """<- Celery settings"""
 # endregion
@@ -545,7 +546,8 @@ SILKY_DYNAMIC_PROFILING = [
 POST_OFFICE = {
     "BATCH_SIZE": 100,
     "QUEUE_NAME": "email-queue",
-    "DEFAULT_PRIORITY": "now",
+    "DEFAULT_PRIORITY": "high",
     "CELERY_ENABLED": True,
 }
+
 """ <-POST OFFICE"""
