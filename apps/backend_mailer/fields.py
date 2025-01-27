@@ -1,6 +1,12 @@
+from typing import Dict
+
 from django.db.models import TextField
 from django.utils.translation import gettext_lazy as _
+
+from apps.backend_mailer.settings import fernet
 from apps.backend_mailer.validators import validate_comma_separated_emails
+import json
+from django.db import models
 
 
 class CommaSeparatedEmailField(TextField):
@@ -55,3 +61,13 @@ class CommaSeparatedEmailField(TextField):
         field_class = "django.db.models.fields.TextField"
         args, kwargs = introspector(self)
         return (field_class, args, kwargs)
+
+
+
+def decrypt_config(value : str) -> Dict:
+    decrypted_value = fernet.decrypt(value.encode()).decode()
+    return json.loads(decrypted_value)
+
+def encrypt_config(value : str) -> Dict:
+    json_string = json.dumps(value)
+    return fernet.encrypt(json_string.encode()).decode()
