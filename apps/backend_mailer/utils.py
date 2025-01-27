@@ -1,3 +1,6 @@
+import json
+from typing import Dict
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files import File
@@ -6,12 +9,11 @@ from django.utils.encoding import force_str
 from apps.backend_mailer import cache
 from apps.backend_mailer.models import (
     Email,
-    PRIORITY,
-    STATUS,
     EmailTemplate,
     Attachment,
 )
-from apps.backend_mailer.settings import get_default_priority
+from apps.backend_mailer.constants import BackendConstants
+from apps.backend_mailer.settings import get_default_priority, fernet
 from apps.backend_mailer.signals import email_queued
 
 from apps.backend_mailer.validators import validate_email_with_name
@@ -25,7 +27,7 @@ def send_mail(
     html_message="",
     scheduled_time=None,
     headers=None,
-    priority=PRIORITY.medium,
+    priority=BackendConstants.PRIORITY.medium,
 ):
     """
     Add a new message to the mail queue. This is a replacement for Django's
@@ -33,7 +35,7 @@ def send_mail(
     """
 
     subject = force_str(subject)
-    status = None if priority == PRIORITY.now else STATUS.queued
+    status = None if priority == BackendConstants.PRIORITY.now else BackendConstants.STATUS.queued
     emails = [
         Email.objects.create(
             from_email=from_email,
@@ -48,7 +50,7 @@ def send_mail(
         )
         for address in recipient_list
     ]
-    if priority == PRIORITY.now:
+    if priority == BackendConstants.PRIORITY.now:
         for email in emails:
             email.dispatch()
     else:
@@ -134,11 +136,11 @@ def parse_priority(priority):
         priority = get_default_priority()
     # If priority is given as a string, returns the enum representation
     if isinstance(priority, str):
-        priority = getattr(PRIORITY, priority, None)
+        priority = getattr(BackendConstants.PRIORITY, priority, None)
 
         if priority is None:
             raise ValueError(
-                "Invalid priority, must be one of: %s" % ", ".join(PRIORITY._fields)
+                "Invalid priority, must be one of: %s" % ", ".join(BackendConstants.PRIORITY._fields)
             )
     return priority
 
