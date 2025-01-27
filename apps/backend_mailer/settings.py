@@ -9,7 +9,11 @@ from django.template import engines as template_engines
 from django.utils.module_loading import import_string
 
 import datetime
+from cryptography.fernet import Fernet
+from config.settings import FERNET_SECRET_KEY
 
+
+fernet = Fernet(FERNET_SECRET_KEY)
 
 def get_backend(alias="default"):
     return get_available_backends()[alias]
