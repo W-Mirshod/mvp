@@ -65,7 +65,6 @@ INSTALLED_APPS = [
     "apps.products",
     "apps.companies",
     "apps.proxies",
-    "apps.campaign",
     "apps.backend_mailer",
 ]
 
