@@ -1,19 +1,13 @@
-import os
-
-from collections import namedtuple
-from uuid import uuid4
 from email.mime.nonmultipart import MIMENonMultipart
+
+from django.contrib.postgres.fields import ArrayField
 from django.core.mail import get_connection
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.db import models
 from django.utils.encoding import smart_str
 from django.utils.translation import pgettext_lazy, gettext_lazy as _
-from django.utils import timezone
 
-from apps.backend_mailer import cache
-
-from apps.backend_mailer.fields import CommaSeparatedEmailField
 from apps.backend_mailer.logutils import setup_loghandlers
 from apps.backend_mailer.settings import (
     context_field_class,
@@ -21,17 +15,11 @@ from apps.backend_mailer.settings import (
     get_template_engine,
     get_override_recipients,
 )
-from apps.backend_mailer.validators import (
-    validate_email_with_name,
-    validate_template_syntax,
-)
-
+from apps.backend_mailer.fields import decrypt_config
+from apps.backend_mailer.validators import validate_email_with_name
+from apps.backend_mailer.constants import BackendConstants
 
 logger = setup_loghandlers("INFO")
-
-
-PRIORITY = namedtuple("PRIORITY", "low medium high now")._make(range(4))
-STATUS = namedtuple("STATUS", "sent failed queued requeued")._make(range(4))
 
 
 class Email(models.Model):
@@ -39,25 +27,30 @@ class Email(models.Model):
     A model to hold email information.
     """
 
-    PRIORITY_CHOICES = [
-        (PRIORITY.low, _("low")),
-        (PRIORITY.medium, _("medium")),
-        (PRIORITY.high, _("high")),
-        (PRIORITY.now, _("now")),
-    ]
-    STATUS_CHOICES = [
-        (STATUS.sent, _("sent")),
-        (STATUS.failed, _("failed")),
-        (STATUS.queued, _("queued")),
-        (STATUS.requeued, _("requeued")),
-    ]
-
     from_email = models.CharField(
         _("Email From"), max_length=254, validators=[validate_email_with_name]
     )
-    to = CommaSeparatedEmailField(_("Email To"))
-    cc = CommaSeparatedEmailField(_("Cc"))
-    bcc = CommaSeparatedEmailField(_("Bcc"))
+    to = ArrayField(
+        models.EmailField(),
+        blank=True,
+        null=True,
+        verbose_name=_("Email To"),
+        help_text=_("Email To"),
+    )
+    cc = ArrayField(
+        models.EmailField(),
+        blank=True,
+        null=True,
+        verbose_name=_("Cc"),
+        help_text=_("Cc"),
+    )
+    bcc = ArrayField(
+        models.EmailField(),
+        blank=True,
+        null=True,
+        verbose_name=_("Bcc"),
+        help_text=_("Bcc"),
+    )
     subject = models.CharField(_("Subject"), max_length=989, blank=True)
     message = models.TextField(_("Message"), blank=True)
     html_message = models.TextField(_("HTML Message"), blank=True)
@@ -67,10 +60,15 @@ class Email(models.Model):
     whether it's successfully delivered.
     """
     status = models.PositiveSmallIntegerField(
-        _("Status"), choices=STATUS_CHOICES, db_index=True, blank=True, null=True
+        _("Status"),
+        choices=BackendConstants.STATUS_CHOICES,
+        db_index=True,
+        default=BackendConstants.STATUS.created,
+        blank=True,
+        null=True,
     )
     priority = models.PositiveSmallIntegerField(
-        _("Priority"), choices=PRIORITY_CHOICES, blank=True, null=True
+        _("Priority"), choices=BackendConstants.PRIORITY_CHOICES, blank=True, null=True
     )
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     last_updated = models.DateTimeField(db_index=True, auto_now=True)
@@ -100,11 +98,18 @@ class Email(models.Model):
         on_delete=models.CASCADE,
     )
     context = context_field_class(_("Context"), blank=True, null=True)
-    backend_alias = models.CharField(
-        _("Backend alias"), blank=True, default="", max_length=70
+    render_on_delivery = models.BooleanField(default=False)
+    message_type = models.PositiveSmallIntegerField(
+        _("Message type"),
+        choices=BackendConstants.MESSAGE_TYPE_CHOICES,
+        default=BackendConstants.MESSAGE_TYPE.text,
     )
-    backend_config = models.JSONField(
-        _("Backend Config"), blank=True, null=True, default=dict
+    email_backend = models.ForeignKey(
+        to="backend_mailer.EmailBackend",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Email backend"),
     )
 
     class Meta:
@@ -178,7 +183,6 @@ class Email(models.Model):
             multipart_template = None
             html_message = self.html_message
 
-        # connection = connections[self.backend_alias or 'default']
         if isinstance(self.headers, dict) or self.expires_at or self.message_id:
             headers = dict(self.headers or {})
             if self.expires_at:
@@ -204,7 +208,6 @@ class Email(models.Model):
                     cc=self.cc,
                     headers=headers,
                     connection=connection,
-                    # connection=connection,
                 )
                 msg.attach_alternative(html_message, "text/html")
             else:
@@ -217,7 +220,6 @@ class Email(models.Model):
                     cc=self.cc,
                     headers=headers,
                     connection=connection,
-                    # connection=connection,
                 )
                 msg.content_subtype = "html"
             if hasattr(multipart_template, "attach_related"):
@@ -233,7 +235,6 @@ class Email(models.Model):
                 cc=self.cc,
                 headers=headers,
                 connection=connection,
-                # connection=connection,
             )
 
         for attachment in self.attachments.all():
@@ -263,11 +264,11 @@ class Email(models.Model):
         """
         try:
             self.email_message().send()
-            status = STATUS.sent
+            status = BackendConstants.STATUS.sent
             message = ""
             exception_type = ""
         except Exception as e:
-            status = STATUS.failed
+            status = BackendConstants.STATUS.failed
             message = str(e)
             exception_type = type(e).__name__
 
@@ -291,7 +292,7 @@ class Email(models.Model):
             # If log level is 0, log nothing, 1 logs only sending failures
             # and 2 means log both successes and failures
             if log_level == 1:
-                if status == STATUS.failed:
+                if status == BackendConstants.STATUS.failed:
                     self.logs.create(
                         status=status, message=message, exception_type=exception_type
                     )
@@ -315,143 +316,3 @@ class Email(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
-
-
-class Log(models.Model):
-    """
-    A model to record sending email sending activities.
-    """
-
-    STATUS_CHOICES = [(STATUS.sent, _("sent")), (STATUS.failed, _("failed"))]
-
-    email = models.ForeignKey(
-        Email,
-        editable=False,
-        related_name="logs",
-        verbose_name=_("Email address"),
-        on_delete=models.CASCADE,
-    )
-    date = models.DateTimeField(auto_now_add=True)
-    status = models.PositiveSmallIntegerField(_("Status"), choices=STATUS_CHOICES)
-    exception_type = models.CharField(_("Exception type"), max_length=255, blank=True)
-    message = models.TextField(_("Message"))
-
-    class Meta:
-
-        verbose_name = _("Log")
-        verbose_name_plural = _("Logs")
-
-    def __str__(self):
-        return str(self.date)
-
-
-class EmailTemplateManager(models.Manager):
-    def get_by_natural_key(self, name, language, default_template):
-        return self.get(name=name, language=language, default_template=default_template)
-
-
-class EmailTemplate(models.Model):
-    """
-    Model to hold template information from db
-    """
-
-    name = models.CharField(
-        _("Name"), max_length=255, help_text=_("e.g: 'welcome_email'")
-    )
-    description = models.TextField(
-        _("Description"), blank=True, help_text=_("Description of this template.")
-    )
-    created = models.DateTimeField(auto_now_add=True)
-    last_updated = models.DateTimeField(auto_now=True)
-    subject = models.CharField(
-        max_length=255,
-        blank=True,
-        verbose_name=_("Subject"),
-        validators=[validate_template_syntax],
-    )
-    content = models.TextField(
-        blank=True, verbose_name=_("Content"), validators=[validate_template_syntax]
-    )
-    html_content = models.TextField(
-        blank=True,
-        verbose_name=_("HTML content"),
-        validators=[validate_template_syntax],
-    )
-    language = models.CharField(
-        max_length=12,
-        verbose_name=_("Language"),
-        help_text=_("Render template in alternative language"),
-        default="",
-        blank=True,
-    )
-    default_template = models.ForeignKey(
-        "self",
-        related_name="translated_templates",
-        null=True,
-        default=None,
-        verbose_name=_("Default template"),
-        on_delete=models.CASCADE,
-    )
-
-    objects = EmailTemplateManager()
-
-    class Meta:
-
-        unique_together = ("name", "language", "default_template")
-        verbose_name = _("Email Template")
-        verbose_name_plural = _("Email Templates")
-        ordering = ["name"]
-
-    def __str__(self):
-        return "%s %s" % (self.name, self.language)
-
-    def natural_key(self):
-        return (self.name, self.language, self.default_template)
-
-    def save(self, *args, **kwargs):
-        # If template is a translation, use default template's name
-        if self.default_template and not self.name:
-            self.name = self.default_template.name
-
-        template = super().save(*args, **kwargs)
-        cache.delete(self.name)
-        return template
-
-
-def get_upload_path(instance, filename):
-    """Overriding to store the original filename"""
-    if not instance.name:
-        instance.name = filename  # set original filename
-    date = timezone.now().date()
-    filename = "{name}.{ext}".format(name=uuid4().hex, ext=filename.split(".")[-1])
-
-    return os.path.join(
-        "post_office_attachments",
-        str(date.year),
-        str(date.month),
-        str(date.day),
-        filename,
-    )
-
-
-class Attachment(models.Model):
-    """
-    A model describing an email attachment.
-    """
-
-    file = models.FileField(_("File"), upload_to=get_upload_path)
-    name = models.CharField(
-        _("Name"), max_length=255, help_text=_("The original filename")
-    )
-    emails = models.ManyToManyField(
-        Email, related_name="attachments", verbose_name=_("Emails")
-    )
-    mimetype = models.CharField(max_length=255, default="", blank=True)
-    headers = models.JSONField(_("Headers"), blank=True, null=True)
-
-    class Meta:
-        verbose_name = _("Attachment")
-        verbose_name_plural = _("Attachments")
-
-    def __str__(self):
-        return self.name
