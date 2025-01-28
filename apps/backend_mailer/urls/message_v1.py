@@ -12,7 +12,7 @@ urlpatterns = [
     ),
     path(
         "<int:pk>/",
-        SentMessageView.as_view({"get": "retrieve"}),
+        SentMessageView.as_view({"get": "retrieve", "delete": "destroy"}),
         name="product_by_id",
     ),
     path(
@@ -22,7 +22,7 @@ urlpatterns = [
     ),
     path(
         "message-templates/<int:pk>/",
-        EmailTemplateView.as_view({"get": "retrieve"}),
+        EmailTemplateView.as_view({"get": "retrieve", "delete": "destroy"}),
         name="message-template_by_id",
     ),
 ]
