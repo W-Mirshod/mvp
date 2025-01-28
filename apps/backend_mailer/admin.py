@@ -20,9 +20,16 @@ from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
 from apps.backend_mailer.fields import CommaSeparatedEmailField
-from apps.backend_mailer.models import STATUS, Attachment, Email, EmailTemplate, Log
+from apps.backend_mailer.models import (
+    Attachment,
+    Email,
+    EmailTemplate,
+    Log,
+    EmailBackend,
+)
 
 from apps.backend_mailer.sanitizer import clean_html
+from apps.backend_mailer.constants import BackendConstants
 
 
 def get_message_preview(instance):
@@ -91,7 +98,7 @@ class CommaSeparatedEmailWidget(TextInput):
 
 def requeue(modeladmin, request, queryset):
     """An admin action to requeue emails."""
-    queryset.update(status=STATUS.queued)
+    queryset.update(status=BackendConstants.STATUS.queued)
 
 
 requeue.short_description = "Requeue selected emails"
@@ -100,11 +107,11 @@ requeue.short_description = "Requeue selected emails"
 class EmailAdmin(admin.ModelAdmin):
     list_display = [
         "truncated_message_id",
-        "to_display",
         "shortened_subject",
         "status",
         "last_updated",
         "scheduled_time",
+        "expires_at",
         "use_template",
     ]
     search_fields = ["to", "subject"]
@@ -136,16 +143,12 @@ class EmailAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("template")
 
-    def to_display(self, instance):
-        return ", ".join(instance.to)
 
     def truncated_message_id(self, instance):
         if instance.message_id:
             return Truncator(instance.message_id[1:-1]).chars(10)
         return str(instance.id)
 
-    to_display.short_description = _("To")
-    to_display.admin_order_field = "to"
     truncated_message_id.short_description = "Message-ID"
 
     def has_add_permission(self, request):
@@ -174,13 +177,32 @@ class EmailAdmin(admin.ModelAdmin):
     use_template.boolean = True
 
     def get_fieldsets(self, request, obj=None):
+        if obj is None:
+            fields = [
+                "subject",
+                "from_email",
+                "to",
+                "cc",
+                "bcc",
+                "priority",
+                "status",
+                "scheduled_time",
+                "expires_at",
+                "email_backend",
+            ]
+            return [(None, {"fields": fields})]
+
         fields = [
             "from_email",
             "to",
             "cc",
             "bcc",
             "priority",
-            ("status", "scheduled_time"),
+            (
+                "status",
+                "scheduled_time",
+                "expires_at",
+            ),
         ]
         if obj.message_id:
             fields.insert(0, "message_id")
@@ -386,7 +408,19 @@ class AttachmentAdmin(admin.ModelAdmin):
     autocomplete_fields = ["emails"]
 
 
+class EmailBackendAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        "created_at",
+    ]
+    list_filter = [
+        "mailing_type",
+    ]
+    list_display = ["id", "author", "mailing_type", "config"]
+    search_fields = ["author"]
+
+
 admin.site.register(Email, EmailAdmin)
 admin.site.register(Log, LogAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(Attachment, AttachmentAdmin)
+admin.site.register(EmailBackend, EmailBackendAdmin)
