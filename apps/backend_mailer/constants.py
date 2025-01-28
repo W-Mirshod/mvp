@@ -16,9 +16,10 @@ class BackendConstants:
     """<- EMAIL PRIORITY"""
 
     """ EMAIL STATUS -> """
-    STATUS = namedtuple("STATUS", "sent failed queued requeued")._make(range(4))
+    STATUS = namedtuple("STATUS", "sent failed queued requeued created")._make(range(5))
 
     STATUS_CHOICES = [
+        (STATUS.created, _("created")),
         (STATUS.sent, _("sent")),
         (STATUS.failed, _("failed")),
         (STATUS.queued, _("queued")),
