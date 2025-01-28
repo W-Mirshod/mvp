@@ -34,7 +34,6 @@ class CreateEmailSerializer(serializers.ModelSerializer):
         return attrs
 
 
-
 class RetrieveEmailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Email
