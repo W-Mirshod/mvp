@@ -20,7 +20,8 @@ class EmailBackend(ChangeloggableMixin, DateModelMixin, DeleteModelMixin):
     backend_type = models.PositiveSmallIntegerField(
         choices=BackendConstants.EMAIL_BACKENDS_CHOICES,
         default=BackendConstants.DEFAULT_EMAIL_BACKEND,
-        help_text=_("Backend mailing type"))
+        help_text=_("Backend mailing type"),
+    )
 
     config = models.TextField(help_text=_("User config for chosen backend"))
 
