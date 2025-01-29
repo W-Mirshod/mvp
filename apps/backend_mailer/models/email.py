@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.encoding import smart_str
 from django.utils.translation import pgettext_lazy, gettext_lazy as _
 
+from apps.backend_mailer.logic.email_backend import EmailBackendManager
 from apps.backend_mailer.logutils import setup_loghandlers
 from apps.backend_mailer.settings import (
     context_field_class,
@@ -18,6 +19,7 @@ from apps.backend_mailer.settings import (
 from apps.backend_mailer.fields import decrypt_config
 from apps.backend_mailer.validators import validate_email_with_name
 from apps.backend_mailer.constants import BackendConstants
+from apps.users.models import User
 
 logger = setup_loghandlers("INFO")
 
@@ -27,6 +29,13 @@ class Email(models.Model):
     A model to hold email information.
     """
 
+    author = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        related_name="email_to_user",
+        null=True,
+        blank=True,
+    )
     from_email = models.CharField(
         _("Email From"), max_length=254, validators=[validate_email_with_name]
     )
@@ -127,20 +136,16 @@ class Email(models.Model):
 
     def create_connection(self):
         try:
-            backend_class = self.backend_config.get("backend")
-            host = self.backend_config.get("host", "localhost")
-            port = self.backend_config.get("port", 25)
-            username = self.backend_config.get("username")
-            password = self.backend_config.get("password")
-            use_tls = self.backend_config.get("use_tls", False)
+            encrypt_config = self.email_backend.config
+            backend_config = decrypt_config(value=encrypt_config)
 
-            data = {
-                "host": host,
-                "port": port,
-                "username": username,
-                "password": password,
-                "use_tls": use_tls,
-            }
+            backend_class = BackendConstants.EMAIL_BACKENDS_CHOICES_DICT.get(
+                self.email_backend.backend_type
+            )
+
+            data = EmailBackendManager.get_backend_fields(
+                backend_type=self.email_backend.backend_type, config=backend_config
+            )
 
             self.connection = get_connection(backend=backend_class, **data)
 
@@ -196,7 +201,7 @@ class Email(models.Model):
 
         self.create_connection()
         connection = self.connection
-        logger.info(f"Connection {connection}.")
+
         if html_message:
             if plaintext_message:
                 msg = EmailMultiAlternatives(
