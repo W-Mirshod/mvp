@@ -4,10 +4,9 @@ from django.db.models import Q, QuerySet
 
 from apps.sentry.sentry_constants import SentryConstants
 from apps.sentry.sentry_scripts import SendToSentry
-
-
 from apps.backend_mailer.models import Email
 from apps.users.models import User
+
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +21,10 @@ class EmailQueryset:
     ) -> list[Email]:
         """tba"""
 
-        query, order_by = cls.queryset(user_obj=user_obj, action=action,kwargs=kwargs)
-        products_qs = cls.filter_email(query, order_by)
+        query, order_by = cls.queryset(user_obj=user_obj, action=action, kwargs=kwargs)
+        emails_qs = cls.filter_email(query, order_by)
 
-        return products_qs
+        return emails_qs
 
     @staticmethod
     def queryset(
@@ -41,18 +40,20 @@ class EmailQueryset:
         ]
 
         if action == "retrieve":
-            email_id =kwargs.get("pk")
+            email_id = kwargs.get("pk")
             if email_id is None or not email_id:
                 return Q(id=None), order_by
 
             query = Q(
                 id=email_id,
                 author_id=user_obj.id,
-
+            )
+        else:
+            query = Q(
+                author_id=user_obj.id,
             )
 
-            return query, order_by
-
+        return query, order_by
 
     @staticmethod
     def filter_email(query: Q, order_by: list[str]) -> QuerySet[Email] | list:
@@ -63,7 +64,6 @@ class EmailQueryset:
                 .select_related(
                     "author",
                 )
-
             )
         except Exception as ex:
             SendToSentry.send_scope_msg(
