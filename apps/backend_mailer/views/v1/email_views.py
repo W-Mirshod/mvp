@@ -1,17 +1,16 @@
 from rest_framework.permissions import IsAuthenticated
 
-from apps.backend_mailer.models import Email
 from apps.backend_mailer.serializers.email_serializers import (
     CreateEmailSerializer,
     RetrieveEmailSerializer,
 )
-from apps.backend_mailer.view_logic.email_queryset import EmailQueryset
+from apps.backend_mailer.view_logic.email_qs import EmailQueryset
 from utils.permissions import IsTokenValid
 from utils.views import MultiSerializerViewSet
 
 
 class SentMessageView(MultiSerializerViewSet):
-    queryset = Email.objects.all()
+    queryset = None  # see get_queryset
     permission_classes = (
         IsAuthenticated,
         IsTokenValid,
