@@ -4,10 +4,9 @@ from django.db.models import Q, QuerySet
 
 from apps.sentry.sentry_constants import SentryConstants
 from apps.sentry.sentry_scripts import SendToSentry
-
-
 from apps.backend_mailer.models import EmailTemplate
 from apps.users.models import User
+
 
 logger = logging.getLogger(__name__)
 
