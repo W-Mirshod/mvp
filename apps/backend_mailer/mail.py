@@ -8,12 +8,10 @@ from email.utils import make_msgid
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 
-# from apps.backend_mailer.connections import connections
 from apps.backend_mailer.lockfile import default_lockfile, FileLock, FileLocked
 from apps.backend_mailer.logutils import setup_loghandlers
-from apps.backend_mailer.models import Email, EmailTemplate, Log, PRIORITY, STATUS
+from apps.backend_mailer.models import Email, EmailTemplate, Log
 from apps.backend_mailer.settings import (
-    get_available_backends,
     get_batch_delivery_timeout,
     get_batch_size,
     get_log_level,
@@ -32,6 +30,8 @@ from apps.backend_mailer.utils import (
     parse_priority,
     split_emails,
 )
+from apps.backend_mailer.constants import BackendConstants
+from apps.mailers.models.event import Event
 
 logger = setup_loghandlers("INFO")
 
@@ -52,15 +52,18 @@ def create(
     priority=None,
     render_on_delivery=False,
     commit=True,
-    config=None,
-    # backend='',
+    email_backend=None,
 ):
     """
     Creates an email from supplied keyword arguments. If template is
     specified, email subject and content will be rendered during delivery.
     """
     priority = parse_priority(priority)
-    status = None if priority == PRIORITY.now else STATUS.queued
+    status = (
+        None
+        if priority == BackendConstants.PRIORITY.now
+        else BackendConstants.STATUS.queued
+    )
 
     if recipients is None:
         recipients = []
@@ -76,6 +79,7 @@ def create(
 
     # If email is to be rendered during delivery, save all necessary
     # information
+
     if render_on_delivery:
         email = Email(
             from_email=sender,
@@ -90,9 +94,7 @@ def create(
             status=status,
             context=context,
             template=template,
-            backend_config=config,
-            # connection=connection,
-            # backend_alias=backend,
+            email_backend=email_backend,
         )
 
     else:
@@ -120,9 +122,7 @@ def create(
             headers=headers,
             priority=priority,
             status=status,
-            backend_config=config,
-            # connection=connection,
-            # backend_alias=backend,
+            email_backend=email_backend,
             template=template,
         )
 
@@ -151,7 +151,7 @@ def send(
     cc=None,
     bcc=None,
     language="",
-    config=None,
+    email_backend=None,
 ):
     try:
         recipients = parse_emails(recipients)
@@ -177,7 +177,7 @@ def send(
         log_level = get_log_level()
 
     if not commit:
-        if priority == PRIORITY.now:
+        if priority == BackendConstants.PRIORITY.now:
             raise ValueError("send_many() can't be used with priority = 'now'")
         if attachments:
             raise ValueError("Can't add attachments with send_many()")
@@ -221,14 +221,14 @@ def send(
         priority,
         render_on_delivery,
         commit=commit,
-        config=config,
+        email_backend=email_backend,
     )
 
     if attachments:
         attachments = create_attachments(attachments)
         email.attachments.add(*attachments)
 
-    if priority == PRIORITY.now:
+    if priority == BackendConstants.PRIORITY.now:
         email.dispatch(log_level=log_level)
     elif commit:
         email_queued.send(sender=Email, emails=[email])
@@ -262,7 +262,13 @@ def get_queued():
         Q(expires_at__gt=now) | Q(expires_at=None)
     )
     return (
-        Email.objects.filter(query, status__in=[STATUS.queued, STATUS.requeued])
+        Email.objects.filter(
+            query,
+            status__in=[
+                BackendConstants.STATUS.queued,
+                BackendConstants.STATUS.requeued,
+            ],
+        )
         .select_related("template")
         .order_by(*get_sending_order())
         .prefetch_related("attachments")[: get_batch_size()]
@@ -404,7 +410,7 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
 
     # Update statuses of sent emails
     email_ids = [email.id for email in sent_emails]
-    Email.objects.filter(id__in=email_ids).update(status=STATUS.sent)
+    Email.objects.filter(id__in=email_ids).update(status=BackendConstants.STATUS.sent)
 
     # Update statuses and conditionally requeue failed emails
     num_failed, num_requeued = 0, 0
@@ -417,11 +423,11 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
             email.number_of_retries = 0
         if email.number_of_retries < max_retries:
             email.number_of_retries += 1
-            email.status = STATUS.requeued
+            email.status = BackendConstants.STATUS.requeued
             email.scheduled_time = scheduled_time
             num_requeued += 1
         else:
-            email.status = STATUS.failed
+            email.status = BackendConstants.STATUS.failed
             num_failed += 1
 
     Email.objects.bulk_update(
@@ -436,7 +442,7 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
             logs.append(
                 Log(
                     email=email,
-                    status=STATUS.failed,
+                    status=BackendConstants.STATUS.failed,
                     message=str(exception),
                     exception_type=type(exception).__name__,
                 )
@@ -448,7 +454,7 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
     if log_level == 2:
         logs = []
         for email in sent_emails:
-            logs.append(Log(email=email, status=STATUS.sent))
+            logs.append(Log(email=email, status=BackendConstants.STATUS.sent))
 
         if logs:
             Log.objects.bulk_create(logs)
