@@ -41,6 +41,7 @@ class BackendConstants:
     """<- LOG STATUS"""
 
     """MAILING TYPE  ->"""
+
     DEFAULT_MAILING_TYPE = 1
     SES_MAILING_TYPE = 2
     ANY_MAIL_MAILING_TYPE = 3
@@ -60,11 +61,47 @@ class BackendConstants:
 
     """ EMAIL BACKENDS ->"""
 
-    EMAIL_BACKENDS = {
-        DEFAULT_MAILING_TYPE: "django.core.mail.backends.smtp.EmailBackend",
-        SES_MAILING_TYPE: "django_ses.SESBackend",
-        SMTP_MAILING_TYPE: "django.core.mail.backends.smtp.EmailBackend",
-        ANY_MAIL_MAILING_TYPE: "anymail.backends.amazon_ses.EmailBackend",
+    DEFAULT_EMAIL_BACKEND = 1
+    SES_EMAIL_BACKEND = 2
+    SMTP_EMAIL_BACKEND = 3
+    ANYMAIL_EMAIL_BACKEND = 4
+
+    EMAIL_BACKENDS_CHOICES = (
+        (DEFAULT_EMAIL_BACKEND, "django.core.mail.backends.smtp.EmailBackend"),
+        (SES_EMAIL_BACKEND, "django_ses.SESBackend"),
+        (SMTP_EMAIL_BACKEND, "django.core.mail.backends.smtp.EmailBackend"),
+        (ANYMAIL_EMAIL_BACKEND, "anymail.backends.amazon_ses.EmailBackend"),
+    )
+
+    EMAIL_BACKENDS_IDS = [i[0] for i in EMAIL_BACKENDS_CHOICES]
+    EMAIL_BACKENDS_CHOICES_DICT = dict(EMAIL_BACKENDS_CHOICES)
+
+    BACKEND_FIELDS = {
+        EMAIL_BACKENDS_CHOICES_DICT.get(DEFAULT_EMAIL_BACKEND): [
+            "host",
+            "port",
+            "username",
+            "password",
+            "use_tls",
+        ],
+        EMAIL_BACKENDS_CHOICES_DICT.get(SMTP_EMAIL_BACKEND): [
+            "host",
+            "port",
+            "username",
+            "password",
+            "use_tls",
+        ],
+        EMAIL_BACKENDS_CHOICES_DICT.get(SES_EMAIL_BACKEND): [
+            "aws_access_key_id",
+            "aws_secret_access_key",
+            "region",
+        ],
+        EMAIL_BACKENDS_CHOICES_DICT.get(ANYMAIL_EMAIL_BACKEND): [
+            "aws_access_key_id",
+            "aws_secret_access_key",
+            "region",
+            "session_token",
+        ],
     }
 
     """<- EMAIL BACKENDS"""
