@@ -2,7 +2,6 @@ from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.utils.translation import gettext_lazy as _
 
-
 from apps.backend_mailer.constants import BackendConstants
 from apps.backend_mailer.fields import encrypt_config
 from apps.changelog.mixins import ChangeloggableMixin
@@ -17,10 +16,12 @@ class EmailBackend(ChangeloggableMixin, DateModelMixin, DeleteModelMixin):
         on_delete=models.CASCADE,
         related_name="backend_to_user",
     )
-    mailing_type = models.PositiveSmallIntegerField(
-        choices=BackendConstants.MAILING_TYPE_CHOICES,
-        help_text=_("Backend mailing type"),
-    )
+
+    backend_type = models.PositiveSmallIntegerField(
+        choices=BackendConstants.EMAIL_BACKENDS_CHOICES,
+        default=BackendConstants.DEFAULT_EMAIL_BACKEND,
+        help_text=_("Backend mailing type"))
+
     config = models.TextField(help_text=_("User config for chosen backend"))
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
