@@ -152,7 +152,7 @@ class EmailAdmin(admin.ModelAdmin):
     truncated_message_id.short_description = "Message-ID"
 
     def has_add_permission(self, request):
-        return False
+        return request.user.is_superuser
 
     def shortened_subject(self, instance):
         if instance.context:
@@ -179,8 +179,10 @@ class EmailAdmin(admin.ModelAdmin):
     def get_fieldsets(self, request, obj=None):
         if obj is None:
             fields = [
+                "author",
                 "subject",
                 "from_email",
+                "template",
                 "to",
                 "cc",
                 "bcc",
@@ -193,11 +195,13 @@ class EmailAdmin(admin.ModelAdmin):
             return [(None, {"fields": fields})]
 
         fields = [
+            "author",
             "from_email",
             "to",
             "cc",
             "bcc",
             "priority",
+            "template",
             (
                 "status",
                 "scheduled_time",
@@ -413,9 +417,9 @@ class EmailBackendAdmin(admin.ModelAdmin):
         "created_at",
     ]
     list_filter = [
-        "mailing_type",
+        "backend_type",
     ]
-    list_display = ["id", "author", "mailing_type", "config"]
+    list_display = ["id", "author", "backend_type", "config"]
     search_fields = ["author"]
 
 
