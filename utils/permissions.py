@@ -71,4 +71,4 @@ class IsOwner(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # check for the default user model and object owner field
-        return obj.owner == request.user
+        return obj.author == request.user
