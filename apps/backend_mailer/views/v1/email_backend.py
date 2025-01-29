@@ -5,7 +5,7 @@ from apps.backend_mailer.serializers.email_backend import (
     RetrieveEmailBackendSerializer,
 )
 from apps.backend_mailer.view_logic.email_backend_qs import EmailBackendQueryset
-from utils.permissions import IsTokenValid
+from utils.permissions import IsTokenValid, IsOwner
 from utils.views import MultiSerializerViewSet
 
 
@@ -14,6 +14,7 @@ class EmailBackendView(MultiSerializerViewSet):
 
     permission_classes = (
         IsAuthenticated,
+        IsOwner,
         # IsTokenValid,
     )
     serializers = {
