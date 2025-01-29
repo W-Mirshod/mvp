@@ -11,12 +11,8 @@ from utils.views import MultiSerializerViewSet
 
 class EmailBackendView(MultiSerializerViewSet):
     queryset = None  # see get_queryset
+    permission_classes = None # see get_permissions
 
-    permission_classes = (
-        IsAuthenticated,
-        IsOwner,
-        # IsTokenValid,
-    )
     serializers = {
         "list": RetrieveEmailBackendSerializer,
         "create": CreateEmailBackendSerializer,
@@ -29,3 +25,10 @@ class EmailBackendView(MultiSerializerViewSet):
             action=self.action,
             kwargs=self.kwargs,
         )
+
+    def get_permissions(self):
+
+        if self.action in ("list", "retrieve", "update", "partial_update", "destroy"):
+            return [permission() for permission in (IsAuthenticated, IsTokenValid, IsOwner)]
+        else:
+            return [permission() for permission in (IsAuthenticated,IsTokenValid)]
