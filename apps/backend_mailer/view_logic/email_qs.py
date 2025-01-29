@@ -35,7 +35,7 @@ class EmailQueryset:
         """tba"""
 
         order_by = [
-            "-created_at",
+            "-created",
             "status",
         ]
 
