@@ -11,12 +11,12 @@ urlpatterns = [
     path(
         "",
         SentMessageView.as_view({"get": "list", "post": "create"}),
-        name="product_list",
+        name="message_list",
     ),
     path(
         "<int:pk>/",
         SentMessageView.as_view({"get": "retrieve", "delete": "destroy"}),
-        name="product_by_id",
+        name="message_by_id",
     ),
     path(
         "message-templates/",
