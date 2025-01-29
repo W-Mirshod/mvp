@@ -8,7 +8,7 @@ class CreateEmailBackendSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmailBackend
         fields = (
-            "mailing_type",
+            "backend_type",
             "config",
         )
 
@@ -27,7 +27,7 @@ class RetrieveEmailBackendSerializer(serializers.ModelSerializer):
         model = EmailBackend
         fields = (
             "author",
-            "mailing_type",
+            "backend_type",
             "config",
             "created_at",
         )
