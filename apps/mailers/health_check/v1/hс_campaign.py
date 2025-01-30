@@ -8,13 +8,13 @@ from config.settings import MAIN_HOST
 import requests
 
 
-class SentMessagesHealthCheck(BaseHealthCheckBackend):
+class CampaignHealthCheck(BaseHealthCheckBackend):
 
     critical_service = False
 
     def check_status(self) -> bool:
         try:
-            url = MAIN_HOST + reverse_lazy("message_api:product_list")
+            url = MAIN_HOST + reverse_lazy("campaign_api:campaign_list")
             response = requests.get(url=url, timeout=5)
 
             if response.status_code != status.HTTP_401_UNAUTHORIZED:
