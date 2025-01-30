@@ -12,7 +12,7 @@ urlpatterns = [
     ),
     path(
         "<int:pk>/",
-        CampaignView.as_view({"get": "retrieve"}),
+        CampaignView.as_view({"get": "retrieve",  "delete": "destroy"}),
         name="campaign_by_id",
     ),
 ]
