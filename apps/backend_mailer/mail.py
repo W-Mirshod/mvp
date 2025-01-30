@@ -8,6 +8,7 @@ from email.utils import make_msgid
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 
+from apps.backend_mailer.crud.crud_email import CRUDEmail
 from apps.backend_mailer.lockfile import default_lockfile, FileLock, FileLocked
 from apps.backend_mailer.logutils import setup_loghandlers
 from apps.backend_mailer.models import Email, EmailTemplate, Log
@@ -31,7 +32,8 @@ from apps.backend_mailer.utils import (
     split_emails,
 )
 from apps.backend_mailer.constants import BackendConstants
-from apps.mailers.models.event import Event
+from apps.mailers.constants import CampaignConstants
+from apps.mailers.crud.crud_campaign import CRUDCampaign
 
 logger = setup_loghandlers("INFO")
 
@@ -244,7 +246,7 @@ def send_many(kwargs_list, **kwargs):
     """
     emails = [send(commit=False, **kwargs) for kwargs in kwargs_list]
     if emails:
-        Email.objects.bulk_create(emails)
+        CRUDEmail.bulk_email_create(create_objects=emails)
         email_queued.send(sender=Email, emails=emails)
 
     return emails
@@ -317,15 +319,7 @@ def send_queued(processes=1, log_level=None):
             # The get method is used with a timeout to wait for each result
             for task in tasks:
                 results.append(task.get(timeout=timeout))
-            # for task in tasks:
-            #     try:
-            #         # Wait for all tasks to complete with a timeout
-            #         # The get method is used with a timeout to wait for each result
-            #         results.append(task.get(timeout=timeout))
-            #     except (TimeoutError, ContextTimeoutError):
-            #         logger.exception("Process timed out after %d seconds" % timeout)
 
-            # results = pool.map(_send_bulk, email_lists)
             pool.terminate()
             pool.join()
 
@@ -395,22 +389,22 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
     # The get method is used with a timeout to wait for each result
     for result in results:
         result.get(timeout=timeout)
-    # for result in results:
-    #     try:
-    #         # Wait for all tasks to complete with a timeout
-    #         # The get method is used with a timeout to wait for each result
-    #         result.get(timeout=timeout)
-    #     except TimeoutError:
-    #         logger.exception("Process timed out after %d seconds" % timeout)
 
     pool.close()
     pool.join()
 
-    # connections.close()
-
     # Update statuses of sent emails
+
     email_ids = [email.id for email in sent_emails]
-    Email.objects.filter(id__in=email_ids).update(status=BackendConstants.STATUS.sent)
+    email_update = CRUDEmail.update_status(
+        object_id=email_ids, status=BackendConstants.STATUS.sent
+    )
+    logger.info(f"Successfully update {email_update} emails")
+
+    campaign_update = CRUDCampaign.update_campaign_status(
+        object_id=email_ids, status=CampaignConstants.STATUS.completed
+    )
+    logger.info(f"Successfully update {campaign_update} campaigns")
 
     # Update statuses and conditionally requeue failed emails
     num_failed, num_requeued = 0, 0
@@ -429,10 +423,7 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
         else:
             email.status = BackendConstants.STATUS.failed
             num_failed += 1
-
-    Email.objects.bulk_update(
-        emails_failed, ["status", "scheduled_time", "number_of_retries"]
-    )
+    CRUDEmail.bulk_email_update(update_objects=emails_failed)
 
     # If log level is 0, log nothing, 1 logs only sending failures
     # and 2 means log both successes and failures

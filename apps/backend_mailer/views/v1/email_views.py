@@ -11,7 +11,7 @@ from utils.views import MultiSerializerViewSet
 
 class SentMessageView(MultiSerializerViewSet):
     queryset = None  # see get_queryset
-    permission_classes = None # see get_permissions
+    permission_classes = None  # see get_permissions
     serializers = {
         "list": RetrieveEmailSerializer,
         "create": CreateEmailSerializer,
@@ -28,6 +28,8 @@ class SentMessageView(MultiSerializerViewSet):
     def get_permissions(self):
 
         if self.action in ("list", "retrieve", "update", "partial_update", "destroy"):
-            return [permission() for permission in (IsAuthenticated, IsTokenValid, IsOwner)]
+            return [
+                permission() for permission in (IsAuthenticated, IsTokenValid, IsOwner)
+            ]
         else:
-            return [permission() for permission in (IsAuthenticated,IsTokenValid)]
+            return [permission() for permission in (IsAuthenticated, IsTokenValid)]

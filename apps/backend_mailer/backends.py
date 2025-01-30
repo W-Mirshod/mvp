@@ -10,6 +10,7 @@ from apps.backend_mailer.signals import email_queued
 from apps.backend_mailer.utils import create_attachments
 from apps.backend_mailer.constants import BackendConstants
 
+
 class EmailBackend(BaseEmailBackend):
     def open(self):
         pass

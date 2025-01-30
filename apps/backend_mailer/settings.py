@@ -15,6 +15,7 @@ from config.settings import FERNET_SECRET_KEY
 
 fernet = Fernet(FERNET_SECRET_KEY)
 
+
 def get_backend(alias="default"):
     return get_available_backends()[alias]
 
