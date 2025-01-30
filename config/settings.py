@@ -18,6 +18,7 @@ DEBUG = environ_values.get("DEBUG")
 
 
 SECRET_KEY = environ_values.get("SECRET_KEY")
+FERNET_SECRET_KEY = environ_values.get("FERNET_SECRET_KEY")
 
 ALLOWED_HOSTS = environ_values.get("ALLOWED_HOSTS").split(",")
 CORS_ORIGIN_WHITELIST = environ_values.get("CORS_ORIGIN_WHITELIST").split(",")
@@ -55,6 +56,8 @@ INSTALLED_APPS = [
     "health_check.contrib.celery_ping",
     "health_check.contrib.redis",
     #
+    "anymail",
+    #
     "apps.users",
     "apps.changelog",
     "apps.mail_servers",
@@ -62,6 +65,7 @@ INSTALLED_APPS = [
     "apps.products",
     "apps.companies",
     "apps.proxies",
+    "apps.backend_mailer",
 ]
 
 MIDDLEWARE = [
@@ -211,7 +215,8 @@ REDIS_PASS = environ_values.get("REDIS_PASS")
 REDIS_HOST = environ_values.get("REDIS_HOST")
 REDIS_PORT = environ_values.get("REDIS_PORT")
 
-REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
+# REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
+REDIS_URL = "redis://localhost:6379/0"
 
 REDIS_DB = "0"
 # endregion
@@ -229,8 +234,9 @@ CELERY_BROKER_CONNECTION_RETRY = True
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 CELERY_IMPORTS = (
-    "apps.mail_servers.tasks",
     "apps.users.tasks",
+    "apps.backend_mailer.tasks",
+    "apps.mailers.tasks"
 )
 
 CELERY_DEFAULT_QUEUE = CeleryConstants.DEFAULT_QUEUE
@@ -238,17 +244,13 @@ CELERY_DEFAULT_EXCHANGE = CeleryConstants.DEFAULT_QUEUE
 CELERY_DEFAULT_ROUTING_KEY = CeleryConstants.DEFAULT_QUEUE
 
 CELERY_BEAT_SCHEDULE = {
-    "test-periodic-task": {
-        "task": "apps.mail_servers.tasks.test_periodic_task",
-        "schedule": crontab(minute="*/1"),
+    "backend_mailer_sending_task": {
+        "task": "apps.backend_mailer.tasks.send_queued_mail",
+        "schedule": 30.0,
     },
-    "process-new-mail-queue-every-3-seconds": {
-        "task": "apps.mail_servers.tasks.process_new_mail_queue",
-        "schedule": 3.0,
-    },
-    "process-in-process-mail-queue-every-3-seconds": {
-        "task": "apps.mail_servers.tasks.process_in_process_mail_queue",
-        "schedule": 3.0,
+    "campaign_status_check_task": {
+        "task": "apps.mailers.tasks.process_campaign",
+        "schedule": 10.0,
     },
 }
 """<- Celery settings"""
@@ -515,12 +517,33 @@ SILKY_AUTHORISATION = True
 SILKY_META = True
 SILKY_ANALYZE_QUERIES = True
 SILKY_INTERCEPT_PERCENT = 50
-SILKY_SENSITIVE_KEYS = {'username', 'api', 'token', 'key', 'secret', 'password', 'signature'}
+SILKY_SENSITIVE_KEYS = {
+    "username",
+    "api",
+    "token",
+    "key",
+    "secret",
+    "password",
+    "signature",
+}
 SILKY_PYTHON_PROFILER = True
-SILKY_PYTHON_PROFILER_RESULT_PATH = '/silk_storage/'
+SILKY_PYTHON_PROFILER_RESULT_PATH = "/silk_storage/"
 
-SILKY_DYNAMIC_PROFILING = [{
-    'module': 'apps.mail_servers.views.v1.views_mail_servers',
-    'function': 'SMTPServerView.retrieve'
-}]
+SILKY_DYNAMIC_PROFILING = [
+    {
+        "module": "apps.mail_servers.views.v1.views_mail_servers",
+        "function": "SMTPServerView.retrieve",
+    }
+]
 """<-  SILK CONFIG """
+
+""" POST OFFICE ->"""
+
+POST_OFFICE = {
+    "BATCH_SIZE": 100,
+    "QUEUE_NAME": "email-queue",
+    "DEFAULT_PRIORITY": "high",
+    "CELERY_ENABLED": True,
+}
+
+""" <-POST OFFICE"""
