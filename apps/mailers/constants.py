@@ -1,7 +1,8 @@
 from collections import namedtuple
 from django.utils.translation import gettext_lazy as _
 
-class EventConstants:
+
+class CampaignConstants:
 
     MAX_CAMPAIGN_ID_LENGTH = 255
     MAX_CAMPAIGN_NAME_LENGTH = 500
@@ -19,7 +20,9 @@ class EventConstants:
     """<- SHIPPING TYPE"""
 
     """MESSAGE TYPE ->"""
-    MESSAGE_TYPE = namedtuple("MESSAGE_TYPE", "default promotion_options newsletter transactional")._make(range(4))
+    MESSAGE_TYPE = namedtuple(
+        "MESSAGE_TYPE", "default promotion_options newsletter transactional"
+    )._make(range(4))
 
     MESSAGE_TYPE_CHOICES = [
         (MESSAGE_TYPE.default, _("Default")),
@@ -31,7 +34,9 @@ class EventConstants:
     """<- MESSAGE TYPE"""
 
     """ STATUS ->"""
-    STATUS = namedtuple("STATUS", "created completed stopped error ai_mailing sending ")._make(range(6))
+    STATUS = namedtuple(
+        "STATUS", "created completed stopped error ai_mailing sending "
+    )._make(range(6))
 
     STATUS_CHOICES = [
         (STATUS.created, _("created")),
@@ -39,7 +44,6 @@ class EventConstants:
         (STATUS.stopped, _("Stopped")),
         (STATUS.error, _("Error")),
         (STATUS.ai_mailing, _("AI Mailing")),
-        (STATUS.completed, _("Completed")),
-
+        (STATUS.sending, _("Sending")),
     ]
     """ STATUS ->"""
