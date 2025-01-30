@@ -1,69 +1,130 @@
-import logging
-from rest_framework.exceptions import APIException
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+from rest_framework.exceptions import APIException
 
-from apps.email_analysis.serializers.email_analysis_serializers import SpamDetectionInputSerializer
-from apps.email_analysis.services.spam_detection_service import classify_email
-
-
-logger = logging.getLogger(__name__)
+from apps.email_analysis.serializers.email_analysis_serializers import EmailInputSerializer, EmailThemeSerializer
+from apps.email_analysis.services.ai_functions import (
+    classify_email, personalize_email, fix_grammar, summarize_email,
+    generate_subject, analyze_sentiment, generate_signature, generate_email
+)
 
 class SpamDetectionView(APIView):
-    @swagger_auto_schema(
-        operation_summary="Detect if an email is spam",
-        operation_description="Takes the email content as input and determines whether it is spam.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "email_content": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="The content of the email to analyze",
-                    example="This is a test email to check for spam.",
-                ),
-            },
-            required=["email_content"],
-        ),
-        responses={
-            200: openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    "is_spam": openapi.Schema(
-                        type=openapi.TYPE_BOOLEAN,
-                        description="Result of the spam detection",
-                        example=False,
-                    ),
-                },
-            ),
-            400: openapi.Response(
-                description="Bad Request",
-                examples={
-                    "application/json": {
-                        "error": "Email content is required"
-                    }
-                },
-            ),
-        },
-    )
+    @swagger_auto_schema(operation_summary="Detect if an email is spam", request_body=EmailInputSerializer)
     def post(self, request, *args, **kwargs):
         try:
-            serializer = SpamDetectionInputSerializer(data=request.data)
+            serializer = EmailInputSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
+            email_body = serializer.validated_data["email_body"]
 
-            email_content = serializer.validated_data["email_content"]
-
-            is_spam = classify_email(email_content)
-
-            return Response(
-                {
-                    "is_spam": is_spam,
-                },
-                status=status.HTTP_200_OK,
-            )
+            is_spam = classify_email(email_body)
+            return Response({"is_spam": is_spam}, status=status.HTTP_200_OK)
 
         except APIException as e:
-            logger.warning(f"Validation error: {str(e)}")
+            return Response({"error": str(e)}, status=e.status_code)
+
+
+class EmailPersonalizationView(APIView):
+    @swagger_auto_schema(operation_summary="Personalize an email", request_body=EmailInputSerializer)
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = EmailInputSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            email_body = serializer.validated_data["email_body"]
+
+            personalized_email = personalize_email(email_body)
+            return Response({"personalized_email": personalized_email}, status=status.HTTP_200_OK)
+
+        except APIException as e:
+            return Response({"error": str(e)}, status=e.status_code)
+
+
+class GrammarFixerView(APIView):
+    @swagger_auto_schema(operation_summary="Fix grammar in an email", request_body=EmailInputSerializer)
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = EmailInputSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            email_body = serializer.validated_data["email_body"]
+
+            corrected_email = fix_grammar(email_body)
+            return Response({"corrected_email": corrected_email}, status=status.HTTP_200_OK)
+
+        except APIException as e:
+            return Response({"error": str(e)}, status=e.status_code)
+
+
+class EmailSummarizationView(APIView):
+    @swagger_auto_schema(operation_summary="Summarize an email", request_body=EmailInputSerializer)
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = EmailInputSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            email_body = serializer.validated_data["email_body"]
+
+            summary = summarize_email(email_body)
+            return Response({"summary": summary}, status=status.HTTP_200_OK)
+
+        except APIException as e:
+            return Response({"error": str(e)}, status=e.status_code)
+
+
+class SubjectLineGeneratorView(APIView):
+    @swagger_auto_schema(operation_summary="Generate subject lines for an email", request_body=EmailInputSerializer)
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = EmailInputSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            email_body = serializer.validated_data["email_body"]
+
+            subjects = generate_subject(email_body)
+            return Response({"subject_suggestions": subjects}, status=status.HTTP_200_OK)
+
+        except APIException as e:
+            return Response({"error": str(e)}, status=e.status_code)
+
+
+class SentimentAnalysisView(APIView):
+    @swagger_auto_schema(operation_summary="Analyze the sentiment of an email", request_body=EmailInputSerializer)
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = EmailInputSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            email_body = serializer.validated_data["email_body"]
+
+            sentiment = analyze_sentiment(email_body)
+            return Response({"sentiment": sentiment}, status=status.HTTP_200_OK)
+
+        except APIException as e:
+            return Response({"error": str(e)}, status=e.status_code)
+
+
+class SignatureGeneratorView(APIView):
+    @swagger_auto_schema(operation_summary="Generate an email signature", request_body=EmailInputSerializer)
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = EmailInputSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            email_body = serializer.validated_data["email_body"]
+
+            signature = generate_signature(email_body)
+            return Response({"signature": signature}, status=status.HTTP_200_OK)
+
+        except APIException as e:
+            return Response({"error": str(e)}, status=e.status_code)
+
+
+class EmailGenerationView(APIView):
+    @swagger_auto_schema(operation_summary="Generate an email based on a theme", request_body=EmailThemeSerializer)
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = EmailThemeSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            theme = serializer.validated_data["theme"]
+
+            generated_email = generate_email(theme)
+            return Response({"generated_email": generated_email}, status=status.HTTP_200_OK)
+
+        except APIException as e:
             return Response({"error": str(e)}, status=e.status_code)
