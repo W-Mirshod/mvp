@@ -2,8 +2,13 @@ from collections import OrderedDict
 from email.mime.base import MIMEBase
 from django.core.files.base import ContentFile
 from django.core.mail.backends.base import BaseEmailBackend
-from apps.backend_mailer.settings import get_default_priority
 
+from apps.backend_mailer.mail import create
+from apps.backend_mailer.models import Email
+from apps.backend_mailer.settings import get_default_priority
+from apps.backend_mailer.signals import email_queued
+from apps.backend_mailer.utils import create_attachments
+from apps.backend_mailer.constants import BackendConstants
 
 class EmailBackend(BaseEmailBackend):
     def open(self):
@@ -17,10 +22,6 @@ class EmailBackend(BaseEmailBackend):
         Queue one or more EmailMessage objects and returns the number of
         email messages sent.
         """
-        from .mail import create
-        from .models import STATUS, Email
-        from .utils import create_attachments
-        from .signals import email_queued
 
         if not email_messages:
             return
@@ -76,7 +77,7 @@ class EmailBackend(BaseEmailBackend):
 
             if default_priority == "now":
                 status = email.dispatch()
-                if status == STATUS.sent:
+                if status == BackendConstants.STATUS.sent:
                     num_sent += 1
 
         if default_priority != "now":
