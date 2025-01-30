@@ -1,11 +1,8 @@
 import logging
-
 from django.core.exceptions import ImproperlyConfigured
-
 from apps.mail_servers.drivers.utils import chunks
 from apps.mail_servers.models.servers import Server
-from apps.mailers.choices import StatusType
-from apps.mailers.models.event import Event
+from apps.backend_mailer.models import EmailBackend
 
 logger = logging.getLogger(__name__)
 
@@ -24,24 +21,8 @@ class BaseDriver:
     def send_mail(self, subject, message, recipient_list):
         raise ImproperlyConfigured("Subclasses must implement this method")
 
-    def add_message_to_queue(self, subject, message, recipient_list):
-        return Event.create_new_event(
-            user=None,
-            server=self.server,
-            template=message,
-            results={"subject": subject, "recipient_list": recipient_list},
-        )
-
-    def process_queue(self):
-        events = Event.objects.filter(server=self.server, status=StatusType.NEW).all()
-        for event in events:
-            self.send_mail(
-                subject=event.sent_message.results["subject"],
-                message=event.sent_message.template,
-                recipient_list=event.sent_message.results["recipient_list"],
-            )
-            event.status = StatusType.IN_PROCESS
-            event.save(update_fields=("status",))
+    def process_queue(self, status: str, server: Server, email_backend: EmailBackend ):
+        raise ImproperlyConfigured("Subclasses must implement this method")
 
     def get_driver(self, driver_type):
         raise ImproperlyConfigured("Subclasses must implement this method")
