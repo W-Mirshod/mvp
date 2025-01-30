@@ -234,8 +234,9 @@ CELERY_BROKER_CONNECTION_RETRY = True
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 CELERY_IMPORTS = (
-    "apps.mail_servers.tasks",
     "apps.users.tasks",
+    "apps.backend_mailer.tasks",
+    "apps.mailers.tasks"
 )
 
 CELERY_DEFAULT_QUEUE = CeleryConstants.DEFAULT_QUEUE
@@ -243,17 +244,13 @@ CELERY_DEFAULT_EXCHANGE = CeleryConstants.DEFAULT_QUEUE
 CELERY_DEFAULT_ROUTING_KEY = CeleryConstants.DEFAULT_QUEUE
 
 CELERY_BEAT_SCHEDULE = {
-    # "test-periodic-task": {
-    #     "task": "apps.mail_servers.tasks.test_periodic_task",
-    #     "schedule": crontab(minute="*/1"),
-    # },
-    "process-new-mail-queue-every-3-seconds": {
-        "task": "apps.mail_servers.tasks.process_new_mail_queue",
-        "schedule": 3.0,
+    "backend_mailer_sending_task": {
+        "task": "apps.backend_mailer.tasks.send_queued_mail",
+        "schedule": 30.0,
     },
-    "process-in-process-mail-queue-every-3-seconds": {
-        "task": "apps.mail_servers.tasks.process_in_process_mail_queue",
-        "schedule": 3.0,
+    "campaign_status_check_task": {
+        "task": "apps.mailers.tasks.process_campaign",
+        "schedule": 10.0,
     },
 }
 """<- Celery settings"""
