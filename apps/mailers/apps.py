@@ -1,8 +1,7 @@
 from django.apps import AppConfig
 from health_check.plugins import plugin_dir
 
-from apps.mailers.health_check.v1.hс_sent_message import SentMessagesHealthCheck
-from apps.mailers.health_check.v1.hс_message_template import MessageTemplateHealthCheck
+from apps.mailers.health_check.v1.hс_campaign import CampaignHealthCheck
 
 
 class MailersConfig(AppConfig):
@@ -11,5 +10,4 @@ class MailersConfig(AppConfig):
 
     def ready(self):
 
-        plugin_dir.register(SentMessagesHealthCheck)
-        plugin_dir.register(MessageTemplateHealthCheck)
+        plugin_dir.register(CampaignHealthCheck)
