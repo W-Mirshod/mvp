@@ -1,1 +1,1 @@
-from apps.mailers.models.template import MessageTemplate
+from apps.mailers.models.campaign import Campaign
