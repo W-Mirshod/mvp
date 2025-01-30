@@ -1,6 +1,3 @@
-import json
-from typing import Dict
-
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files import File
@@ -35,7 +32,11 @@ def send_mail(
     """
 
     subject = force_str(subject)
-    status = None if priority == BackendConstants.PRIORITY.now else BackendConstants.STATUS.queued
+    status = (
+        None
+        if priority == BackendConstants.PRIORITY.now
+        else BackendConstants.STATUS.queued
+    )
     emails = [
         Email.objects.create(
             from_email=from_email,
@@ -140,7 +141,8 @@ def parse_priority(priority):
 
         if priority is None:
             raise ValueError(
-                "Invalid priority, must be one of: %s" % ", ".join(BackendConstants.PRIORITY._fields)
+                "Invalid priority, must be one of: %s"
+                % ", ".join(BackendConstants.PRIORITY._fields)
             )
     return priority
 

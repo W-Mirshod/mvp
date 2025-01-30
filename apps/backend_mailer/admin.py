@@ -143,7 +143,6 @@ class EmailAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("template")
 
-
     def truncated_message_id(self, instance):
         if instance.message_id:
             return Truncator(instance.message_id[1:-1]).chars(10)
