@@ -49,7 +49,7 @@ def validate_and_create_proxy(host, port, username, password, existing_proxies):
         return proxy_key, None
 
 
-def _process_proxies(proxies, existing_proxies):
+def process_proxies(proxies, existing_proxies):
     created_proxies = []
     errors = []
 

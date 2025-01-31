@@ -11,7 +11,7 @@ from apps.proxies.models.proxies import Proxy
 from apps.proxies.serializers.file_upload import TextFileUploadSerializer
 from apps.proxies.serializers.proxy import ProxySerizalizer
 from apps.proxies.tasks import check_proxy_health
-from apps.proxies.utils import check_single_proxy
+from apps.proxies.utils import check_single_proxy, get_existing_proxies, validate_and_create_proxy, process_proxies
 from utils.permissions import IsTokenValid
 
 
@@ -37,11 +37,7 @@ class ProxyViewSet(ModelViewSet):
         serializer = TextFileUploadSerializer(data=request.data)
         if serializer.is_valid():
             file = serializer.validated_data['file']
-            existing_proxies = set()
-
-            for proxy in Proxy.objects.all():
-                existing_proxies.add(f"{proxy.host}:{proxy.port}")
-
+            existing_proxies = get_existing_proxies()
             created_proxies = []
             errors = []
 
@@ -50,29 +46,18 @@ class ProxyViewSet(ModelViewSet):
                     line = line.decode('utf-8').strip()
                     if line:
                         parts = line.split(':')
-
-                        if len(parts) == 2:
-                            host, port = parts
-                            username = None
-                            password = None
-                        elif len(parts) == 4:
-                            host, port, username, password = parts
+                        if len(parts) in (2, 4):
+                            host, port = parts[:2]
+                            username = parts[2] if len(parts) == 4 else None
+                            password = parts[3] if len(parts) == 4 else None
+                            proxy_key, error = validate_and_create_proxy(host, port, username, password,
+                                                                               existing_proxies)
+                            if proxy_key:
+                                created_proxies.append(proxy_key)
+                            if error:
+                                errors.append(error)
                         else:
                             errors.append(f"Invalid proxy format: {line}")
-                            continue
-
-                        proxy_key = f"{host}:{port}"
-
-                        if proxy_key in existing_proxies:
-                            errors.append(f"Proxy {proxy_key} already exists.")
-                        else:
-                            Proxy.objects.create(
-                                host=host,
-                                port=int(port),
-                                username=username,
-                                password=password
-                            )
-                            created_proxies.append(proxy_key)
 
                 check_proxy_health.delay()
 
@@ -93,31 +78,11 @@ class ProxyViewSet(ModelViewSet):
     def upload_list_proxies(self, request):
         logger.info("Uploading list of proxies")
         proxies = request.data.get('proxies', [])
-        existing_proxies = set(f"{proxy.host}:{proxy.port}" for proxy in Proxy.objects.all())
-        created_proxies = []
-        errors = []
+        existing_proxies = get_existing_proxies()
+
+        created_proxies, errors = process_proxies(proxies, existing_proxies)
 
         try:
-            for proxy in proxies:
-                host = proxy.get('host')
-                port = proxy.get('port')
-                username = proxy.get('username', None)
-                password = proxy.get('password', None)
-
-                if host and port is not None:
-                    proxy_key = f"{host}:{port}"
-
-                    if proxy_key in existing_proxies:
-                        errors.append(f"Proxy {proxy_key} already exists.")
-                    else:
-                        Proxy.objects.create(
-                            host=host,
-                            port=int(port),
-                            username=username,
-                            password=password
-                        )
-                        created_proxies.append(proxy_key)
-
             check_proxy_health.delay()
 
             response_data = {
