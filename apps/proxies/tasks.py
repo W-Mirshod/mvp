@@ -4,6 +4,10 @@ from models.proxies import Proxy
 from .utils import check_single_proxy
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 @app.shared_task
@@ -17,4 +21,4 @@ def check_proxy_health():
             try:
                 future.result()
             except Exception as e:
-                print(f'Error checking proxy {proxy.host}:{proxy.port} - {e}')
+                logger.error(f'Error checking proxy {proxy.host}:{proxy.port} - {e}')
