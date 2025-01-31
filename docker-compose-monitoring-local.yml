@@ -1,0 +1,44 @@
+
+networks:
+  mega_mailer_network:
+    external: true
+
+volumes:
+    grafana_data:
+
+services:
+  mvp-back-grafana:
+    image: grafana/grafana
+    container_name: mvp-back-grafana
+    ports:
+      - "3010:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    restart: always
+    networks:
+      - mega_mailer_network
+
+  mvp-back-prometheus:
+    image: prom/prometheus:latest
+    container_name: mvp-back-prometheus
+    restart: always
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      - mega_mailer_network
+
+  mvp-back-node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: mvp-back-node_exporter
+    command:
+      - '--path.rootfs=/host'
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,z'
