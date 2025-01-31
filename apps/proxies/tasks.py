@@ -1,7 +1,7 @@
 from celery import app
 
-from models.proxies import Proxy
-from .utils import check_single_proxy
+from apps.proxies.models.proxies import Proxy
+from apps.proxies.utils import check_single_proxy
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
