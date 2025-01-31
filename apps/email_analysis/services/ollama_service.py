@@ -6,7 +6,7 @@ from apps.email_analysis.services.prompts import PROMPTS
 
 logger = logging.getLogger(__name__)
 
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434/api/generate")
 
 def call_ollama(model: str, prompt_key: str, **kwargs) -> str:
     """

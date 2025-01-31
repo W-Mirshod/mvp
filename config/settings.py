@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "apps.companies",
     "apps.proxies",
     "apps.backend_mailer",
+    "apps.email_analysis"
 ]
 
 MIDDLEWARE = [
