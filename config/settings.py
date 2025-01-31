@@ -553,3 +553,9 @@ POST_OFFICE = {
 }
 
 """ <-POST OFFICE"""
+
+"""<-  OLLAMA CONFIG """
+
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434/api/generate")
+
+""" OLLAMA CONFIG ->"""

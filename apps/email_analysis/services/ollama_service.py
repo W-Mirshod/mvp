@@ -1,12 +1,11 @@
-import os
-
 import requests
 import logging
 from apps.email_analysis.services.prompts import PROMPTS
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434/api/generate")
+OLLAMA_URL = settings.OLLAMA_URL
 
 def call_ollama(model: str, prompt_key: str, **kwargs) -> str:
     """
@@ -24,8 +23,7 @@ def call_ollama(model: str, prompt_key: str, **kwargs) -> str:
 
         payload = {"model": model, "prompt": prompt, "stream": False}
 
-        # 🚀 Increase timeout
-        response = requests.post(OLLAMA_URL, json=payload, timeout=600)  # 10 minutes timeout
+        response = requests.post(OLLAMA_URL, json=payload, timeout=600)
 
         if response.status_code != 200:
             logger.error(f"Ollama API error: {response.text}")

@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import APIException
+from rest_framework.permissions import IsAuthenticated
+from utils.permissions import IsTokenValid
 
 from apps.email_analysis.serializers.email_analysis_serializers import EmailInputSerializer, EmailThemeSerializer, \
     EmailPersonalizationInputSerializer
@@ -12,6 +14,10 @@ from apps.email_analysis.services.ai_functions import (
 )
 
 class SpamDetectionView(APIView):
+    permission_classes = (
+        IsAuthenticated,
+        IsTokenValid,
+    )
     @swagger_auto_schema(operation_summary="Detect if an email is spam", request_body=EmailInputSerializer)
     def post(self, request, *args, **kwargs):
         try:
@@ -27,6 +33,10 @@ class SpamDetectionView(APIView):
 
 
 class EmailPersonalizationView(APIView):
+    permission_classes = (
+        IsAuthenticated,
+        IsTokenValid,
+    )
     @swagger_auto_schema(
         operation_summary="Personalize an email based on a given theme",
         request_body=EmailPersonalizationInputSerializer
@@ -47,6 +57,10 @@ class EmailPersonalizationView(APIView):
 
 
 class GrammarFixerView(APIView):
+    permission_classes = (
+        IsAuthenticated,
+        IsTokenValid,
+    )
     @swagger_auto_schema(operation_summary="Fix grammar in an email", request_body=EmailInputSerializer)
     def post(self, request, *args, **kwargs):
         try:
@@ -62,6 +76,10 @@ class GrammarFixerView(APIView):
 
 
 class EmailSummarizationView(APIView):
+    permission_classes = (
+        IsAuthenticated,
+        IsTokenValid,
+    )
     @swagger_auto_schema(operation_summary="Summarize an email", request_body=EmailInputSerializer)
     def post(self, request, *args, **kwargs):
         try:
@@ -77,6 +95,10 @@ class EmailSummarizationView(APIView):
 
 
 class SubjectLineGeneratorView(APIView):
+    permission_classes = (
+        IsAuthenticated,
+        IsTokenValid,
+    )
     @swagger_auto_schema(operation_summary="Generate subject lines for an email", request_body=EmailInputSerializer)
     def post(self, request, *args, **kwargs):
         try:
@@ -92,6 +114,10 @@ class SubjectLineGeneratorView(APIView):
 
 
 class SentimentAnalysisView(APIView):
+    permission_classes = (
+        IsAuthenticated,
+        IsTokenValid,
+    )
     @swagger_auto_schema(operation_summary="Analyze the sentiment of an email", request_body=EmailInputSerializer)
     def post(self, request, *args, **kwargs):
         try:
@@ -107,6 +133,10 @@ class SentimentAnalysisView(APIView):
 
 
 class SignatureGeneratorView(APIView):
+    permission_classes = (
+        IsAuthenticated,
+        IsTokenValid,
+    )
     @swagger_auto_schema(operation_summary="Generate an email signature", request_body=EmailInputSerializer)
     def post(self, request, *args, **kwargs):
         try:
@@ -122,6 +152,10 @@ class SignatureGeneratorView(APIView):
 
 
 class EmailGenerationView(APIView):
+    permission_classes = (
+        IsAuthenticated,
+        IsTokenValid,
+    )
     @swagger_auto_schema(operation_summary="Generate an email based on a theme", request_body=EmailThemeSerializer)
     def post(self, request, *args, **kwargs):
         try:
