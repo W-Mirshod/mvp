@@ -14,25 +14,25 @@ PROMPTS = {
     "email_personalization": (
         "Rewrite the following email in a more engaging and user-friendly manner while keeping its original meaning intact.\n\n"
         "### Rules:\n"
-        "- Keep the key message unchanged.\n"
-        "- Use a natural, friendly tone.\n"
-        "- Do NOT add explanations, formatting, or extra words.\n\n"
-        "- Do NOT add any additional text like 'Here is the corrected email' or anything like that.\n\n"
+        "- Keep the original message, do NOT remove key details.\n"
+        "- Adapt the tone to match the given theme.\n"
+        "- Use a natural, friendly, and engaging tone.\n"
+        "- Do NOT add explanations, formatting, or extra words.\n"
+        "- Do NOT introduce any new ideas, just improve readability.\n\n"
+        "- The rewritten email MUST reflect the original theme: {theme}\n\n"
         "{email_body}\n\n"
         "### Rewritten Email:\n"
     ),
 
     "grammar_fixer": (
-        "You are an AI grammar corrector. Your ONLY task is to correct grammar, punctuation, and spelling errors in the provided email.\n\n"
+        "You are an AI grammar corrector. Your ONLY task is to correct grammar, punctuation, and spelling mistakes in the provided email.\n\n"
         "### NON-NEGOTIABLE RULES:\n"
-        "- Do NOT change sentence structure.\n"
-        "- Do NOT add or remove words, except for fixing mistakes.\n"
+        "- Do NOT change the sentence structure.\n"
+        "- Do NOT rewrite or rephrase any part of the email.\n"
+        "- Do NOT add or remove words (except for necessary corrections).\n"
         "- Do NOT add explanations, introductions, or formatting.\n"
-        "- Do NOT include phrases like 'Here is the corrected email' or any similar text.\n"
-        "- Return your response in pure JSON format like this:\n\n"
-        "{\n"
-        '  "corrected_email": "FULLY_CORRECTED_EMAIL_HERE"\n'
-        "}\n\n"
+        "- Do NOT modify the style or tone of the email.\n"
+        "- Reply with ONLY the corrected email, nothing else.\n\n"
         "{email_body}"
     ),
 

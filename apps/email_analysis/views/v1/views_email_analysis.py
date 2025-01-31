@@ -4,7 +4,8 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import APIException
 
-from apps.email_analysis.serializers.email_analysis_serializers import EmailInputSerializer, EmailThemeSerializer
+from apps.email_analysis.serializers.email_analysis_serializers import EmailInputSerializer, EmailThemeSerializer, \
+    EmailPersonalizationInputSerializer
 from apps.email_analysis.services.ai_functions import (
     classify_email, personalize_email, fix_grammar, summarize_email,
     generate_subject, analyze_sentiment, generate_signature, generate_email
@@ -26,14 +27,19 @@ class SpamDetectionView(APIView):
 
 
 class EmailPersonalizationView(APIView):
-    @swagger_auto_schema(operation_summary="Personalize an email", request_body=EmailInputSerializer)
+    @swagger_auto_schema(
+        operation_summary="Personalize an email based on a given theme",
+        request_body=EmailPersonalizationInputSerializer
+    )
     def post(self, request, *args, **kwargs):
         try:
-            serializer = EmailInputSerializer(data=request.data)
+            serializer = EmailPersonalizationInputSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            email_body = serializer.validated_data["email_body"]
 
-            personalized_email = personalize_email(email_body)
+            email_body = serializer.validated_data["email_body"]
+            theme = serializer.validated_data["theme"]
+
+            personalized_email = personalize_email(email_body, theme)
             return Response({"personalized_email": personalized_email}, status=status.HTTP_200_OK)
 
         except APIException as e:

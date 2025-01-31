@@ -5,9 +5,9 @@ def classify_email(email_body: str) -> bool:
     result = call_ollama(model="gemma", prompt_key="spam_detection", email_body=email_body)
     return result == "spam"
 
-def personalize_email(email_body: str) -> str:
-    """Rewrites the email to match the user's past writing style."""
-    return call_ollama(model="llama3", prompt_key="email_personalization", email_body=email_body)
+def personalize_email(email_body: str, theme: str) -> str:
+    """Rewrites the email while maintaining the given theme."""
+    return call_ollama(model="llama3", prompt_key="email_personalization", email_body=email_body, theme=theme)
 
 def fix_grammar(email_body: str) -> str:
     """Corrects grammar, spelling, and style issues in the email."""
