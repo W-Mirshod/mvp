@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from .checker import ProxyChecker
+from .models.proxies import Proxy
 
 
 def check_single_proxy(proxy):
@@ -28,3 +29,41 @@ def check_single_proxy(proxy):
     proxy.save()
 
     return proxy
+
+
+def get_existing_proxies():
+    return set(f"{proxy.host}:{proxy.port}" for proxy in Proxy.objects.all())
+
+
+def validate_and_create_proxy(host, port, username, password, existing_proxies):
+    proxy_key = f"{host}:{port}"
+    if proxy_key in existing_proxies:
+        return None, f"Proxy {proxy_key} already exists."
+    else:
+        Proxy.objects.create(
+            host=host,
+            port=int(port),
+            username=username,
+            password=password
+        )
+        return proxy_key, None
+
+
+def _process_proxies(proxies, existing_proxies):
+    created_proxies = []
+    errors = []
+
+    for proxy in proxies:
+        host = proxy.get('host')
+        port = proxy.get('port')
+        username = proxy.get('username', None)
+        password = proxy.get('password', None)
+
+        if host is not None and port is not None:
+            proxy_key, error = validate_and_create_proxy(host, port, username, password, existing_proxies)
+            if proxy_key:
+                created_proxies.append(proxy_key)
+            if error:
+                errors.append(error)
+
+    return created_proxies, errors
