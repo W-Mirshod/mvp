@@ -237,7 +237,8 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_IMPORTS = (
     "apps.users.tasks",
     "apps.backend_mailer.tasks",
-    "apps.mailers.tasks"
+    "apps.mailers.tasks",
+    "apps.proxies.tasks",
 )
 
 CELERY_DEFAULT_QUEUE = CeleryConstants.DEFAULT_QUEUE
@@ -252,6 +253,10 @@ CELERY_BEAT_SCHEDULE = {
     "campaign_status_check_task": {
         "task": "apps.mailers.tasks.process_campaign",
         "schedule": 10.0,
+    },
+    "proxy_check_health": {
+        "task": "app.proxies.tasks.check_proxy_health",
+        "schedule": 20.0,
     },
 }
 """<- Celery settings"""
