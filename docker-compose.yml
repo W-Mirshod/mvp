@@ -55,7 +55,7 @@ services:
       - ./scripts:/scripts
     networks:
       - mega_mailer_network
-    entrypoint: ["/bin/sh", "-c", "./scripts/entrypoint-ollama.sh"]
+    entrypoint: ["/bin/sh", "-c", "chmod +x ./scripts/entrypoint-ollama.sh && ./scripts/entrypoint-ollama.sh"]
     environment:
       - OLLAMA_CTX_SIZE=1024
       - OLLAMA_NUM_PARALLEL=1
