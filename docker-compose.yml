@@ -96,6 +96,23 @@ services:
     networks:
       - mega_mailer_network
 
+
+  email_engine:
+    image: postalsys/emailengine:latest
+    volumes:
+      - .:/mmb
+    ports:
+      - "8080:3000"
+    container_name: email_engine
+    restart: always
+    depends_on:
+      - mm-back-web
+      - redis
+    environment:
+      - REDIS_URL=redis://default:${REDIS_PASS}@mm_redis:6379/0
+    networks:
+      - mega_mailer_network
+
 networks:
   mega_mailer_network:
     external: true
