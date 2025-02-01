@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "apps.companies",
     "apps.proxies",
     "apps.backend_mailer",
+    "apps.email_analysis"
 ]
 
 MIDDLEWARE = [
@@ -552,3 +553,9 @@ POST_OFFICE = {
 }
 
 """ <-POST OFFICE"""
+
+"""<-  OLLAMA CONFIG """
+
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434/api/generate")
+
+""" OLLAMA CONFIG ->"""
