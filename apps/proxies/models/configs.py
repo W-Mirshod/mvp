@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 
@@ -16,6 +17,7 @@ class ProxyConfig(ChangeloggableMixin, DateModelMixin, DeleteModelMixin):
         ("ANONYMOUS", "Anonymous")
     )
 
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='proxy_config')
     judge = models.ManyToManyField(Judge)
     timeout = models.PositiveSmallIntegerField()
     countries = models.ManyToManyField(Country)
