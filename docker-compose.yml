@@ -96,6 +96,17 @@ services:
     networks:
       - mega_mailer_network
 
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    container_name: smtp4dev
+    restart: always
+    ports:
+      - '3000:80'
+      - '25:25'      # smtp
+    volumes:
+      - smtp4dev-data:/smtp4dev
+    networks:
+      - mega_mailer_network
 
 networks:
   mega_mailer_network:
@@ -104,3 +115,4 @@ networks:
 volumes:
   db_data:
   ollama_data:
+  smtp4dev-data:
