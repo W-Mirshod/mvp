@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework.permissions import IsAuthenticated
 
 from apps.mail_servers.models import IMAPServer, ProxyServer, SMTPServer
@@ -8,6 +10,8 @@ from apps.mail_servers.serializers import (
 )
 from utils.permissions import IsTokenValid
 from utils.views import MultiSerializerViewSet
+
+logger = logging.getLogger(__name__)
 
 
 class SMTPServerView(MultiSerializerViewSet):
@@ -21,6 +25,14 @@ class SMTPServerView(MultiSerializerViewSet):
         "list": SMTPServerSerializer,
     }
 
+    def list(self, request, *args, **kwargs):
+        logger.info(f"Listing SMTP servers for user: {request.user}")
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        logger.info(f"Retrieving SMTP server details for user: {request.user}")
+        return super().retrieve(request, *args, **kwargs)
+
 
 class IMAPServerView(MultiSerializerViewSet):
     queryset = IMAPServer.objects.all()
@@ -33,6 +45,14 @@ class IMAPServerView(MultiSerializerViewSet):
         "list": IMAPServerSerializer,
     }
 
+    def list(self, request, *args, **kwargs):
+        logger.info(f"Listing IMAP servers for user: {request.user}")
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        logger.info(f"Retrieving IMAP server details for user: {request.user}")
+        return super().retrieve(request, *args, **kwargs)
+
 
 class ProxyServerView(MultiSerializerViewSet):
     queryset = ProxyServer.objects.all()
@@ -44,3 +64,12 @@ class ProxyServerView(MultiSerializerViewSet):
         "retrieve": ProxyServerSerializer,
         "list": ProxyServerSerializer,
     }
+
+    def list(self, request, *args, **kwargs):
+        logger.info(f"Listing proxy servers for user: {request.user}")
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        logger.info(f"Retrieving proxy server details for user: {request.user}")
+        return super().retrieve(request, *args, **kwargs)
+    

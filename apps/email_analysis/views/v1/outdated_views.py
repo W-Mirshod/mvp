@@ -71,7 +71,6 @@ class SpamDetectionView(APIView):
             )
 
         except Exception as e:
-            logger.error(f"Unexpected error: {e}")
             return Response(
                 {"error": "An unexpected error occurred. Please try again later."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -143,5 +142,4 @@ class EmailPersonalizationView(APIView):
             )
 
         except APIException as e:
-            logger.warning(f"Validation error: {str(e)}")
             return Response({"error": str(e)}, status=e.status_code)
