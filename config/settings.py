@@ -19,6 +19,7 @@ DEBUG = environ_values.get("DEBUG")
 
 SECRET_KEY = environ_values.get("SECRET_KEY")
 FERNET_SECRET_KEY = environ_values.get("FERNET_SECRET_KEY")
+DISCORD_ALERT = environ_values.get("DISCORD_ALERT", False)
 
 ALLOWED_HOSTS = environ_values.get("ALLOWED_HOSTS").split(",")
 CORS_ORIGIN_WHITELIST = environ_values.get("CORS_ORIGIN_WHITELIST").split(",")
