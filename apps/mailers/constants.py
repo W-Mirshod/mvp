@@ -35,11 +35,12 @@ class CampaignConstants:
 
     """ STATUS ->"""
     STATUS = namedtuple(
-        "STATUS", "created completed stopped error ai_mailing sending "
-    )._make(range(6))
+        "STATUS", "created started completed stopped error ai_mailing sending "
+    )._make(range(7))
 
     STATUS_CHOICES = [
         (STATUS.created, _("created")),
+        (STATUS.started, _("started")),
         (STATUS.completed, _("Completed")),
         (STATUS.stopped, _("Stopped")),
         (STATUS.error, _("Error")),
