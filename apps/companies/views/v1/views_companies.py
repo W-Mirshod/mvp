@@ -34,9 +34,8 @@ class CompanyView(MultiSerializerViewSet):
         return super().list(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
-        logger.info("Creating new company")
+        logger.info(f"Creating new company with data: {request.data}")
         return super().create(request, *args, **kwargs)
-
     def destroy(self, request, *args, **kwargs):
         logger.info(f"Deleting company with id {kwargs.get('pk')}")
         return super().destroy(request, *args, **kwargs)
@@ -44,4 +43,8 @@ class CompanyView(MultiSerializerViewSet):
     def update(self, request, *args, **kwargs):
         logger.info(f"Updating company with id {kwargs.get('pk')}")
         return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        logger.info(f"Partially updating company with id {kwargs.get('pk')}")
+        return super().partial_update(request, *args, **kwargs)
     
