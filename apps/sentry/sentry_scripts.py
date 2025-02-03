@@ -1,8 +1,8 @@
 import logging
 
 from sentry_sdk import capture_message, push_scope
-
 from apps.sentry.sentry_constants import SentryConstants
+from apps.sentry.tasks import task_send_discord_alert
 from config.settings import USE_SENTRY
 
 logger = logging.getLogger(__name__)
@@ -52,6 +52,9 @@ class SendToSentry:
                 if level == SentryConstants.SENTRY_MSG_INFO:
                     scope.clear_breadcrumbs()
                 capture_message(message=message, level=level)
+
+            task_send_discord_alert.s(scope_data=scope_data).apply_async()
+
         else:
             """if debug"""
             logger_msg = f"{message} | {detail} | {extra_detail} | {tag}"
