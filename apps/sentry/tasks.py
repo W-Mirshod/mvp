@@ -1,3 +1,5 @@
+from typing import Dict
+
 from celery.utils.log import get_task_logger
 from apps.sentry.scripts.requests_logic import DiscordAlertLogic
 from celery_scripts.celery_app import celery_app
@@ -11,10 +13,10 @@ logger = get_task_logger(__name__)
     queue=CeleryConstants.DATA_PROCESSING_QUEUE,
     ignore_result=False,
 )
-def task_send_discord_alert(message: str, detail: str) -> bool:
+def task_send_discord_alert(scope_data: Dict) -> bool:
     try:
 
-        DiscordAlertLogic.send_msg_discord(msg=message, detail=detail)
+        DiscordAlertLogic.send_msg_discord(scope_data=scope_data)
     except Exception:
         return False
     logger.info(f"Done")

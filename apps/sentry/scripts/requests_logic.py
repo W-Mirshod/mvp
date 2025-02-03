@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 import requests
 from requests import Response
@@ -35,16 +36,25 @@ class DiscordAlertLogic:
                 return True, response_obj
 
     @classmethod
-    def send_msg_discord(
-        cls,
-        msg: str,
-        detail: str,
-    ) -> None:
+    def send_msg_discord(cls, scope_data: Dict) -> None:
+        if DISCORD_ALERT:
+            message = scope_data.get("message")
+            level = scope_data.get("level")
+            tag = scope_data.get("tag")
+            detail = scope_data.get("detail")
+            extra_detail = scope_data.get("extra_detail")
 
-        content = {"content": f"{msg} \n {detail}"}
-        success, response_obj = cls.do_request(
-            url=DISCORD_ALERT,
-            json_data=content,
-        )
+            content = {
+                "content": f"Message : {message}\n"
+                f"Level: {level}\n"
+                f"Tag: {tag}\n"
+                f"Detail: {detail}\n"
+                f"Extra detail: {extra_detail}"
+            }
 
-        return response_obj.json()
+            cls.do_request(
+                url=DISCORD_ALERT,
+                json_data=content,
+            )
+
+            return

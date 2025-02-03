@@ -53,7 +53,7 @@ class SendToSentry:
                     scope.clear_breadcrumbs()
                 capture_message(message=message, level=level)
 
-            task_send_discord_alert.s(message=message, detail=detail).apply_async()
+            task_send_discord_alert.s(scope_data=scope_data).apply_async()
 
         else:
             """if debug"""
