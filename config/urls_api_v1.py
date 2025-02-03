@@ -12,6 +12,9 @@ urlpatterns = [
     path("companies/", include("apps.companies.urls.urls_companies")),
     path("monitoring/", include("apps.metrics.urls")),
     path("proxies/", include("apps.proxies.urls.urls_proxies")),
+    path("judges/", include("apps.proxies.urls.urls_judges")),
+    path("countries/", include("apps.proxies.urls.urls_countries")),
+    path("configs/", include("apps.proxies.urls.urls_configs")),
     path("email-analysis/", include("apps.email_analysis.urls.urls_email_analysis")),
     path(
         "docs/",
