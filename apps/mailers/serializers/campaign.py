@@ -31,6 +31,7 @@ class RetrieveCampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = (
+            "id",
             "author",
             "campaign_id",
             "campaign_name",
@@ -45,3 +46,9 @@ class RetrieveCampaignSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+
+
+class StartCampaignSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Campaign
+        fields = ("status",)

@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from apps.mailers.serializers.campaign import (
     CreateCampaignSerializer,
     RetrieveCampaignSerializer,
+    StartCampaignSerializer,
 )
 from apps.mailers.view_logic.campaign_qs import CampaignQueryset
 from utils.permissions import IsTokenValid, IsOwner
@@ -18,9 +19,10 @@ class CampaignView(MultiSerializerViewSet):
     permission_classes = None  # see get_permissions
 
     serializers = {
-        "list": CreateCampaignSerializer,
+        "list": RetrieveCampaignSerializer,
         "create": CreateCampaignSerializer,
         "retrieve": RetrieveCampaignSerializer,
+        "partial_update": StartCampaignSerializer,
     }
 
     def get_queryset(self):

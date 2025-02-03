@@ -16,7 +16,7 @@ logger = get_task_logger(__name__)
 def process_campaign():
 
     campaigns = CRUDCampaign.filter_campaign(
-        Q(status=CampaignConstants.STATUS.created), fields=["status"]
+        Q(status=CampaignConstants.STATUS.started), fields=["status"]
     )
     for campaign in campaigns:
         try:
