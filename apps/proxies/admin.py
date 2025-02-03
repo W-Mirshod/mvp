@@ -15,7 +15,7 @@ class ProxyAdmin(admin.ModelAdmin):
         "timeout",
         "username",
         "password",
-        "user",
+        "author",
     )
     list_filter = (
         "is_active",
@@ -24,7 +24,7 @@ class ProxyAdmin(admin.ModelAdmin):
     )
     search_fields = (
         "is_active",
-        "user",
+        "author",
         "anonymity",
     )
     ordering = ("-id",)

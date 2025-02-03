@@ -17,7 +17,7 @@ class ProxyConfig(ChangeloggableMixin, DateModelMixin, DeleteModelMixin):
         ("ANONYMOUS", "Anonymous")
     )
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='proxy_config')
+    author = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='proxy_config')
     judge = models.ManyToManyField(Judge)
     timeout = models.PositiveSmallIntegerField()
     countries = models.ManyToManyField(Country)

@@ -1,0 +1,12 @@
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+
+from apps.proxies.models import ProxyConfig
+from apps.proxies.serializers.proxy_config import ProxyConfigSerializer
+from utils.permissions import IsTokenValid
+
+
+class ProxyConfigViewSet(viewsets.ModelViewSet):
+    queryset = ProxyConfig.objects.all()
+    serializer_class = ProxyConfigSerializer
+    permission_classes = (IsAuthenticated, IsTokenValid)

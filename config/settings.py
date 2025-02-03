@@ -255,7 +255,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 10.0,
     },
     "proxy_check_health": {
-        "task": "app.proxies.tasks.check_proxy_health",
+        "task": "apps.proxies.tasks.check_proxy_health",
         "schedule": 20.0,
     },
 }

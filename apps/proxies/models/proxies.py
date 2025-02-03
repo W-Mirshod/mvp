@@ -18,7 +18,7 @@ class Proxy(ChangeloggableMixin, DateModelMixin, DeleteModelMixin):
     timeout = models.PositiveIntegerField(blank=True, null=True)
     username = models.CharField(max_length=255, blank=True, null=True)
     password = models.CharField(max_length=255, blank=True, null=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ("-id", )
