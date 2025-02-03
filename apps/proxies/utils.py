@@ -1,12 +1,17 @@
 from datetime import datetime
 
-from .checker import ProxyChecker
-from .models.proxies import Proxy
+from apps.proxies.checker import ProxyChecker
+from apps.proxies.models.proxies import Proxy
+from apps.proxies.models.configs import ProxyConfig
 
 
-def check_single_proxy(proxy):
-
+def check_single_proxy(proxy, user=None):
     checker = ProxyChecker()
+
+    if ProxyConfig.objects.filter(author=user):
+        config = ProxyConfig.objects.filter(author=user).first()
+        checker.proxy_judges = config.judge
+        checker.timeout = config.timeout
 
     response = checker.check_proxy(
         f'{proxy.host}:{proxy.port}',

@@ -5,12 +5,14 @@ import random
 
 
 class ProxyChecker:
-    def __init__(self):
+    def __init__(self, judges=None, timeout=1):
         self.ip = self.get_ip()
-        self.proxy_judges = [
-            'http://proxyjudge.us/azenv.php',
-            'http://mojeip.net.pl/asdfa/azenv.php'
-        ]
+        self.proxy_judges = judges if judges is not None else \
+            [
+                'http://proxyjudge.us/azenv.php',
+                'http://mojeip.net.pl/asdfa/azenv.php'
+            ]
+        self.timeout = timeout
 
     def get_ip(self):
         r = self.send_query(url='https://api.ipify.org/')
@@ -26,7 +28,7 @@ class ProxyChecker:
 
         c.setopt(c.URL, url or random.choice(self.proxy_judges))
         c.setopt(c.WRITEDATA, response)
-        c.setopt(c.TIMEOUT, 1)
+        c.setopt(c.TIMEOUT, self.timeout)
 
         if user is not None and password is not None:
             c.setopt(c.PROXYUSERPWD, f"{user}:{password}")

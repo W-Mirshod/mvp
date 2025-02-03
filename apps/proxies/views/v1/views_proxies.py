@@ -27,7 +27,7 @@ class ProxyViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         logger.info("Retrieving proxy")
         instance = self.get_object()
-        proxy = check_single_proxy(instance)
+        proxy = check_single_proxy(instance, self.request.user)
         serializer = self.get_serializer(proxy)
         return Response(serializer.data)
 
