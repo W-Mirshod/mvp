@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.changelog.mixins import ChangeloggableMixin
 from apps.changelog.signals import journal_save_handler, journal_delete_handler
-from apps.users.choices import UserRoles
+from apps.users.choices import UserConstance
 
 
 class UserManager(BaseUserManager):
@@ -64,9 +64,14 @@ class User(ChangeloggableMixin, AbstractUser):
     jwt_max_out = models.DateTimeField(blank=True, null=True)
 
     role = models.CharField(
-        max_length=255, choices=UserRoles.CHOICES, default=UserRoles.USER
+        max_length=255,
+        choices=UserConstance.USER_ROLES_CHOICES,
+        default=UserConstance.USER,
     )
 
+    telegram_username = models.CharField(
+        max_length=UserConstance.TG_USERNAME_MAX_LENGTH, blank=True, null=True
+    )
     username = None
 
     USERNAME_FIELD = "email"
