@@ -66,6 +66,9 @@ services:
   # Django WSGI App
   mm_back-socket:
     image: mvp-back-mm-back-web:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     container_name: mm-back-socket
     restart: always
     ports:
@@ -79,10 +82,13 @@ services:
     command: ./scripts/start_dj_sockets.sh
     networks:
       - mega_mailer_network
-
+      
   # Flower
   flower:
     image: mvp-back-mm-back-web:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     command: ["sh", "./scripts/entrypoint-flower.sh"]
     volumes:
       - .:/mmb
