@@ -6,7 +6,7 @@ class ServerType:
     Type of the server
     """
 
-    SMTP = "smpt"
+    SMTP = "smtp"
     IMAP = "imap"
     PROXY = "proxy"
 
