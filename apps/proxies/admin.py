@@ -9,7 +9,6 @@ class ProxyAdmin(admin.ModelAdmin):
         "host",
         "port",
         "is_active",
-        "country",
         "country_code",
         "anonymity",
         "timeout",
@@ -19,7 +18,6 @@ class ProxyAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "is_active",
-        "country",
         "timeout",
     )
     search_fields = (
@@ -28,3 +26,4 @@ class ProxyAdmin(admin.ModelAdmin):
         "anonymity",
     )
     ordering = ("-id",)
+    filter_horizontal = ('countries',)
