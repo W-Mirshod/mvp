@@ -11,7 +11,6 @@ services:
     depends_on:
       - db
       - redis
-      - ollama
     restart: always
     ports:
       - "8000:8000"
@@ -43,29 +42,9 @@ services:
     networks:
       - mega_mailer_network
 
-
-  ollama:
-    image: ollama/ollama
-    container_name: ollama
-    restart: always
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-      - ./scripts:/scripts
-    networks:
-      - mega_mailer_network
-    entrypoint: ["/bin/sh", "-c", "chmod +x ./scripts/entrypoint-ollama.sh && ./scripts/entrypoint-ollama.sh"]
-    environment:
-      - OLLAMA_CTX_SIZE=1024
-      - OLLAMA_NUM_PARALLEL=1
-      - OLLAMA_MAX_QUEUE=256
-      - OLLAMA_KEEP_ALIVE=10m
-
-
   # Django WSGI App
   mm_back-socket:
-    image: mvp-back-mm-back-web:latest
+    image: back-mm-back-web:latest
     container_name: mm-back-socket
     restart: always
     ports:
@@ -75,14 +54,13 @@ services:
     depends_on:
       - db
       - redis
-      - ollama
     command: ./scripts/start_dj_sockets.sh
     networks:
       - mega_mailer_network
 
   # Flower
   flower:
-    image: mvp-back-mm-back-web:latest
+    image: back-mm-back-web:latest
     command: ["sh", "./scripts/entrypoint-flower.sh"]
     volumes:
       - .:/mmb
@@ -114,5 +92,4 @@ networks:
 
 volumes:
   db_data:
-  ollama_data:
   smtp4dev-data:
