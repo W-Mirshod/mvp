@@ -19,10 +19,13 @@ logger = logging.getLogger(__name__)
 
 
 class ProxyViewSet(ModelViewSet):
-    queryset = Proxy.objects.all()
+    queryset = Proxy.objects.none()
     serializer_class = ProxySerizalizer
     pagination_class = PageNumberPagination
     permission_classes = (IsAuthenticated, IsTokenValid)
+
+    def get_queryset(self):
+        return Proxy.objects.filter(author_id=self.request.user.pk)
 
     def retrieve(self, request, *args, **kwargs):
         logger.info("Retrieving proxy")
