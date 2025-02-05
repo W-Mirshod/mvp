@@ -44,7 +44,6 @@ def check_server_task(task_id, settings_id):
             error_message = str(e)
             logger.error(f"Task {task_id}: Error checking {server.type.upper()} server ({server.url}): {error_message}")
 
-        # Store result
         SMTPCheckerTaskResult.objects.create(
             task=task,
             server=server,
@@ -74,11 +73,11 @@ def check_smtp(server, settings):
             smtp.quit()
 
             success = True
-            break  # Exit loop on success
+            break
         except Exception as e:
             attempt += 1
             if attempt >= settings.attempts_for_sending_count:
-                raise e  # Raise only if max retries are reached
+                raise e
 
     return round(time.time() - start_time, 3) if success else None
 
@@ -97,11 +96,11 @@ def check_imap(server, settings):
             imap.logout()
 
             success = True
-            break  # Exit loop on success
+            break
         except Exception as e:
             attempt += 1
             if attempt >= settings.attempts_for_sending_count:
-                raise e  # Raise only if max retries are reached
+                raise e
 
     return round(time.time() - start_time, 3) if success else None
 
@@ -126,11 +125,11 @@ def check_proxy(server, settings):
                 raise Exception(f"Proxy returned status code {response.status_code}")
 
             success = True
-            break  # Exit loop on success
+            break
         except Exception as e:
             attempt += 1
             if attempt >= settings.attempts_for_sending_count:
-                raise e  # Raise only if max retries are reached
+                raise e
 
     return round(time.time() - start_time, 3) if success else None
 
