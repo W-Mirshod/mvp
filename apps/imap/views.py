@@ -5,14 +5,18 @@ from rest_framework.decorators import action
 from django.core.exceptions import ValidationError
 from .services import IMAPService
 from .models import EmailAccount
+import sentry_sdk
+
 
 class EmailViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
-    queryset = EmailAccount.objects.all()
+
+    def get_queryset(self):
+        return EmailAccount.objects.filter(user=self.request.user)
 
     def _get_service(self):
         """Helper to create service instance"""
-        account = EmailAccount.objects.filter(is_active=True).first()
+        account = self.get_queryset().filter(is_active=True).first()
         return IMAPService(account)
 
     @action(detail=False)
@@ -22,6 +26,7 @@ class EmailViewSet(viewsets.ModelViewSet):
             folder = request.query_params.get('folder', 'INBOX')
             return Response(service.check_folder(folder))
         except Exception as e:
+            sentry_sdk.capture_exception(e)
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
@@ -40,11 +45,13 @@ class EmailViewSet(viewsets.ModelViewSet):
                 'emails': service.get_latest_emails(folder, limit)
             })
         except ValidationError as e:
+            sentry_sdk.capture_exception(e)
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
-        except ValueError:
+        except ValueError as e:
+            sentry_sdk.capture_exception(e)
             return Response(
                 {'error': 'Invalid limit parameter'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -58,6 +65,7 @@ class EmailViewSet(viewsets.ModelViewSet):
             stats = service.get_folder_stats()
             return Response(stats)
         except ValidationError as e:
+            sentry_sdk.capture_exception(e)
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
