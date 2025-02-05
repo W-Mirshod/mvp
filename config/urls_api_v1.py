@@ -13,6 +13,7 @@ urlpatterns = [
     path("monitoring/", include("apps.metrics.urls")),
     path("proxies/", include("apps.proxies.urls.urls_proxies")),
     path("email-analysis/", include("apps.email_analysis.urls.urls_email_analysis")),
+    path("imap/", include("apps.imap.urls", namespace="imap")),
     path(
         "docs/",
         include_docs_urls(
