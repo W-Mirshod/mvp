@@ -9,15 +9,10 @@ from apps.smtp_checker.serializers.smtp_serializers import (
     SMTPCheckerSettingsSerializer, SMTPCheckerTaskSerializer, SMTPCheckerTaskResultSerializer
 )
 from utils.permissions import IsTokenValid, IsOwner
+from utils.views import MultiSerializerViewSet
 
 
-class ServerCheckerSettingsAPIView(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
-):
+class ServerCheckerSettingsAPIView(MultiSerializerViewSet):
     """API for managing server checker settings"""
     queryset = SMTPCheckerSettings.objects.all()
     serializer_class = SMTPCheckerSettingsSerializer
@@ -38,13 +33,7 @@ class ServerCheckerSettingsAPIView(
             return [permission() for permission in (IsAuthenticated, IsTokenValid)]
 
 
-class ServerCheckerTaskAPIView(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
-):
+class ServerCheckerTaskAPIView(MultiSerializerViewSet):
     """API for managing SMTP Checker tasks"""
     queryset = SMTPCheckerTask.objects.all()
     serializer_class = SMTPCheckerTaskSerializer
@@ -72,11 +61,7 @@ class ServerCheckerTaskAPIView(
 
         return Response({"detail": "Task has been queued for processing."}, status=status.HTTP_200_OK)
 
-class ServerCheckerTaskResultAPIView(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
-):
+class ServerCheckerTaskResultAPIView(MultiSerializerViewSet):
     """API for retrieving server checker results (SMTP, IMAP, Proxy)"""
     queryset = SMTPCheckerTaskResult.objects.all()
     serializer_class = SMTPCheckerTaskResultSerializer
