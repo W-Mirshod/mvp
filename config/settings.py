@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "apps.backend_mailer",
     "apps.email_analysis",
     "apps.imap",
+    "apps.smtp_checker"
 ]
 
 MIDDLEWARE = [

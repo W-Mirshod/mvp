@@ -14,6 +14,7 @@ urlpatterns = [
     path("proxies/", include("apps.proxies.urls.urls_proxies")),
     path("email-analysis/", include("apps.email_analysis.urls.urls_email_analysis")),
     path("imap/", include("apps.imap.urls", namespace="imap")),
+    path("smtp-checker/", include("apps.smtp_checker.urls.smtp_urls")),
     path(
         "docs/",
         include_docs_urls(
