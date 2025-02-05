@@ -1,8 +1,15 @@
+import logging
+
 from rest_framework import serializers
 
 from apps.proxies.models import ProxyConfig, Judge, Country
 from apps.proxies.serializers.country import CountrySerializer
 from apps.proxies.serializers.judge import JudgeSerializer
+from apps.sentry.sentry_constants import SentryConstants
+from apps.sentry.sentry_scripts import SendToSentry
+
+
+logger = logging.getLogger(__name__)
 
 
 class ProxyConfigSerializer(serializers.ModelSerializer):
@@ -41,6 +48,16 @@ class ProxyConfigSerializer(serializers.ModelSerializer):
             self._create_or_update_related_objects(proxy_config, 'countries', Country, countries_data)
             return proxy_config
         except Exception as e:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"ProxyConfigSerializer.create: Exception",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": f"Creating proxy serializer failed",
+                    "extra_detail": str(e),
+                }
+            )
+            logger.error(f"Creating proxy serializer failed {e}")
             raise serializers.ValidationError(f"Error creating ProxyConfig: {str(e)}")
 
     def update(self, instance, validated_data):
@@ -60,4 +77,14 @@ class ProxyConfigSerializer(serializers.ModelSerializer):
 
             return instance
         except Exception as e:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"ProxyConfigSerializer.update: Exception",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": f"Updating proxy serializer failed",
+                    "extra_detail": str(e),
+                }
+            )
+            logger.error(f"Updating proxy serializer failed {e}")
             raise serializers.ValidationError(f"Error updating ProxyConfig: {str(e)}")
