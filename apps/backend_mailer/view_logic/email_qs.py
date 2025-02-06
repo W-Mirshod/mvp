@@ -19,7 +19,12 @@ class EmailQueryset:
         action: str,
         kwargs: dict,
     ) -> list[Email]:
-        """tba"""
+        """
+        Swagger:
+        - Retrieves a queryset of Email objects filtered according to user and action.
+        - Uses ordering and select_related to optimize the query.
+        - Captures and reports exceptions via Sentry.
+        """
 
         query, order_by = cls.queryset(user_obj=user_obj, action=action, kwargs=kwargs)
         emails_qs = cls.filter_email(query, order_by)

@@ -19,7 +19,12 @@ class EmailBackendQueryset:
         action: str,
         kwargs: dict,
     ) -> list[EmailBackend]:
-        """tba"""
+        """
+        Swagger:
+        - Returns a filtered list of EmailBackend objects based on the provided user and action.
+        - Implements ordering and prefetching for efficient database retrieval.
+        - Exceptions are logged and sent to Sentry for monitoring.
+        """
 
         query, order_by = cls.queryset(user_obj=user_obj, action=action, kwargs=kwargs)
         email_backends = cls.filter_email_backends(query, order_by)

@@ -1,6 +1,8 @@
 import logging
 
 from rest_framework.permissions import IsAuthenticated
+from drf_yasg.utils import swagger_auto_schema
+from django.utils.decorators import method_decorator
 
 from apps.backend_mailer.serializers.email_backend import (
     CreateEmailBackendSerializer,
@@ -11,6 +13,11 @@ from utils.permissions import IsTokenValid, IsOwner
 from utils.views import MultiSerializerViewSet
 
 logger = logging.getLogger(__name__)
+
+
+@method_decorator(name='list', decorator=swagger_auto_schema(operation_description="List email backends"))
+@method_decorator(name='create', decorator=swagger_auto_schema(operation_description="Create an email backend"))
+@method_decorator(name='retrieve', decorator=swagger_auto_schema(operation_description="Retrieve an email backend"))
 
 
 class EmailBackendView(MultiSerializerViewSet):
@@ -39,4 +46,3 @@ class EmailBackendView(MultiSerializerViewSet):
             ]
         else:
             return [permission() for permission in (IsAuthenticated, IsTokenValid)]
-        

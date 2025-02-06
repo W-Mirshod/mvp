@@ -12,6 +12,7 @@ from apps.email_analysis.services.ai_functions import classify_email,personalize
 
 logger = logging.getLogger(__name__)
 
+
 class SpamDetectionView(APIView):
     @swagger_auto_schema(
         operation_summary="Detect if an email is spam",
@@ -80,7 +81,7 @@ class SpamDetectionView(APIView):
 class EmailPersonalizationView(APIView):
     @swagger_auto_schema(
         operation_summary="Generate a personalized version of an email",
-        operation_description="Takes an email content and rewrites it in a more engaging and friendly way.",
+        operation_description="Receive email content as input.\nRewrite content in a friendly tone.\nReturn the personalized email.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={

@@ -1,6 +1,8 @@
 import logging
 
 from rest_framework.permissions import IsAuthenticated
+from drf_yasg.utils import swagger_auto_schema
+from django.utils.decorators import method_decorator
 
 from apps.backend_mailer.serializers.email_serializers import (
     CreateEmailSerializer,
@@ -11,6 +13,10 @@ from utils.permissions import IsTokenValid, IsOwner
 from utils.views import MultiSerializerViewSet
 
 logger = logging.getLogger(__name__)
+
+@method_decorator(name='list', decorator=swagger_auto_schema(operation_description="List sent messages"))
+@method_decorator(name='create', decorator=swagger_auto_schema(operation_description="Create a sent message"))
+@method_decorator(name='retrieve', decorator=swagger_auto_schema(operation_description="Retrieve a sent message"))
 
 
 class SentMessageView(MultiSerializerViewSet):
@@ -38,4 +44,3 @@ class SentMessageView(MultiSerializerViewSet):
             ]
         else:
             return [permission() for permission in (IsAuthenticated, IsTokenValid)]
-        

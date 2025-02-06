@@ -19,7 +19,12 @@ class EmailTemplateQueryset:
         action: str,
         kwargs: dict,
     ) -> list[EmailTemplate] | QuerySet[EmailTemplate]:
-        """tba"""
+        """
+        Swagger:
+        - Returns a filtered queryset of EmailTemplate objects based on user and action.
+        - Applies ordering and related field inclusion.
+        - Handles exceptions by sending error details to Sentry.
+        """
 
         query, order_by = cls.queryset(user_obj=user_obj, action=action, kwargs=kwargs)
         email_templates_qs = cls.filter_email_templates(query, order_by)
