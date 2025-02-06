@@ -13,7 +13,11 @@ from utils.views import MultiSerializerViewSet
 
 
 class ServerCheckerSettingsAPIView(MultiSerializerViewSet):
-    """API for managing server checker settings"""
+    """
+    API for managing server checker settings.
+    Allows users to create, retrieve, update, and delete SMTP checker settings.
+    Only authenticated users can access this API.
+    """
     queryset = SMTPCheckerSettings.objects.all()
     serializer_class = SMTPCheckerSettingsSerializer
     permission_classes = [IsAuthenticated]
@@ -34,7 +38,11 @@ class ServerCheckerSettingsAPIView(MultiSerializerViewSet):
 
 
 class ServerCheckerTaskAPIView(MultiSerializerViewSet):
-    """API for managing SMTP Checker tasks"""
+    """
+    API for managing SMTP Checker tasks.
+    Allows users to create and run SMTP checker tasks.
+    Tasks are processed asynchronously.
+    """
     queryset = SMTPCheckerTask.objects.all()
     serializer_class = SMTPCheckerTaskSerializer
     permission_classes = [IsAuthenticated]
@@ -62,7 +70,11 @@ class ServerCheckerTaskAPIView(MultiSerializerViewSet):
         return Response({"detail": "Task has been queued for processing."}, status=status.HTTP_200_OK)
 
 class ServerCheckerTaskResultAPIView(MultiSerializerViewSet):
-    """API for retrieving server checker results (SMTP, IMAP, Proxy)"""
+    """
+    API for retrieving server checker results (SMTP, IMAP, Proxy).
+    Provides access to the results of completed SMTP checker tasks.
+    Only authenticated users can access this API.
+    """
     queryset = SMTPCheckerTaskResult.objects.all()
     serializer_class = SMTPCheckerTaskResultSerializer
     permission_classes = [IsAuthenticated]

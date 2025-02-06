@@ -13,12 +13,17 @@ from apps.email_analysis.services.ai_functions import (
     generate_subject, analyze_sentiment, generate_signature, generate_email
 )
 
+
 class SpamDetectionView(APIView):
     permission_classes = (
         IsAuthenticated,
         IsTokenValid,
     )
-    @swagger_auto_schema(operation_summary="Detect if an email is spam", request_body=EmailInputSerializer)
+    @swagger_auto_schema(
+        operation_summary="Detect if an email is spam",
+        operation_description="Detect if email is spam.\nLog the detection process.\nReturn a boolean flag.",
+        request_body=EmailInputSerializer
+    )
     def post(self, request, *args, **kwargs):
         try:
             serializer = EmailInputSerializer(data=request.data)
@@ -39,6 +44,7 @@ class EmailPersonalizationView(APIView):
     )
     @swagger_auto_schema(
         operation_summary="Personalize an email based on a given theme",
+        operation_description="Personalize email content.\nEnhance tone and style.\nReturn a customized email.",
         request_body=EmailPersonalizationInputSerializer
     )
     def post(self, request, *args, **kwargs):
@@ -61,7 +67,11 @@ class GrammarFixerView(APIView):
         IsAuthenticated,
         IsTokenValid,
     )
-    @swagger_auto_schema(operation_summary="Fix grammar in an email", request_body=EmailInputSerializer)
+    @swagger_auto_schema(
+        operation_summary="Fix grammar in an email",
+        operation_description="Detect grammatical errors.\nApply corrections.\nReturn the corrected email.",
+        request_body=EmailInputSerializer
+    )
     def post(self, request, *args, **kwargs):
         try:
             serializer = EmailInputSerializer(data=request.data)
@@ -80,7 +90,11 @@ class EmailSummarizationView(APIView):
         IsAuthenticated,
         IsTokenValid,
     )
-    @swagger_auto_schema(operation_summary="Summarize an email", request_body=EmailInputSerializer)
+    @swagger_auto_schema(
+        operation_summary="Summarize an email",
+        operation_description="Extract key ideas from email.\nCondense information effectively.\nReturn a summary string.",
+        request_body=EmailInputSerializer
+    )
     def post(self, request, *args, **kwargs):
         try:
             serializer = EmailInputSerializer(data=request.data)
@@ -99,7 +113,11 @@ class SubjectLineGeneratorView(APIView):
         IsAuthenticated,
         IsTokenValid,
     )
-    @swagger_auto_schema(operation_summary="Generate subject lines for an email", request_body=EmailInputSerializer)
+    @swagger_auto_schema(
+        operation_summary="Generate subject lines for an email",
+        operation_description="Analyze email content.\nDetermine suitable subject lines.\nReturn subject suggestions.",
+        request_body=EmailInputSerializer
+    )
     def post(self, request, *args, **kwargs):
         try:
             serializer = EmailInputSerializer(data=request.data)
@@ -118,7 +136,11 @@ class SentimentAnalysisView(APIView):
         IsAuthenticated,
         IsTokenValid,
     )
-    @swagger_auto_schema(operation_summary="Analyze the sentiment of an email", request_body=EmailInputSerializer)
+    @swagger_auto_schema(
+        operation_summary="Analyze the sentiment of an email",
+        operation_description="Examine emotional tone.\nCompute sentiment score.\nReturn sentiment classification.",
+        request_body=EmailInputSerializer
+    )
     def post(self, request, *args, **kwargs):
         try:
             serializer = EmailInputSerializer(data=request.data)
@@ -137,7 +159,11 @@ class SignatureGeneratorView(APIView):
         IsAuthenticated,
         IsTokenValid,
     )
-    @swagger_auto_schema(operation_summary="Generate an email signature", request_body=EmailInputSerializer)
+    @swagger_auto_schema(
+        operation_summary="Generate an email signature",
+        operation_description="Determine appropriate signature style.\nCompose signature text.\nReturn generated signature.",
+        request_body=EmailInputSerializer
+    )
     def post(self, request, *args, **kwargs):
         try:
             serializer = EmailInputSerializer(data=request.data)
@@ -156,7 +182,11 @@ class EmailGenerationView(APIView):
         IsAuthenticated,
         IsTokenValid,
     )
-    @swagger_auto_schema(operation_summary="Generate an email based on a theme", request_body=EmailThemeSerializer)
+    @swagger_auto_schema(
+        operation_summary="Generate an email based on a theme",
+        operation_description="Utilize theme to create email content.\nApply creative text generation.\nReturn the generated email.",
+        request_body=EmailThemeSerializer
+    )
     def post(self, request, *args, **kwargs):
         try:
             serializer = EmailThemeSerializer(data=request.data)

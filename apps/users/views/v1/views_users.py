@@ -121,6 +121,11 @@ class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
 
 
 class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
+    """
+    Blacklists a given refresh token.
+    This API allows authenticated users to logout by blacklisting their refresh token,
+    effectively invalidating their access.
+    """
     authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (IsAuthenticated,)
 
@@ -177,6 +182,11 @@ class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
 
 
 class RegistrationViewSet(MultiSerializerViewSet):
+    """
+    Registers a new user.
+    Allows users to register a new account.
+    Sends a verification email upon successful registration.
+    """
     queryset = User.objects.none()
     serializers = {
         "registration": UserRegistrationSerializer,
@@ -377,6 +387,11 @@ class EmailVerificationView(MultiSerializerViewSet):
 
 
 class UserViewSet(MultiSerializerViewSet):
+    """
+    Retrieves user details.
+    Allows authenticated users to retrieve their own user details.
+    Only authenticated users with a valid token can access this API.
+    """
     queryset = User.objects.filter(is_active=True).all()
     serializers = {
         "retrieve": UserDetailSerializer,
@@ -394,6 +409,11 @@ class UserViewSet(MultiSerializerViewSet):
 
 
 class OneTimeJWTFunctionsViewSet(MultiSerializerViewSet):
+    """
+    Handles one-time JWT functions such as password restoration.
+    Allows users with a valid one-time JWT to restore their password.
+    Requires authentication with a valid one-time token.
+    """
     queryset = User.objects.filter(is_active=True)
     serializers = {
         "restore_password": RestorePasswordSerializer,
@@ -422,6 +442,11 @@ class OneTimeJWTFunctionsViewSet(MultiSerializerViewSet):
 
 
 class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
+    """
+    Refreshes an access token using a refresh token.
+    This API allows clients to exchange a valid refresh token for a new access token,
+    without requiring the user to re-authenticate.
+    """
     authentication_classes = ()
     permission_classes = ()
 

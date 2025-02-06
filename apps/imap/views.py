@@ -6,6 +6,8 @@ from django.core.exceptions import ValidationError
 from .services import IMAPService
 from .models import EmailAccount
 import sentry_sdk
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
 class EmailViewSet(viewsets.ModelViewSet):
@@ -19,6 +21,13 @@ class EmailViewSet(viewsets.ModelViewSet):
         account = self.get_queryset().filter(is_active=True).first()
         return IMAPService(account)
 
+    @swagger_auto_schema(
+        operation_summary="Check email folder connectivity",
+        operation_description="Verify connectivity to the specified folder.\nReturn folder details and message counts.\nLog exceptions if encountered.",
+        manual_parameters=[
+            openapi.Parameter('folder', openapi.IN_QUERY, description="Folder name", type=openapi.TYPE_STRING, default="INBOX")
+        ]
+    )
     @action(detail=False)
     def check(self, request):
         try:
@@ -32,6 +41,14 @@ class EmailViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
 
+    @swagger_auto_schema(
+        operation_summary="Fetch latest emails",
+        operation_description="Retrieve the latest emails from the specified folder.\nLimit the number of emails returned.\nReturn folder name and email list.",
+        manual_parameters=[
+            openapi.Parameter('folder', openapi.IN_QUERY, description="Folder name", type=openapi.TYPE_STRING, default="INBOX"),
+            openapi.Parameter('limit', openapi.IN_QUERY, description="Maximum number of emails", type=openapi.TYPE_INTEGER, default=5)
+        ]
+    )
     @action(detail=False)
     def latest(self, request):
         """Get latest emails from specified folder"""
@@ -57,6 +74,10 @@ class EmailViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+    @swagger_auto_schema(
+        operation_summary="Get email folder statistics",
+        operation_description="Compute statistics for important email folders.\nReturn counts and other folder metrics.\nLog validation errors if encountered."
+    )
     @action(detail=False)
     def stats(self, request):
         """Get statistics for important folders"""

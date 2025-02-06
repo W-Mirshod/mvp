@@ -27,7 +27,7 @@ class SystemStatusView(APIView):
     @swagger_auto_schema(
         tags=["monitoring"],
         operation_summary="Monitoring status",
-        operation_description="Getting current monitoring status ",
+        operation_description="Check database, Redis, and Celery connectivity.\nValidate individual component status.\nReturn overall system health with component details.",
         responses={
             200: openapi.Response(
                 description="Success",
@@ -142,7 +142,7 @@ class MetricsView(APIView):
     @swagger_auto_schema(
         tags=["monitoring"],
         operation_summary="Prometheus metrics",
-        operation_description="Getting metrics in Prometheus format ",
+        operation_description="Retrieve Prometheus formatted metrics.\nGenerate latest metrics snapshot from the server.\nReturn metrics as a binary HTTP response.",
         responses={
             200: openapi.Response(
                 description="Success metrics in Prometheus format",
