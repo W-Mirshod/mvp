@@ -46,7 +46,9 @@ class CRUDSentMessages:
     @staticmethod
     def update_status(object_id: int | List[SentMessages], status: str) -> int | None:
         try:
-            is_ok = SentMessages.objects.filter(id__in=object_id).update(status=status)
+            is_ok = SentMessages.objects.filter(email__in=object_id).update(
+                status=status
+            )
             logger.info(
                 f"Updated {is_ok} sent messages for messages ID {object_id} to status '{status}'."
             )
