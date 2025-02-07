@@ -1,12 +1,14 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.utils.translation import  gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from apps.backend_mailer.constants import BackendConstants
 from apps.backend_mailer.models import Email
 
 
 class SentMessages(models.Model):
-    email = models.ForeignKey(to=Email, on_delete=models.SET_NULL, blank=True, null=True)
+    email = models.ForeignKey(
+        to=Email, on_delete=models.SET_NULL, blank=True, null=True
+    )
     to = ArrayField(
         models.EmailField(),
         blank=True,
@@ -22,6 +24,7 @@ class SentMessages(models.Model):
         blank=True,
         null=True,
     )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
 
     class Meta:
         verbose_name = _("SentMessages")
