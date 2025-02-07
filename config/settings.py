@@ -309,8 +309,8 @@ if SQL_DEBUG:
 """Security->"""
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-#CSRF_TRUSTED_ORIGINS = environ_values.get("CSRF_TRUSTED_ORIGINS").split(",")
-CSRF_TRUSTED_ORIGINS = ["*"]
+CSRF_TRUSTED_ORIGINS = environ_values.get("CSRF_TRUSTED_ORIGINS").split(",")
+
 
 SESSION_COOKIE_DOMAIN = environ_values.get("DOMAIN", None)
 SECURE_HSTS_SECONDS = 3600  # 1h
