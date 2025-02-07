@@ -25,8 +25,14 @@ DISCORD_ALERT = environ_values.get("DISCORD_ALERT", False)
 ALLOWED_HOSTS = ["*"]
 
 #CORS_ORIGIN_WHITELIST = environ_values.get("CORS_ORIGIN_WHITELIST").split(",")
-CORS_ORIGIN_WHITELIST = ["*"]
 
+# region CORS
+#CORS_ALLOWED_ORIGINS = environ_values.get("CORS_ALLOWED_ORIGINS").split(",")
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# endregion
 # Application definition
 
 INSTALLED_APPS = [
@@ -278,10 +284,6 @@ CONSTANCE_CONFIG = {
 }
 # endregion
 
-# region CORS
-#CORS_ALLOWED_ORIGINS = environ_values.get("CORS_ALLOWED_ORIGINS").split(",")
-CORS_ALLOWED_ORIGINS = ["*"]
-# endregion
 
 MAIN_HOST = environ_values.get("MAIN_HOST", "http://localhost:8000/")
 
@@ -349,11 +351,6 @@ SWAGGER_SETTINGS = {
     },
 }
 # endregion
-
-
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
-
 
 """Email config ->"""
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
