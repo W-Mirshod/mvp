@@ -9,9 +9,10 @@ from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 
 from apps.backend_mailer.crud.crud_email import CRUDEmail
+from apps.backend_mailer.crud.crud_sent_messages import CRUDSentMessages
 from apps.backend_mailer.lockfile import default_lockfile, FileLock, FileLocked
 from apps.backend_mailer.logutils import setup_loghandlers
-from apps.backend_mailer.models import Email, EmailTemplate, Log
+from apps.backend_mailer.models import Email, EmailTemplate, Log, SentMessages
 from apps.backend_mailer.settings import (
     get_batch_delivery_timeout,
     get_batch_size,
@@ -283,11 +284,14 @@ def send_queued(processes=1, log_level=None):
     """
     queued_emails = get_queued()
     total_sent, total_failed, total_requeued = 0, 0, 0
-    total_email = len(queued_emails)
 
-    logger.info(
-        "Started sending %s emails with %s processes." % (total_email, processes)
-    )
+    emails = [
+        email
+        for email in (email.to or email.bcc for email in queued_emails)
+        for email in email
+    ]
+    total_email = len(emails)
+
 
     if log_level is None:
         log_level = get_log_level()
@@ -349,17 +353,24 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
         log_level = get_log_level()
 
     sent_emails = []
-    failed_emails = []  # This is a list of two tuples (email, exception)
-    email_count = len(emails)
+    failed_emails = []
+    st_emails = []
+
+    emails_list = [
+        email
+        for email in (email.to or email.bcc for email in emails)
+        for email in email
+    ]
+    email_count = len(emails_list)
 
     logger.info("Process started, sending %s emails" % email_count)
 
-    def send(email):
+    def send(email_obj, email_list):
         try:
-            email.dispatch(
+            email_obj.dispatch(
                 log_level=log_level, commit=False, disconnect_after_delivery=False
             )
-            sent_emails.append(email)
+            sent_emails.append(email_list)
             logger.debug("Successfully sent email #%d" % email.id)
         except Exception as e:
             logger.exception("Failed to send email #%d" % email.id)
@@ -367,6 +378,8 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
 
     # Prepare emails before we send these to threads for sending
     # So we don't need to access the DB from within threads
+    st_emails = []
+
     for email in emails:
         # Sometimes this can fail, for example when trying to render
         # email from a faulty Django template
@@ -381,8 +394,12 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
 
     results = []
     for email in emails:
-        results.append(pool.apply_async(send, args=(email,)))
+        for e in emails_list:
+            st_emails.append(SentMessages(email=email, to=e))
+        results.append(pool.apply_async(send, args=(email, emails_list)))
 
+    if st_emails:
+        CRUDSentMessages.bulk_sent_messages_create(st_emails)
     timeout = get_batch_delivery_timeout()
 
     # Wait for all tasks to complete with a timeout
@@ -395,11 +412,16 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
 
     # Update statuses of sent emails
 
-    email_ids = [email.id for email in sent_emails]
+    email_ids = [email.id for email in emails]
     email_update = CRUDEmail.update_status(
         object_id=email_ids, status=BackendConstants.STATUS.sent
     )
+    sent_message_update = CRUDSentMessages.update_status(
+        object_id=email_ids, status=BackendConstants.STATUS.sent
+    )
+
     logger.info(f"Successfully update {email_update} emails")
+    logger.info(f"Successfully update {sent_message_update} sent messages")
 
     campaign_update = CRUDCampaign.update_campaign_status(
         object_id=email_ids, status=CampaignConstants.STATUS.completed
@@ -444,7 +466,7 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
 
     if log_level == 2:
         logs = []
-        for email in sent_emails:
+        for email in emails:
             logs.append(Log(email=email, status=BackendConstants.STATUS.sent))
 
         if logs:
@@ -453,12 +475,12 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
     logger.info(
         "Process finished, %s attempted, %s sent, %s failed, %s requeued",
         email_count,
-        len(sent_emails),
+        len(sent_emails[0]),
         num_failed,
         num_requeued,
     )
 
-    return len(sent_emails), num_failed, num_requeued
+    return len(sent_emails[0]), num_failed, num_requeued
 
 
 def send_queued_mail_until_done(lockfile=default_lockfile, processes=1, log_level=None):

@@ -26,6 +26,7 @@ from apps.backend_mailer.models import (
     EmailTemplate,
     Log,
     EmailBackend,
+    SentMessages,
 )
 
 from apps.backend_mailer.sanitizer import clean_html
@@ -422,8 +423,18 @@ class EmailBackendAdmin(admin.ModelAdmin):
     search_fields = ["author"]
 
 
+class SentMessagesAdmin(admin.ModelAdmin):
+    readonly_fields = ["created_at", "status"]
+    list_filter = [
+        "status",
+    ]
+    list_display = ["id", "to", "status", "created_at"]
+    search_fields = ["email__author"]
+
+
 admin.site.register(Email, EmailAdmin)
 admin.site.register(Log, LogAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(Attachment, AttachmentAdmin)
 admin.site.register(EmailBackend, EmailBackendAdmin)
+admin.site.register(SentMessages, SentMessagesAdmin)
