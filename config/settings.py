@@ -21,8 +21,11 @@ SECRET_KEY = environ_values.get("SECRET_KEY")
 FERNET_SECRET_KEY = environ_values.get("FERNET_SECRET_KEY")
 DISCORD_ALERT = environ_values.get("DISCORD_ALERT", False)
 
-ALLOWED_HOSTS = environ_values.get("ALLOWED_HOSTS").split(",")
-CORS_ORIGIN_WHITELIST = environ_values.get("CORS_ORIGIN_WHITELIST").split(",")
+#ALLOWED_HOSTS = environ_values.get("ALLOWED_HOSTS").split(",")
+ALLOWED_HOSTS = ["*"]
+
+#CORS_ORIGIN_WHITELIST = environ_values.get("CORS_ORIGIN_WHITELIST").split(",")
+CORS_ORIGIN_WHITELIST = ["*"]
 
 # Application definition
 
@@ -276,7 +279,8 @@ CONSTANCE_CONFIG = {
 # endregion
 
 # region CORS
-CORS_ALLOWED_ORIGINS = environ_values.get("CORS_ALLOWED_ORIGINS").split(",")
+#CORS_ALLOWED_ORIGINS = environ_values.get("CORS_ALLOWED_ORIGINS").split(",")
+CORS_ALLOWED_ORIGINS = ["*"]
 # endregion
 
 MAIN_HOST = environ_values.get("MAIN_HOST", "http://localhost:8000/")
@@ -303,7 +307,9 @@ if SQL_DEBUG:
 """Security->"""
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-CSRF_TRUSTED_ORIGINS = environ_values.get("CSRF_TRUSTED_ORIGINS").split(",")
+#CSRF_TRUSTED_ORIGINS = environ_values.get("CSRF_TRUSTED_ORIGINS").split(",")
+CSRF_TRUSTED_ORIGINS = ["*"]
+
 SESSION_COOKIE_DOMAIN = environ_values.get("DOMAIN", None)
 SECURE_HSTS_SECONDS = 3600  # 1h
 SECURE_HSTS_PRELOAD = True
