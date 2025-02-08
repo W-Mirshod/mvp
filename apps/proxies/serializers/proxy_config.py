@@ -18,7 +18,7 @@ class ProxyConfigSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProxyConfig
-        fields = ['id', 'user', 'judge', 'timeout', 'countries', 'anonymity']
+        fields = ["id", "user", "judge", "timeout", "countries", "anonymity"]
 
     def validate_judge(self, value):
         if not value:
@@ -30,7 +30,9 @@ class ProxyConfigSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("At least one country is required.")
         return value
 
-    def _create_or_update_related_objects(self, instance, related_field, related_model, related_data):
+    def _create_or_update_related_objects(
+        self, instance, related_field, related_model, related_data
+    ):
         """Helper method to handle creation/updating of related objects."""
         getattr(instance, related_field).clear()
         related_objects = [
@@ -39,13 +41,17 @@ class ProxyConfigSerializer(serializers.ModelSerializer):
         related_model.objects.bulk_create(related_objects)
 
     def create(self, validated_data):
-        judges_data = validated_data.pop('judge')
-        countries_data = validated_data.pop('countries')
+        judges_data = validated_data.pop("judge")
+        countries_data = validated_data.pop("countries")
 
         try:
             proxy_config = ProxyConfig.objects.create(**validated_data)
-            self._create_or_update_related_objects(proxy_config, 'judge', Judge, judges_data)
-            self._create_or_update_related_objects(proxy_config, 'countries', Country, countries_data)
+            self._create_or_update_related_objects(
+                proxy_config, "judge", Judge, judges_data
+            )
+            self._create_or_update_related_objects(
+                proxy_config, "countries", Country, countries_data
+            )
             return proxy_config
         except Exception as e:
             SendToSentry.send_scope_msg(
@@ -61,19 +67,23 @@ class ProxyConfigSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"Error creating ProxyConfig: {str(e)}")
 
     def update(self, instance, validated_data):
-        judges_data = validated_data.pop('judge', None)
-        countries_data = validated_data.pop('countries', None)
+        judges_data = validated_data.pop("judge", None)
+        countries_data = validated_data.pop("countries", None)
 
         try:
-            instance.timeout = validated_data.get('timeout', instance.timeout)
-            instance.anonymity = validated_data.get('anonymity', instance.anonymity)
+            instance.timeout = validated_data.get("timeout", instance.timeout)
+            instance.anonymity = validated_data.get("anonymity", instance.anonymity)
             instance.save()
 
             if judges_data is not None:
-                self._create_or_update_related_objects(instance, 'judge', Judge, judges_data)
+                self._create_or_update_related_objects(
+                    instance, "judge", Judge, judges_data
+                )
 
             if countries_data is not None:
-                self._create_or_update_related_objects(instance, 'countries', Country, countries_data)
+                self._create_or_update_related_objects(
+                    instance, "countries", Country, countries_data
+                )
 
             return instance
         except Exception as e:

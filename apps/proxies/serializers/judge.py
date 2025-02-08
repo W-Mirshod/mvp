@@ -6,5 +6,4 @@ from apps.proxies.models import Judge
 class JudgeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Judge
-        fields = ['id', 'url']
-        
+        fields = ["id", "url"]
