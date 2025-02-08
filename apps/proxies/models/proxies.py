@@ -13,7 +13,7 @@ class Proxy(ChangeloggableMixin, DateModelMixin, DeleteModelMixin):
     host = models.CharField(max_length=15)
     port = models.PositiveIntegerField()
     is_active = models.BooleanField(blank=True, null=True)
-    countries = models.ManyToManyField(Country, blank=True, null=True)
+    countries = models.ManyToManyField(Country, blank=True)
     country_code = models.CharField(max_length=5, blank=True, null=True)
     anonymity = models.CharField(max_length=15, blank=True, null=True)
     timeout = models.PositiveIntegerField(blank=True, null=True)
