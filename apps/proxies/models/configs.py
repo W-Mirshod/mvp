@@ -12,11 +12,14 @@ from utils.models import DateModelMixin, DeleteModelMixin
 
 
 class ProxyConfig(ChangeloggableMixin, DateModelMixin, DeleteModelMixin):
-    author = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='proxy_config')
+    author = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="proxy_config"
+    )
     judge = models.ManyToManyField(Judge)
     timeout = models.PositiveSmallIntegerField()
     countries = models.ManyToManyField(Country)
     anonymity = models.PositiveSmallIntegerField(choices=ANONYMITY_CHOICES)
+
 
 post_save.connect(journal_save_handler, sender=ProxyConfig)
 post_delete.connect(journal_delete_handler, sender=ProxyConfig)

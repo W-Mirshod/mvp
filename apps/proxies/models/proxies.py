@@ -22,7 +22,7 @@ class Proxy(ChangeloggableMixin, DateModelMixin, DeleteModelMixin):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ("-id", )
+        ordering = ("-id",)
         verbose_name = _("Proxy")
         verbose_name_plural = _("Proxies")
 

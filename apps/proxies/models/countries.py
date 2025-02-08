@@ -9,12 +9,13 @@ class Country(models.Model):
     name = models.CharField(max_length=100)
 
     class Meta:
-        ordering = ("name", )
+        ordering = ("name",)
         verbose_name = _("Country")
         verbose_name_plural = _("Countries")
 
     def __str__(self):
         return self.name
+
 
 post_save.connect(journal_save_handler, sender=Country)
 post_delete.connect(journal_delete_handler, sender=Country)

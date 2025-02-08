@@ -16,5 +16,6 @@ class Judge(models.Model):
     def __str__(self):
         return self.url
 
+
 post_save.connect(journal_save_handler, sender=Judge)
 post_delete.connect(journal_delete_handler, sender=Judge)
