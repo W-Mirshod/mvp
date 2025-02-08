@@ -1,5 +1,5 @@
 from apps.proxies.models.proxies import Proxy
-from apps.proxies.utils import check_single_proxy
+from apps.proxies.utils import CheckProxyUtils
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
@@ -17,7 +17,7 @@ class CheckProxyHealth:
 
         with ThreadPoolExecutor(max_workers=100) as executor:
             future_to_proxy = {
-                executor.submit(check_single_proxy, proxy): proxy for proxy in proxies
+                executor.submit(CheckProxyUtils.check_single_proxy, proxy): proxy for proxy in proxies
             }
             for future in as_completed(future_to_proxy):
                 proxy = future_to_proxy[future]
