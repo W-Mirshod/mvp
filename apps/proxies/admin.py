@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models.proxies import Proxy
+from apps.proxies.models.proxies import Proxy
 
 
 @admin.register(Proxy)
@@ -9,22 +9,21 @@ class ProxyAdmin(admin.ModelAdmin):
         "host",
         "port",
         "is_active",
-        "country",
         "country_code",
         "anonymity",
         "timeout",
         "username",
         "password",
-        "user",
+        "author",
     )
     list_filter = (
         "is_active",
-        "country",
         "timeout",
     )
     search_fields = (
         "is_active",
-        "user",
+        "author",
         "anonymity",
     )
     ordering = ("-id",)
+    filter_horizontal = ("countries",)
