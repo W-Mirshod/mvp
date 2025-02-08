@@ -13,7 +13,14 @@ from apps.proxies.models.proxies import Proxy
 from apps.proxies.serializers.file_upload import TextFileUploadSerializer
 from apps.proxies.serializers.proxy import ProxySerizalizer
 from apps.proxies.tasks import check_proxy_health
-from apps.proxies.utils import check_single_proxy, get_existing_proxies, validate_and_create_proxy, process_proxies
+from apps.proxies.utils import (
+    check_single_proxy,
+    get_existing_proxies,
+    validate_and_create_proxy,
+    process_proxies,
+)
+from apps.sentry.sentry_constants import SentryConstants
+from apps.sentry.sentry_scripts import SendToSentry
 from utils.permissions import IsTokenValid
 
 
@@ -21,14 +28,17 @@ logger = logging.getLogger(__name__)
 
 
 class ProxyViewSet(ModelViewSet):
-    queryset = Proxy.objects.all()
+    queryset = Proxy.objects.none()
     serializer_class = ProxySerizalizer
     pagination_class = PageNumberPagination
     permission_classes = (IsAuthenticated, IsTokenValid)
 
+    def get_queryset(self):
+        return Proxy.objects.filter(author_id=self.request.user.pk)
+
     @swagger_auto_schema(
         operation_summary="Retrieve proxy details",
-        operation_description="Fetch details of a specific proxy.\nCheck the proxy health.\nReturn detailed serialized data."
+        operation_description="Fetch details of a specific proxy.\nCheck the proxy health.\nReturn detailed serialized data.",
     )
     def retrieve(self, request, *args, **kwargs):
         logger.info("Retrieving proxy")
@@ -42,27 +52,28 @@ class ProxyViewSet(ModelViewSet):
         operation_description="Upload proxies from a text file.\nValidate proxy format and create new proxies.\nReturn upload status and error messages.",
         request_body=TextFileUploadSerializer,
     )
-    @action(detail=False, methods=['post'], url_path='upload')
+    @action(detail=False, methods=["post"], url_path="upload")
     def upload_proxies(self, request):
         logger.info("Uploading proxies")
         serializer = TextFileUploadSerializer(data=request.data)
         if serializer.is_valid():
-            file = serializer.validated_data['file']
+            file = serializer.validated_data["file"]
             existing_proxies = get_existing_proxies()
             created_proxies = []
             errors = []
 
             try:
                 for line in file:
-                    line = line.decode('utf-8').strip()
+                    line = line.decode("utf-8").strip()
                     if line:
-                        parts = line.split(':')
+                        parts = line.split(":")
                         if len(parts) in (2, 4):
                             host, port = parts[:2]
                             username = parts[2] if len(parts) == 4 else None
                             password = parts[3] if len(parts) == 4 else None
-                            proxy_key, error = validate_and_create_proxy(host, port, username, password,
-                                                                               existing_proxies)
+                            proxy_key, error = validate_and_create_proxy(
+                                host, port, username, password, existing_proxies
+                            )
                             if proxy_key:
                                 created_proxies.append(proxy_key)
                             if error:
@@ -75,11 +86,20 @@ class ProxyViewSet(ModelViewSet):
                 response_data = {
                     "message": "Proxies uploaded successfully!",
                     "created": created_proxies,
-                    "errors": errors
+                    "errors": errors,
                 }
                 return Response(response_data, status=status.HTTP_201_CREATED)
 
             except Exception as e:
+                SendToSentry.send_scope_msg(
+                    scope_data={
+                        "message": f"ProxyViewSet.upload_proxies: Exception",
+                        "level": SentryConstants.SENTRY_MSG_ERROR,
+                        "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                        "detail": f"Error uploading proxies",
+                        "extra_detail": str(e),
+                    }
+                )
                 logger.error(f"Error uploading proxies: {str(e)}")
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -91,21 +111,21 @@ class ProxyViewSet(ModelViewSet):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'proxies': openapi.Schema(
+                "proxies": openapi.Schema(
                     type=openapi.TYPE_ARRAY,
                     items=openapi.Schema(
                         type=openapi.TYPE_STRING,
-                        description="Proxy string in the format host:port or host:port:username:password"
+                        description="Proxy string in the format host:port or host:port:username:password",
                     ),
-                    description="List of proxy strings"
+                    description="List of proxy strings",
                 )
-            }
-        )
+            },
+        ),
     )
-    @action(detail=False, methods=['post'], url_path='upload-list')
+    @action(detail=False, methods=["post"], url_path="upload-list")
     def upload_list_proxies(self, request):
         logger.info("Uploading list of proxies")
-        proxies = request.data.get('proxies', [])
+        proxies = request.data.get("proxies", [])
         existing_proxies = get_existing_proxies()
 
         created_proxies, errors = process_proxies(proxies, existing_proxies)
@@ -116,10 +136,19 @@ class ProxyViewSet(ModelViewSet):
             response_data = {
                 "message": "Proxies uploaded successfully!",
                 "created": created_proxies,
-                "errors": errors
+                "errors": errors,
             }
             return Response(response_data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
+            SendToSentry.send_scope_msg(
+                scope_data={
+                    "message": f"ProxyViewSet.upload_list_proxies: Exception",
+                    "level": SentryConstants.SENTRY_MSG_ERROR,
+                    "tag": SentryConstants.SENTRY_TAG_REQUEST,
+                    "detail": f"Error uploading list of proxies",
+                    "extra_detail": str(e),
+                }
+            )
             logger.error(f"Error uploading list of proxies: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
