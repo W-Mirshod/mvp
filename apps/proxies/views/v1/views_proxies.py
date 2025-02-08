@@ -14,11 +14,12 @@ from apps.proxies.serializers.file_upload import TextFileUploadSerializer
 from apps.proxies.serializers.proxy import ProxySerizalizer
 from apps.proxies.tasks import check_proxy_health
 from apps.proxies.utils import (
-    check_single_proxy,
-    get_existing_proxies,
-    validate_and_create_proxy,
-    process_proxies,
+    CheckProxyUtils,
+    GetExistingProxies,
+    ValidateCreateProxy,
+    ProcessProxies,
 )
+
 from apps.sentry.sentry_constants import SentryConstants
 from apps.sentry.sentry_scripts import SendToSentry
 from utils.permissions import IsTokenValid
@@ -43,7 +44,7 @@ class ProxyViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         logger.info("Retrieving proxy")
         instance = self.get_object()
-        proxy = check_single_proxy(instance)
+        proxy = CheckProxyUtils.check_single_proxy(instance)
         serializer = self.get_serializer(proxy)
         return Response(serializer.data)
 
@@ -58,7 +59,7 @@ class ProxyViewSet(ModelViewSet):
         serializer = TextFileUploadSerializer(data=request.data)
         if serializer.is_valid():
             file = serializer.validated_data["file"]
-            existing_proxies = get_existing_proxies()
+            existing_proxies = GetExistingProxies.get_existing_proxies()
             created_proxies = []
             errors = []
 
@@ -71,8 +72,10 @@ class ProxyViewSet(ModelViewSet):
                             host, port = parts[:2]
                             username = parts[2] if len(parts) == 4 else None
                             password = parts[3] if len(parts) == 4 else None
-                            proxy_key, error = validate_and_create_proxy(
-                                host, port, username, password, existing_proxies
+                            proxy_key, error = (
+                                ValidateCreateProxy.validate_and_create_proxy(
+                                    host, port, username, password, existing_proxies
+                                )
                             )
                             if proxy_key:
                                 created_proxies.append(proxy_key)
@@ -126,9 +129,11 @@ class ProxyViewSet(ModelViewSet):
     def upload_list_proxies(self, request):
         logger.info("Uploading list of proxies")
         proxies = request.data.get("proxies", [])
-        existing_proxies = get_existing_proxies()
+        existing_proxies = GetExistingProxies.get_existing_proxies()
 
-        created_proxies, errors = process_proxies(proxies, existing_proxies)
+        created_proxies, errors = ProcessProxies.process_proxies(
+            proxies, existing_proxies
+        )
 
         try:
             check_proxy_health.delay()
