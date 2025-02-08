@@ -4,9 +4,14 @@ import requests
 import time
 import logging
 from celery import shared_task
-from apps.smtp_checker.models.models import SMTPCheckerTask, SMTPCheckerTaskResult, SMTPCheckerSettings
+from apps.smtp_checker.models.models import (
+    SMTPCheckerTask,
+    SMTPCheckerTaskResult,
+    SMTPCheckerSettings,
+)
 
 logger = logging.getLogger(__name__)
+
 
 @shared_task
 def check_server_task(task_id, settings_id):
@@ -42,14 +47,16 @@ def check_server_task(task_id, settings_id):
 
         except Exception as e:
             error_message = str(e)
-            logger.error(f"Task {task_id}: Error checking {server.type.upper()} server ({server.url}): {error_message}")
+            logger.error(
+                f"Task {task_id}: Error checking {server.type.upper()} server ({server.url}): {error_message}"
+            )
 
         SMTPCheckerTaskResult.objects.create(
             task=task,
             server=server,
             result=result,
             response_time=response_time,
-            error_message=error_message
+            error_message=error_message,
         )
 
     task.status = "completed"
@@ -64,7 +71,9 @@ def check_smtp(server, settings):
 
     while attempt < settings.attempts_for_sending_count:
         try:
-            smtp = smtplib.SMTP(server.url, server.port, timeout=settings.connection_timeout)
+            smtp = smtplib.SMTP(
+                server.url, server.port, timeout=settings.connection_timeout
+            )
 
             if server.email_use_tls:
                 smtp.starttls()
@@ -80,7 +89,6 @@ def check_smtp(server, settings):
                 raise e
 
     return round(time.time() - start_time, 3) if success else None
-
 
 
 def check_imap(server, settings):
@@ -105,7 +113,6 @@ def check_imap(server, settings):
     return round(time.time() - start_time, 3) if success else None
 
 
-
 def check_proxy(server, settings):
     """Checks a Proxy server with user-defined settings."""
     start_time = time.time()
@@ -114,11 +121,13 @@ def check_proxy(server, settings):
 
     while attempt < settings.attempts_for_sending_count:
         try:
-            proxy_url = f"http://{server.username}:{server.password}@{server.url}:{server.port}"
+            proxy_url = (
+                f"http://{server.username}:{server.password}@{server.url}:{server.port}"
+            )
             response = requests.get(
                 "https://www.google.com",
                 proxies={"http": proxy_url, "https": proxy_url},
-                timeout=settings.connection_timeout
+                timeout=settings.connection_timeout,
             )
 
             if response.status_code != 200:
@@ -132,4 +141,3 @@ def check_proxy(server, settings):
                 raise e
 
     return round(time.time() - start_time, 3) if success else None
-
