@@ -18,7 +18,7 @@ class ProxyConfigSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProxyConfig
-        fields = ["id", "user", "judge", "timeout", "countries", "anonymity"]
+        fields = ["id", "author", "judge", "timeout", "countries", "anonymity"]
 
     def validate_judge(self, value):
         if not value:
