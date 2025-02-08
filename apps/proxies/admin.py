@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models.proxies import Proxy
+from apps.proxies.models.proxies import Proxy
 
 
 @admin.register(Proxy)
@@ -26,4 +26,4 @@ class ProxyAdmin(admin.ModelAdmin):
         "anonymity",
     )
     ordering = ("-id",)
-    filter_horizontal = ('countries',)
+    filter_horizontal = ("countries",)
