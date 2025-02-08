@@ -6,7 +6,7 @@ from apps.changelog.mixins import ChangeloggableMixin
 from apps.changelog.signals import journal_save_handler, journal_delete_handler
 from apps.proxies.models.countries import Country
 from apps.proxies.models.judges import Judge
-from apps.proxies.constants import ANONYMITY_CHOICES
+from apps.proxies.constants import ProxiesConstants
 
 from utils.models import DateModelMixin, DeleteModelMixin
 
@@ -18,7 +18,7 @@ class ProxyConfig(ChangeloggableMixin, DateModelMixin, DeleteModelMixin):
     judge = models.ManyToManyField(Judge)
     timeout = models.PositiveSmallIntegerField()
     countries = models.ManyToManyField(Country)
-    anonymity = models.PositiveSmallIntegerField(choices=ANONYMITY_CHOICES)
+    anonymity = models.PositiveSmallIntegerField(choices=ProxiesConstants.ANONYMITY_CHOICES)
 
 
 post_save.connect(journal_save_handler, sender=ProxyConfig)
