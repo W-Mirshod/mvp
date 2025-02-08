@@ -1,5 +1,9 @@
 from rest_framework import serializers
-from apps.smtp_checker.models.models import SMTPCheckerSettings, SMTPCheckerTask, SMTPCheckerTaskResult
+from apps.smtp_checker.models.models import (
+    SMTPCheckerSettings,
+    SMTPCheckerTask,
+    SMTPCheckerTaskResult,
+)
 
 
 class SMTPCheckerSettingsSerializer(serializers.ModelSerializer):
