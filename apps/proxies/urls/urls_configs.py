@@ -5,8 +5,8 @@ from rest_framework.routers import DefaultRouter
 from apps.proxies.views.v1.views_proxy_configs import ProxyConfigViewSet
 
 router = DefaultRouter()
-router.register('', ProxyConfigViewSet)
+router.register("", ProxyConfigViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]
