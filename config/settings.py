@@ -19,10 +19,20 @@ DEBUG = environ_values.get("DEBUG")
 
 SECRET_KEY = environ_values.get("SECRET_KEY")
 FERNET_SECRET_KEY = environ_values.get("FERNET_SECRET_KEY")
+DISCORD_ALERT = environ_values.get("DISCORD_ALERT", False)
 
-ALLOWED_HOSTS = environ_values.get("ALLOWED_HOSTS").split(",")
-CORS_ORIGIN_WHITELIST = environ_values.get("CORS_ORIGIN_WHITELIST").split(",")
+#ALLOWED_HOSTS = environ_values.get("ALLOWED_HOSTS").split(",")
+ALLOWED_HOSTS = ["*"]
 
+#CORS_ORIGIN_WHITELIST = environ_values.get("CORS_ORIGIN_WHITELIST").split(",")
+
+# region CORS
+#CORS_ALLOWED_ORIGINS = environ_values.get("CORS_ALLOWED_ORIGINS").split(",")
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# endregion
 # Application definition
 
 INSTALLED_APPS = [
@@ -66,7 +76,9 @@ INSTALLED_APPS = [
     "apps.companies",
     "apps.proxies",
     "apps.backend_mailer",
-    "apps.email_analysis"
+    "apps.email_analysis",
+    "apps.imap",
+    "apps.smtp_checker"
 ]
 
 MIDDLEWARE = [
@@ -272,9 +284,6 @@ CONSTANCE_CONFIG = {
 }
 # endregion
 
-# region CORS
-CORS_ALLOWED_ORIGINS = environ_values.get("CORS_ALLOWED_ORIGINS").split(",")
-# endregion
 
 MAIN_HOST = environ_values.get("MAIN_HOST", "http://localhost:8000/")
 
@@ -301,6 +310,8 @@ if SQL_DEBUG:
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = environ_values.get("CSRF_TRUSTED_ORIGINS").split(",")
+
+
 SESSION_COOKIE_DOMAIN = environ_values.get("DOMAIN", None)
 SECURE_HSTS_SECONDS = 3600  # 1h
 SECURE_HSTS_PRELOAD = True
@@ -340,11 +351,6 @@ SWAGGER_SETTINGS = {
     },
 }
 # endregion
-
-
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
-
 
 """Email config ->"""
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

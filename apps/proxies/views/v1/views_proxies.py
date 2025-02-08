@@ -6,6 +6,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from apps.proxies.models.proxies import Proxy
 from apps.proxies.serializers.file_upload import TextFileUploadSerializer
@@ -19,21 +21,27 @@ logger = logging.getLogger(__name__)
 
 
 class ProxyViewSet(ModelViewSet):
-    queryset = Proxy.objects.none()
+    queryset = Proxy.objects.all()
     serializer_class = ProxySerizalizer
     pagination_class = PageNumberPagination
     permission_classes = (IsAuthenticated, IsTokenValid)
 
-    def get_queryset(self):
-        return Proxy.objects.filter(author_id=self.request.user.pk)
-
+    @swagger_auto_schema(
+        operation_summary="Retrieve proxy details",
+        operation_description="Fetch details of a specific proxy.\nCheck the proxy health.\nReturn detailed serialized data."
+    )
     def retrieve(self, request, *args, **kwargs):
         logger.info("Retrieving proxy")
         instance = self.get_object()
-        proxy = check_single_proxy(instance, self.request.user)
+        proxy = check_single_proxy(instance)
         serializer = self.get_serializer(proxy)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_summary="Upload proxies from a text file",
+        operation_description="Upload proxies from a text file.\nValidate proxy format and create new proxies.\nReturn upload status and error messages.",
+        request_body=TextFileUploadSerializer,
+    )
     @action(detail=False, methods=['post'], url_path='upload')
     def upload_proxies(self, request):
         logger.info("Uploading proxies")
@@ -77,6 +85,23 @@ class ProxyViewSet(ModelViewSet):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(
+        operation_summary="Upload a list of proxies",
+        operation_description="Upload a list of proxies.\nValidate proxy format and create new proxies.\nReturn upload status and error messages.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'proxies': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="Proxy string in the format host:port or host:port:username:password"
+                    ),
+                    description="List of proxy strings"
+                )
+            }
+        )
+    )
     @action(detail=False, methods=['post'], url_path='upload-list')
     def upload_list_proxies(self, request):
         logger.info("Uploading list of proxies")

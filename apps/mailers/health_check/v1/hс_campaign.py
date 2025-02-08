@@ -9,6 +9,11 @@ import requests
 
 
 class CampaignHealthCheck(BaseHealthCheckBackend):
+    """
+    Health check backend for Campaign API.
+    Verifies that the Campaign API is accessible and returns the expected status code.
+    This check ensures the basic functionality of the Campaign API.
+    """
 
     critical_service = False
 
