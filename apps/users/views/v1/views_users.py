@@ -382,6 +382,7 @@ class EmailVerificationView(MultiSerializerViewSet):
             )
 
         user.is_verified = True
+        user.is_one_time_jwt_created = False
         user.save()
         return Response({"detail": "Email verified"}, status=status.HTTP_200_OK)
 
