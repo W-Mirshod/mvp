@@ -81,8 +81,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         fields = (
             "email",
             "password",
-            "first_name",
-            "last_name",
+            "telegram_username",
         )
 
     def validate_email(self, attr):
@@ -96,8 +95,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create(
             email=validated_data["email"],
-            first_name=validated_data["first_name"],
-            last_name=validated_data["last_name"],
+            telegram_username=validated_data["telegram_username"],
         )
 
         user.set_password(validated_data["password"])
@@ -134,6 +132,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "is_verified",
             "is_staff",
             "user_tariff",
+            "telegram_username",
         )
 
     def get_user_tariff(self, obj):

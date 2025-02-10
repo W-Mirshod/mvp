@@ -17,6 +17,8 @@ class Campaign(DeleteModelMixin, DateModelMixin, models.Model):
         max_length=CampaignConstants.MAX_CAMPAIGN_ID_LENGTH,
         help_text=_("Campaign it"),
         verbose_name=_("Campaign id"),
+        null=True,
+        blank=True
     )
     campaign_name = models.CharField(
         max_length=CampaignConstants.MAX_CAMPAIGN_NAME_LENGTH,
