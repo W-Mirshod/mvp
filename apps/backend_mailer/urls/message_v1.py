@@ -3,6 +3,7 @@ from django.urls import path
 from apps.backend_mailer.views.v1.email_views import SentMessageView
 from apps.backend_mailer.views.v1.email_template_views import EmailTemplateView
 from apps.backend_mailer.views.v1.email_backend import EmailBackendView
+from apps.backend_mailer.views.v1.files import FileUploadView
 
 
 app_name = "backend_email"
@@ -38,4 +39,5 @@ urlpatterns = [
         EmailBackendView.as_view({"get": "retrieve", "delete": "destroy"}),
         name="email-backend_by_id",
     ),
+    path('upload/', FileUploadView.as_view(), name='file-upload'),
 ]
