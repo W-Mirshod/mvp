@@ -1,4 +1,5 @@
 import logging
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema 
 
 from rest_framework.permissions import IsAuthenticated
@@ -26,32 +27,55 @@ class CompanyView(MultiSerializerViewSet):
         "update": CompanyActivitySerializer,
     }
 
-    @swagger_auto_schema(operation_description="Retrieve company details\nLog retrieval action\nReturn serialized data")
-    def retrieve(self, request, *args, **kwargs):
-        logger.info(f"Retrieving company with id {kwargs.get('pk')}")
-        return super().retrieve(request, *args, **kwargs)
-
-    @swagger_auto_schema(operation_description="List all companies\nLog listing action\nReturn serialized list")
+    
+    @swagger_auto_schema(
+        operation_summary="List Companies",
+        operation_description="Retrieve a list of all companies.",
+        responses={200: CompanySerializer(many=True)}
+    )
     def list(self, request, *args, **kwargs):
-        logger.info("Listing all companies")
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(operation_description="Create a new company\nLog creation action\nValidate and save data")
+    @swagger_auto_schema(
+        operation_summary="Create Company",
+        operation_description="Create a new company instance.",
+        request_body=CompanySerializer,
+        responses={201: CompanySerializer}
+    )
     def create(self, request, *args, **kwargs):
-        logger.info(f"Creating new company with data: {request.data}")
         return super().create(request, *args, **kwargs)
 
-    @swagger_auto_schema(operation_description="Delete a company\nLog deletion action\nRemove instance by id")
-    def destroy(self, request, *args, **kwargs):
-        logger.info(f"Deleting company with id {kwargs.get('pk')}")
-        return super().destroy(request, *args, **kwargs)
+    @swagger_auto_schema(
+        operation_summary="Retrieve Company",
+        operation_description="Retrieve a specific company.",
+        responses={200: CompanySerializer}
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
-    @swagger_auto_schema(operation_description="Update a company\nLog update action\nValidate, update, and return data")
+    @swagger_auto_schema(
+        operation_summary="Update Company",
+        operation_description="Update a company instance.",
+        request_body=CompanyActivitySerializer,
+        responses={200: CompanyActivitySerializer}
+    )
     def update(self, request, *args, **kwargs):
-        logger.info(f"Updating company with id {kwargs.get('pk')}")
         return super().update(request, *args, **kwargs)
 
-    @swagger_auto_schema(operation_description="Partially update a company\nLog partial update action\nValidate and update selected fields")
+    @swagger_auto_schema(
+        operation_summary="Partial Update Company",
+        operation_description="Partially update a company instance.",
+        request_body=CompanyActivitySerializer,
+        responses={200: CompanyActivitySerializer}
+    )
     def partial_update(self, request, *args, **kwargs):
-        logger.info(f"Partially updating company with id {kwargs.get('pk')}")
         return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Delete Company",
+        operation_description="Delete a company instance.",
+        responses={204: openapi.Response(description="No content")}
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+    

@@ -91,3 +91,46 @@ class EmailViewSet(viewsets.ModelViewSet):
                 {'error': str(e)},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
+
+    @swagger_auto_schema(
+        operation_summary="List Email Accounts",
+        operation_description="Retrieve a list of all email accounts for the authenticated user."
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Create Email Account",
+        operation_description="Create a new email account for the authenticated user."
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve Email Account",
+        operation_description="Retrieve details of a specific email account."
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Update Email Account",
+        operation_description="Update an existing email account's details."
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Partial Update Email Account",
+        operation_description="Partially update an existing email account's details."
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Delete Email Account",
+        operation_description="Delete an existing email account."
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+    
