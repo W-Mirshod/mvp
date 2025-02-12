@@ -13,6 +13,7 @@ class CreateCampaignSerializer(serializers.ModelSerializer):
             "campaign_tag",
             "country",
             "email_content",
+            "message",
         )
 
     def validate(self, attrs: dict) -> dict:
