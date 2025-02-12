@@ -26,6 +26,12 @@ class CreateCampaignSerializer(serializers.ModelSerializer):
 
 
 class RetrieveCampaignSerializer(serializers.ModelSerializer):
+    country = serializers.SerializerMethodField()
+
+    def get_country(self, obj):
+        return str(obj.country) if obj.country else None
+
+
     class Meta:
         model = Campaign
         fields = (
