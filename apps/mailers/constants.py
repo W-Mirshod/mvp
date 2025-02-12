@@ -6,7 +6,7 @@ class CampaignConstants:
 
     MAX_CAMPAIGN_ID_LENGTH = 255
     MAX_CAMPAIGN_NAME_LENGTH = 500
-    MAX_COUNTRY_TAG_LENGTH = 3
+    MAX_CAMPAIGN_TAG_LENGTH = 100
 
     """SHIPPING TYPE ->"""
     SHIPPING = namedtuple("SHIPPING", "default speed extra_speed")._make(range(3))

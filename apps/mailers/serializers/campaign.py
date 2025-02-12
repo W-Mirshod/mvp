@@ -10,11 +10,9 @@ class CreateCampaignSerializer(serializers.ModelSerializer):
         fields = (
             "campaign_id",
             "campaign_name",
-            "shipping_type",
-            "message_type",
-            "comment",
-            "message",
-            "country_tag",
+            "campaign_tag",
+            "country",
+            "email_content",
         )
 
     def validate(self, attrs: dict) -> dict:
@@ -28,6 +26,12 @@ class CreateCampaignSerializer(serializers.ModelSerializer):
 
 
 class RetrieveCampaignSerializer(serializers.ModelSerializer):
+    country = serializers.SerializerMethodField()
+
+    def get_country(self, obj):
+        return str(obj.country) if obj.country else None
+
+
     class Meta:
         model = Campaign
         fields = (
@@ -35,14 +39,13 @@ class RetrieveCampaignSerializer(serializers.ModelSerializer):
             "author",
             "campaign_id",
             "campaign_name",
-            "shipping_type",
-            "message_type",
-            "comment",
+            "campaign_tag",
+            "country",
+            "email_content",
             "open_rate",
             "visitor_clicks",
             "status",
             "message",
-            "country_tag",
             "created_at",
             "updated_at",
         )
