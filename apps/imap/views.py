@@ -1,3 +1,4 @@
+import logging
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -8,6 +9,9 @@ from .models import EmailAccount
 import sentry_sdk
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
+
+logger = logging.getLogger(__name__)
 
 
 class EmailViewSet(viewsets.ModelViewSet):
@@ -35,6 +39,7 @@ class EmailViewSet(viewsets.ModelViewSet):
             folder = request.query_params.get('folder', 'INBOX')
             return Response(service.check_folder(folder))
         except Exception as e:
+            logger.error(f"Error checking folder: {str(e)}")
             sentry_sdk.capture_exception(e)
             return Response(
                 {'error': str(e)},
@@ -62,12 +67,14 @@ class EmailViewSet(viewsets.ModelViewSet):
                 'emails': service.get_latest_emails(folder, limit)
             })
         except ValidationError as e:
+            logger.error(f"Validation error getting latest emails: {str(e)}")
             sentry_sdk.capture_exception(e)
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
         except ValueError as e:
+            logger.error(f"Invalid limit parameter: {str(e)}")
             sentry_sdk.capture_exception(e)
             return Response(
                 {'error': 'Invalid limit parameter'},
@@ -86,8 +93,56 @@ class EmailViewSet(viewsets.ModelViewSet):
             stats = service.get_folder_stats()
             return Response(stats)
         except ValidationError as e:
+            logger.error(f"Error getting folder stats: {str(e)}")
             sentry_sdk.capture_exception(e)
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
+    @swagger_auto_schema(
+        operation_summary="List Email Accounts",
+        operation_description="Retrieve a list of all email accounts for the authenticated user."
+    )
+    def list(self, request, *args, **kwargs):
+        logger.info("Listing email accounts")
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Create Email Account",
+        operation_description="Create a new email account for the authenticated user."
+    )
+    def create(self, request, *args, **kwargs):
+        logger.info("Creating new email account")
+        return super().create(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve Email Account",
+        operation_description="Retrieve details of a specific email account."
+    )
+    def retrieve(self, request, *args, **kwargs):
+        logger.info(f"Retrieving email account with id {kwargs.get('pk')}")
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Update Email Account",
+        operation_description="Update an existing email account's details."
+    )
+    def update(self, request, *args, **kwargs):
+        logger.info(f"Updating email account with id {kwargs.get('pk')}")
+        return super().update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Partial Update Email Account",
+        operation_description="Partially update an existing email account's details."
+    )
+    def partial_update(self, request, *args, **kwargs):
+        logger.info(f"Partially updating email account with id {kwargs.get('pk')}")
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Delete Email Account",
+        operation_description="Delete an existing email account."
+    )
+    def destroy(self, request, *args, **kwargs):
+        logger.info(f"Deleting email account with id {kwargs.get('pk')}")
+        return super().destroy(request, *args, **kwargs)

@@ -9,6 +9,8 @@ from apps.mailers.serializers.campaign import (
 from apps.mailers.view_logic.campaign_qs import CampaignQueryset
 from utils.permissions import IsTokenValid, IsOwner
 from utils.views import MultiSerializerViewSet
+from drf_yasg.utils import swagger_auto_schema
+
 
 
 logger = logging.getLogger(__name__)
@@ -41,4 +43,52 @@ class CampaignView(MultiSerializerViewSet):
             ]
         else:
             return [permission() for permission in (IsAuthenticated, IsTokenValid)]
-        
+
+    @swagger_auto_schema(
+        operation_summary="List Campaigns",
+        operation_description="Retrieve a list of all campaigns."
+    )
+    def list(self, request, *args, **kwargs):
+        logger.info(f"List campaigns for user {request.user}")
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Create Campaign",
+        operation_description="Create a new campaign instance."
+    )
+    def create(self, request, *args, **kwargs):
+        logger.info(f"Create campaign for user {request.user}")
+        return super().create(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve Campaign",
+        operation_description="Retrieve a specific campaign."
+    )
+    def retrieve(self, request, *args, **kwargs):
+        logger.info(f"Retrieve campaign {kwargs.get('pk')} for user {request.user}")
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Update Campaign",
+        operation_description="Update a campaign instance."
+    )
+    def update(self, request, *args, **kwargs):
+        logger.info(f"Update campaign {kwargs.get('pk')} for user {request.user}")
+        return super().update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Start Campaign",
+        operation_description="Start a campaign instance."
+    )
+    def partial_update(self, request, *args, **kwargs):
+        logger.info(f"Start campaign {kwargs.get('pk')} for user {request.user}")
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Delete Campaign",
+        operation_description="Delete a campaign instance."
+    )
+    def destroy(self, request, *args, **kwargs):
+        logger.info(f"Delete campaign {kwargs.get('pk')} for user {request.user}")
+        return super().destroy(request, *args, **kwargs)
+    
