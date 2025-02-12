@@ -1,3 +1,4 @@
+import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -12,6 +13,8 @@ from apps.email_analysis.services.ai_functions import (
     classify_email, personalize_email, fix_grammar, summarize_email,
     generate_subject, analyze_sentiment, generate_signature, generate_email
 )
+
+logger = logging.getLogger(__name__)
 
 
 class SpamDetectionView(APIView):
@@ -30,10 +33,13 @@ class SpamDetectionView(APIView):
             serializer.is_valid(raise_exception=True)
             email_body = serializer.validated_data["email_body"]
 
+            logger.info(f"Processing spam detection for email")
             is_spam = classify_email(email_body)
+            logger.info(f"Spam detection completed. Result: {is_spam}")
             return Response({"is_spam": is_spam}, status=status.HTTP_200_OK)
 
         except APIException as e:
+            logger.error(f"Spam detection failed: {str(e)}")
             return Response({"error": str(e)}, status=e.status_code)
 
 
@@ -55,10 +61,13 @@ class EmailPersonalizationView(APIView):
             email_body = serializer.validated_data["email_body"]
             theme = serializer.validated_data["theme"]
 
+            logger.info(f"Processing email personalization with theme: {theme}")
             personalized_email = personalize_email(email_body, theme)
+            logger.info("Email personalization completed")
             return Response({"personalized_email": personalized_email}, status=status.HTTP_200_OK)
 
         except APIException as e:
+            logger.error(f"Email personalization failed: {str(e)}")
             return Response({"error": str(e)}, status=e.status_code)
 
 
@@ -78,10 +87,13 @@ class GrammarFixerView(APIView):
             serializer.is_valid(raise_exception=True)
             email_body = serializer.validated_data["email_body"]
 
+            logger.info("Processing grammar correction")
             corrected_email = fix_grammar(email_body)
+            logger.info("Grammar correction completed")
             return Response({"corrected_email": corrected_email}, status=status.HTTP_200_OK)
 
         except APIException as e:
+            logger.error(f"Grammar correction failed: {str(e)}")
             return Response({"error": str(e)}, status=e.status_code)
 
 
@@ -101,10 +113,13 @@ class EmailSummarizationView(APIView):
             serializer.is_valid(raise_exception=True)
             email_body = serializer.validated_data["email_body"]
 
+            logger.info("Processing email summarization")
             summary = summarize_email(email_body)
+            logger.info("Email summarization completed")
             return Response({"summary": summary}, status=status.HTTP_200_OK)
 
         except APIException as e:
+            logger.error(f"Email summarization failed: {str(e)}")
             return Response({"error": str(e)}, status=e.status_code)
 
 
@@ -124,10 +139,13 @@ class SubjectLineGeneratorView(APIView):
             serializer.is_valid(raise_exception=True)
             email_body = serializer.validated_data["email_body"]
 
+            logger.info("Processing subject line generation")
             subjects = generate_subject(email_body)
+            logger.info("Subject line generation completed")
             return Response({"subject_suggestions": subjects}, status=status.HTTP_200_OK)
 
         except APIException as e:
+            logger.error(f"Subject line generation failed: {str(e)}")
             return Response({"error": str(e)}, status=e.status_code)
 
 
@@ -147,10 +165,13 @@ class SentimentAnalysisView(APIView):
             serializer.is_valid(raise_exception=True)
             email_body = serializer.validated_data["email_body"]
 
+            logger.info("Processing sentiment analysis")
             sentiment = analyze_sentiment(email_body)
+            logger.info(f"Sentiment analysis completed. Result: {sentiment}")
             return Response({"sentiment": sentiment}, status=status.HTTP_200_OK)
 
         except APIException as e:
+            logger.error(f"Sentiment analysis failed: {str(e)}")
             return Response({"error": str(e)}, status=e.status_code)
 
 
@@ -170,10 +191,13 @@ class SignatureGeneratorView(APIView):
             serializer.is_valid(raise_exception=True)
             email_body = serializer.validated_data["email_body"]
 
+            logger.info("Processing signature generation")
             signature = generate_signature(email_body)
+            logger.info("Signature generation completed")
             return Response({"signature": signature}, status=status.HTTP_200_OK)
 
         except APIException as e:
+            logger.error(f"Signature generation failed: {str(e)}")
             return Response({"error": str(e)}, status=e.status_code)
 
 
@@ -193,8 +217,12 @@ class EmailGenerationView(APIView):
             serializer.is_valid(raise_exception=True)
             theme = serializer.validated_data["theme"]
 
+            logger.info(f"Processing email generation with theme: {theme}")
             generated_email = generate_email(theme)
+            logger.info("Email generation completed")
             return Response({"generated_email": generated_email}, status=status.HTTP_200_OK)
 
         except APIException as e:
+            logger.error(f"Email generation failed: {str(e)}")
             return Response({"error": str(e)}, status=e.status_code)
+        

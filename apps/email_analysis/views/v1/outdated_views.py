@@ -51,9 +51,11 @@ class SpamDetectionView(APIView):
     )
     def post(self, request, *args, **kwargs):
         try:
+            logger.info("Processing spam detection request")
             serializer = SpamDetectionInputSerializer(data=request.data)
 
             if "email_content" not in request.data:
+                logger.warning("Email content missing in request")
                 return Response(
                     {"error": "Email content is required."},
                     status=status.HTTP_400_BAD_REQUEST
@@ -62,7 +64,9 @@ class SpamDetectionView(APIView):
             serializer.is_valid(raise_exception=True)
             email_content = serializer.validated_data["email_content"]
 
+            logger.debug(f"Analyzing email content for spam detection")
             is_spam = classify_email(email_content)
+            logger.info(f"Spam detection result: {is_spam}")
 
             return Response(
                 {
@@ -72,6 +76,7 @@ class SpamDetectionView(APIView):
             )
 
         except Exception as e:
+            logger.error(f"Error in spam detection: {str(e)}")
             return Response(
                 {"error": "An unexpected error occurred. Please try again later."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -121,20 +126,24 @@ class EmailPersonalizationView(APIView):
         API endpoint to personalize an email using Ollama.
         """
         try:
+            logger.info("Processing email personalization request")
             serializer = EmailPersonalizationInputSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
             email_content = serializer.validated_data["email_content"]
             user = request.user
+            logger.debug(f"Personalizing email for user: {user}")
 
             personalized_email = personalize_email(user, email_content)
 
             if not personalized_email:
+                logger.error("Failed to generate personalized email")
                 return Response(
                     {"error": "Failed to generate personalized email"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
 
+            logger.info("Successfully generated personalized email")
             return Response(
                 {
                     "personalized_email": personalized_email,
@@ -143,4 +152,5 @@ class EmailPersonalizationView(APIView):
             )
 
         except APIException as e:
+            logger.error(f"API Exception in email personalization: {str(e)}")
             return Response({"error": str(e)}, status=e.status_code)

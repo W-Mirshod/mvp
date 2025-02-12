@@ -27,13 +27,13 @@ class CompanyView(MultiSerializerViewSet):
         "update": CompanyActivitySerializer,
     }
 
-    
     @swagger_auto_schema(
         operation_summary="List Companies",
         operation_description="Retrieve a list of all companies.",
         responses={200: CompanySerializer(many=True)}
     )
     def list(self, request, *args, **kwargs):
+        logger.info(f"Listing all companies requested by user {request.user.id}")
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -43,6 +43,7 @@ class CompanyView(MultiSerializerViewSet):
         responses={201: CompanySerializer}
     )
     def create(self, request, *args, **kwargs):
+        logger.info(f"Creating new company requested by user {request.user.id}")
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -51,6 +52,7 @@ class CompanyView(MultiSerializerViewSet):
         responses={200: CompanySerializer}
     )
     def retrieve(self, request, *args, **kwargs):
+        logger.info(f"Retrieving company {kwargs.get('pk')} requested by user {request.user.id}")
         return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -60,6 +62,7 @@ class CompanyView(MultiSerializerViewSet):
         responses={200: CompanyActivitySerializer}
     )
     def update(self, request, *args, **kwargs):
+        logger.info(f"Updating company {kwargs.get('pk')} requested by user {request.user.id}")
         return super().update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -69,6 +72,7 @@ class CompanyView(MultiSerializerViewSet):
         responses={200: CompanyActivitySerializer}
     )
     def partial_update(self, request, *args, **kwargs):
+        logger.info(f"Partially updating company {kwargs.get('pk')} requested by user {request.user.id}")
         return super().partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -77,5 +81,6 @@ class CompanyView(MultiSerializerViewSet):
         responses={204: openapi.Response(description="No content")}
     )
     def destroy(self, request, *args, **kwargs):
+        logger.info(f"Deleting company {kwargs.get('pk')} requested by user {request.user.id}")
         return super().destroy(request, *args, **kwargs)
     

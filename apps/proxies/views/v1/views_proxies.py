@@ -35,6 +35,7 @@ class ProxyViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsTokenValid)
 
     def get_queryset(self):
+        logger.info("Getting queryset for user %s", self.request.user.pk)
         return Proxy.objects.filter(author_id=self.request.user.pk)
 
     @swagger_auto_schema(
@@ -157,13 +158,13 @@ class ProxyViewSet(ModelViewSet):
             )
             logger.error(f"Error uploading list of proxies: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
     
     @swagger_auto_schema(
         operation_summary="List Judges",
         operation_description="Retrieve a list of all judges."
     )
     def list(self, request, *args, **kwargs):
+        logger.info("Listing all judges")
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -171,6 +172,7 @@ class ProxyViewSet(ModelViewSet):
         operation_description="Create a new judge instance."
     )
     def create(self, request, *args, **kwargs):
+        logger.info("Creating new judge")
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -178,6 +180,7 @@ class ProxyViewSet(ModelViewSet):
         operation_description="Retrieve a specific judge."
     )
     def retrieve(self, request, *args, **kwargs):
+        logger.info("Retrieving specific judge")
         return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -185,6 +188,7 @@ class ProxyViewSet(ModelViewSet):
         operation_description="Update a judge instance."
     )
     def update(self, request, *args, **kwargs):
+        logger.info("Updating judge")
         return super().update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -192,6 +196,7 @@ class ProxyViewSet(ModelViewSet):
         operation_description="Partially update a judge instance."
     )
     def partial_update(self, request, *args, **kwargs):
+        logger.info("Partially updating judge")
         return super().partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -199,4 +204,6 @@ class ProxyViewSet(ModelViewSet):
         operation_description="Delete a judge instance."
     )
     def destroy(self, request, *args, **kwargs):
+        logger.info("Deleting judge")
         return super().destroy(request, *args, **kwargs)
+    

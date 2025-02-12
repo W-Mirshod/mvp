@@ -50,6 +50,7 @@ class SentMessageView(MultiSerializerViewSet):
         operation_description="Retrieve a list of all sent messages."
     )
     def list(self, request, *args, **kwargs):
+        logger.info(f"List request received from user {request.user}")
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -57,6 +58,7 @@ class SentMessageView(MultiSerializerViewSet):
         operation_description="Create a new sent message."
     )
     def create(self, request, *args, **kwargs):
+        logger.info(f"Create request received from user {request.user}")
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -64,6 +66,7 @@ class SentMessageView(MultiSerializerViewSet):
         operation_description="Retrieve a specific sent message."
     )
     def retrieve(self, request, *args, **kwargs):
+        logger.info(f"Retrieve request received from user {request.user} for message {kwargs.get('pk')}")
         return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -71,6 +74,7 @@ class SentMessageView(MultiSerializerViewSet):
         operation_description="Update a sent message."
     )
     def update(self, request, *args, **kwargs):
+        logger.info(f"Update request received from user {request.user} for message {kwargs.get('pk')}")
         return super().update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -78,6 +82,7 @@ class SentMessageView(MultiSerializerViewSet):
         operation_description="Partially update a sent message."
     )
     def partial_update(self, request, *args, **kwargs):
+        logger.info(f"Partial update request received from user {request.user} for message {kwargs.get('pk')}")
         return super().partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -85,5 +90,6 @@ class SentMessageView(MultiSerializerViewSet):
         operation_description="Delete a sent message."
     )
     def destroy(self, request, *args, **kwargs):
+        logger.info(f"Delete request received from user {request.user} for message {kwargs.get('pk')}")
         return super().destroy(request, *args, **kwargs)
     
