@@ -14,10 +14,6 @@ from utils.views import MultiSerializerViewSet
 
 logger = logging.getLogger(__name__)
 
-@method_decorator(name='list', decorator=swagger_auto_schema(operation_description="List sent messages"))
-@method_decorator(name='create', decorator=swagger_auto_schema(operation_description="Create a sent message"))
-@method_decorator(name='retrieve', decorator=swagger_auto_schema(operation_description="Retrieve a sent message"))
-
 
 class SentMessageView(MultiSerializerViewSet):
     queryset = None  # see get_queryset
