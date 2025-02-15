@@ -19,3 +19,8 @@ class NotifyConstants:
         (NOTIFICATIONS.general, _("General")),
     )
     """<- Notify type"""
+
+    """Notify msg ->"""
+    NOTIFICATION_SENT_MESSAGE_TITLE = "Email sending finished,"
+    NOTIFICATION_SENT_MESSAGE_DES = "Process finished, %s attempted, %s sent, %s failed, %s requeued"
+    """<- Notify msg"""
