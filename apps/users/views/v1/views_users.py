@@ -6,7 +6,7 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -475,3 +475,28 @@ class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
         data["user_id"] = refresh.payload["user_id"]
 
         return Response(data, status=status.HTTP_200_OK)
+
+class UserDetailsView(generics.UpdateAPIView):
+    """
+    Updates user details.
+    This API allows users to update their profile information.
+    """
+    serializer_class = UserDetailSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        user_id = self.request.data.get('user_id', self.request.user.id)
+        return User.objects.get(id=user_id)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        request.data["user_id"] = instance.id
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(
+            {"message": _("Successfully updated user details."), "data": serializer.data},
+            status=status.HTTP_200_OK,
+        )
