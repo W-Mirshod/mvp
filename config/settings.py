@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     "apps.imap",
     "apps.smtp_checker",
     "apps.websocket",
+    "apps.notify",
 ]
 
 MIDDLEWARE = [
