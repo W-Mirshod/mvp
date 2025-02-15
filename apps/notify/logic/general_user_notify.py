@@ -17,9 +17,6 @@ class GeneralUserNotify:
     ) -> None:
         """tba"""
 
-        logger.info(
-            f"Create notification  : user={str(user_id)=}, user={str(user_id)=}, title={title=}, description={description=}, notify_type={notify_type=},  data={data=}"
-        )
 
         CRUDNotification.create_notification(
             data={
@@ -29,4 +26,7 @@ class GeneralUserNotify:
                 "notify_type": notify_type,
                 "data": data,
             }
+        )
+        logger.info(
+            f"Create notification  : user={str(user_id)=}, user={str(user_id)=}, title={title=}, description={description=}, notify_type={notify_type=},  data={data=}"
         )
