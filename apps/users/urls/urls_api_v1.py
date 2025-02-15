@@ -8,6 +8,7 @@ from apps.users.views.v1.views_users import (
     RefreshTokenView,
     RegistrationViewSet,
     OneTimeJWTFunctionsViewSet,
+    UserDetailsView,
 )
 
 app_name = "users_api"
@@ -49,5 +50,10 @@ urlpatterns = [
         "restore_password/",
         OneTimeJWTFunctionsViewSet.as_view({"patch": "restore_password"}),
         name="restore_password",
+    ),
+    path(
+        "details/",
+        UserDetailsView.as_view(),
+        name="user_details",
     ),
 ]
