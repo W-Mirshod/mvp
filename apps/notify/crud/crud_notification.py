@@ -1,9 +1,11 @@
+import logging
 from apps.sentry.sentry_scripts import SendToSentry
 from apps.sentry.sentry_constants import SentryConstants
 from apps.notify.models import Notification
 from apps.websocket.socket_scripts.consumers import ChatConsumer
 from asgiref.sync import async_to_sync
 
+logger = logging.getLogger(__name__)
 
 class CRUDNotification:
 
@@ -34,6 +36,9 @@ class CRUDNotification:
                 data=notification_date,
                 msg_type="notification",
             )
+            logger.info(
+                f"Successfully create notification : {notification_date=}"
+            )
 
         except Exception as ex:
             SendToSentry.send_scope_msg(
@@ -46,5 +51,4 @@ class CRUDNotification:
                 }
             )
             return None
-
         return obj
