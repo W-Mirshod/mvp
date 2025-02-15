@@ -76,7 +76,6 @@ INSTALLED_APPS = [
     "apps.companies",
     "apps.proxies",
     "apps.backend_mailer",
-    "apps.email_analysis",
     "apps.imap",
     "apps.smtp_checker",
     "apps.websocket",
@@ -229,8 +228,8 @@ REDIS_PASS = environ_values.get("REDIS_PASS")
 REDIS_HOST = environ_values.get("REDIS_HOST")
 REDIS_PORT = environ_values.get("REDIS_PORT")
 
-REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
-
+#REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
+REDIS_URL = "redis://localhost:6379/0"
 
 REDIS_DB = "0"
 # endregion
