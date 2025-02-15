@@ -35,6 +35,8 @@ from apps.backend_mailer.utils import (
 from apps.backend_mailer.constants import BackendConstants
 from apps.mailers.constants import CampaignConstants
 from apps.mailers.crud.crud_campaign import CRUDCampaign
+from apps.notify.constants import NotifyConstants
+from apps.notify.logic.general_user_notify import GeneralUserNotify
 
 logger = setup_loghandlers("INFO")
 
@@ -292,7 +294,6 @@ def send_queued(processes=1, log_level=None):
     ]
     total_email = len(emails)
 
-
     if log_level is None:
         log_level = get_log_level()
 
@@ -354,8 +355,6 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
 
     sent_emails = []
     failed_emails = []
-    st_emails = []
-
     emails_list = [
         email
         for email in (email.to or email.bcc for email in emails)
@@ -479,7 +478,23 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
         num_failed,
         num_requeued,
     )
-
+    GeneralUserNotify.notify(
+        user_id=str(emails[0].author.id),
+        title=NotifyConstants.NOTIFICATION_SENT_MESSAGE_TITLE,
+        description=NotifyConstants.NOTIFICATION_SENT_MESSAGE_DES
+        % (
+            email_count,
+            len(sent_emails[0]),
+            num_failed,
+            num_requeued,
+        ),
+        notify_type=NotifyConstants.NOTIFICATIONS.item,
+        data={
+            "send_email": str(len(sent_emails[0])),
+            "num_failed": num_failed,
+            "num_requeued": num_requeued,
+        },
+    )
     return len(sent_emails[0]), num_failed, num_requeued
 
 

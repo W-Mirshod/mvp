@@ -34,6 +34,8 @@ class ServerCheckerSettingsAPIView(MultiSerializerViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return SMTPCheckerSettings.objects.none()
         return SMTPCheckerSettings.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
@@ -49,10 +51,10 @@ class ServerCheckerSettingsAPIView(MultiSerializerViewSet):
             ]
         else:
             return [permission() for permission in (IsAuthenticated, IsTokenValid)]
-    
+
     @swagger_auto_schema(
         operation_summary="List SMTP Settings",
-        operation_description="Retrieve a list of all SMTP checker settings for the authenticated user."
+        operation_description="Retrieve a list of all SMTP checker settings for the authenticated user.",
     )
     def list(self, request, *args, **kwargs):
         logger.debug(f"Listing SMTP settings for user {request.user.id}")
@@ -60,7 +62,7 @@ class ServerCheckerSettingsAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Create SMTP Settings",
-        operation_description="Create new SMTP checker settings."
+        operation_description="Create new SMTP checker settings.",
     )
     def create(self, request, *args, **kwargs):
         logger.debug(f"Creating SMTP settings for user {request.user.id}")
@@ -68,7 +70,7 @@ class ServerCheckerSettingsAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Retrieve SMTP Settings",
-        operation_description="Retrieve specific SMTP checker settings."
+        operation_description="Retrieve specific SMTP checker settings.",
     )
     def retrieve(self, request, *args, **kwargs):
         logger.debug(f"Retrieving SMTP settings for user {request.user.id}")
@@ -76,7 +78,7 @@ class ServerCheckerSettingsAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Update SMTP Settings",
-        operation_description="Update SMTP checker settings."
+        operation_description="Update SMTP checker settings.",
     )
     def update(self, request, *args, **kwargs):
         logger.debug(f"Updating SMTP settings for user {request.user.id}")
@@ -84,7 +86,7 @@ class ServerCheckerSettingsAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Partial Update SMTP Settings",
-        operation_description="Partially update SMTP checker settings."
+        operation_description="Partially update SMTP checker settings.",
     )
     def partial_update(self, request, *args, **kwargs):
         logger.debug(f"Partially updating SMTP settings for user {request.user.id}")
@@ -92,7 +94,7 @@ class ServerCheckerSettingsAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Delete SMTP Settings",
-        operation_description="Delete SMTP checker settings."
+        operation_description="Delete SMTP checker settings.",
     )
     def destroy(self, request, *args, **kwargs):
         logger.debug(f"Deleting SMTP settings for user {request.user.id}")
@@ -111,6 +113,8 @@ class ServerCheckerTaskAPIView(MultiSerializerViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return SMTPCheckerTask.objects.none()
         return SMTPCheckerTask.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
@@ -120,7 +124,7 @@ class ServerCheckerTaskAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Run SMTP Check Task",
-        operation_description="Initiate an asynchronous SMTP server check task."
+        operation_description="Initiate an asynchronous SMTP server check task.",
     )
     @action(detail=True, methods=["post"], url_path="run-task")
     def run_task(self, request, pk=None):
@@ -141,10 +145,10 @@ class ServerCheckerTaskAPIView(MultiSerializerViewSet):
             {"detail": "Task has been queued for processing."},
             status=status.HTTP_200_OK,
         )
-    
+
     @swagger_auto_schema(
         operation_summary="List SMTP Tasks",
-        operation_description="Retrieve a list of all SMTP checker tasks."
+        operation_description="Retrieve a list of all SMTP checker tasks.",
     )
     def list(self, request, *args, **kwargs):
         logger.debug(f"Listing SMTP tasks for user {request.user.id}")
@@ -152,7 +156,7 @@ class ServerCheckerTaskAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Create SMTP Task",
-        operation_description="Create a new SMTP checker task."
+        operation_description="Create a new SMTP checker task.",
     )
     def create(self, request, *args, **kwargs):
         logger.debug(f"Creating SMTP task for user {request.user.id}")
@@ -160,7 +164,7 @@ class ServerCheckerTaskAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Retrieve SMTP Task",
-        operation_description="Retrieve a specific SMTP checker task."
+        operation_description="Retrieve a specific SMTP checker task.",
     )
     def retrieve(self, request, *args, **kwargs):
         logger.debug(f"Retrieving SMTP task for user {request.user.id}")
@@ -168,7 +172,7 @@ class ServerCheckerTaskAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Update SMTP Task",
-        operation_description="Update an SMTP checker task."
+        operation_description="Update an SMTP checker task.",
     )
     def update(self, request, *args, **kwargs):
         logger.debug(f"Updating SMTP task for user {request.user.id}")
@@ -176,7 +180,7 @@ class ServerCheckerTaskAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Partial Update SMTP Task",
-        operation_description="Partially update an SMTP checker task."
+        operation_description="Partially update an SMTP checker task.",
     )
     def partial_update(self, request, *args, **kwargs):
         logger.debug(f"Partially updating SMTP task for user {request.user.id}")
@@ -184,7 +188,7 @@ class ServerCheckerTaskAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Delete SMTP Task",
-        operation_description="Delete an SMTP checker task."
+        operation_description="Delete an SMTP checker task.",
     )
     def destroy(self, request, *args, **kwargs):
         logger.debug(f"Deleting SMTP task for user {request.user.id}")
@@ -203,6 +207,8 @@ class ServerCheckerTaskResultAPIView(MultiSerializerViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return SMTPCheckerTaskResult.objects.none()
         return SMTPCheckerTaskResult.objects.filter(task__user=self.request.user)
 
     def get_permissions(self):
@@ -211,7 +217,7 @@ class ServerCheckerTaskResultAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="List SMTP Results",
-        operation_description="Retrieve a list of all SMTP checker results."
+        operation_description="Retrieve a list of all SMTP checker results.",
     )
     def list(self, request, *args, **kwargs):
         logger.debug(f"Listing SMTP results for user {request.user.id}")
@@ -219,7 +225,7 @@ class ServerCheckerTaskResultAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Create SMTP Result",
-        operation_description="Create a new SMTP checker result."
+        operation_description="Create a new SMTP checker result.",
     )
     def create(self, request, *args, **kwargs):
         logger.debug(f"Creating SMTP result for user {request.user.id}")
@@ -227,7 +233,7 @@ class ServerCheckerTaskResultAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Retrieve SMTP Result",
-        operation_description="Retrieve a specific SMTP checker result."
+        operation_description="Retrieve a specific SMTP checker result.",
     )
     def retrieve(self, request, *args, **kwargs):
         logger.debug(f"Retrieving SMTP result for user {request.user.id}")
@@ -235,7 +241,7 @@ class ServerCheckerTaskResultAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Update SMTP Result",
-        operation_description="Update an SMTP checker result."
+        operation_description="Update an SMTP checker result.",
     )
     def update(self, request, *args, **kwargs):
         logger.debug(f"Updating SMTP result for user {request.user.id}")
@@ -243,7 +249,7 @@ class ServerCheckerTaskResultAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Partial Update SMTP Result",
-        operation_description="Partially update an SMTP checker result."
+        operation_description="Partially update an SMTP checker result.",
     )
     def partial_update(self, request, *args, **kwargs):
         logger.debug(f"Partially updating SMTP result for user {request.user.id}")
@@ -251,9 +257,8 @@ class ServerCheckerTaskResultAPIView(MultiSerializerViewSet):
 
     @swagger_auto_schema(
         operation_summary="Delete SMTP Result",
-        operation_description="Delete an SMTP checker result."
+        operation_description="Delete an SMTP checker result.",
     )
     def destroy(self, request, *args, **kwargs):
         logger.debug(f"Deleting SMTP result for user {request.user.id}")
         return super().destroy(request, *args, **kwargs)
-    
