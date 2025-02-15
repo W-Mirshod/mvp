@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class EmailViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
+    serializer_class = None
 
     def get_queryset(self):
         return EmailAccount.objects.filter(user=self.request.user)
