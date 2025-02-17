@@ -221,7 +221,7 @@ class Setting(models.Model):
     data = models.IntegerField(null=True)
 
     class Meta:
-        unique_together = ("session", "type")
+        unique_together = ("session", "settings_type")
 
 
 class IPBlacklist(models.Model):
