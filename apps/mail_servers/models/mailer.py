@@ -5,10 +5,26 @@ class Session(models.Model):
     name = models.CharField(max_length=255, null=True)
 
 
+class StatusChoices:
+    NEW = 'new'
+    ACTIVE = 'active'
+    INACTIVE = 'inactive'
+    PENDING = 'pending'
+    FAILED = 'failed'
+        
+    CHOICES = [
+        (NEW, 'New'),
+        (ACTIVE, 'Active'),
+        (INACTIVE, 'Inactive'),
+        (PENDING, 'Pending'),
+        (FAILED, 'Failed'),
+   ]
+
+
 class Base(models.Model):
     first = models.CharField(max_length=255, null=True)
     last = models.CharField(max_length=255, null=True)
-    email = models.CharField(max_length=255, null=True)
+    email = models.EmailField(max_length=150, null=True)
     session = models.ForeignKey(
         to=Session,
         on_delete=models.SET_NULL,
@@ -17,7 +33,12 @@ class Base(models.Model):
         blank=True,
     )
 
-    status = models.CharField(max_length=255, null=True, default="new")
+    status = models.CharField(
+        max_length=255,
+        null=True,
+        default=StatusChoices.NEW,
+        choices=StatusChoices.CHOICES
+    )
 
     class Meta:
         db_table = "bases"
@@ -28,8 +49,13 @@ class Base(models.Model):
 
 
 class Domain(models.Model):
-    url = models.TextField(null=True)
-    status = models.CharField(max_length=255, null=True)
+    url = models.URLField(max_length=255, null=True)
+    status = models.CharField(
+        max_length=255,
+        null=True,
+        default=StatusChoices.NEW,
+        choices=StatusChoices.CHOICES
+    )
     session = models.ForeignKey(
         to=Session,
         on_delete=models.SET_NULL,
@@ -42,19 +68,30 @@ class Domain(models.Model):
 
 
 class Manifest(models.Model):
-    name = models.CharField(max_length=255, null=True)
-    type = models.CharField(max_length=255, null=True)
+    title = models.CharField(max_length=255, null=True)
+    manifest_type = models.CharField(max_length=255, null=True)
 
 
 class Material(models.Model):
-    manifest = models.CharField(max_length=255, null=True)
+    manifest = models.ForeignKey(
+        to=Manifest,
+        on_delete=models.SET_NULL,
+        related_name="manifest_materials",
+        null=True,
+        blank=True,
+    )
     data = models.TextField(null=True)
 
 
 class Proxy(models.Model):
     ip = models.CharField(max_length=255, null=True)
     port = models.CharField(max_length=255, null=True)
-    status = models.CharField(max_length=255, null=True, default="new")
+    status = models.CharField(
+        max_length=255,
+        null=True,
+        default=StatusChoices.NEW,
+        choices=StatusChoices.CHOICES
+    )
     session = models.ForeignKey(
         to=Session,
         on_delete=models.SET_NULL,
@@ -74,9 +111,14 @@ class Proxy(models.Model):
 class SMTP(models.Model):
     server = models.CharField(max_length=255, null=True)
     port = models.CharField(max_length=255, null=True)
-    email = models.CharField(max_length=255, null=True)
+    email = models.EmailField(max_length=255, null=True)
     password = models.CharField(max_length=255, null=True)
-    status = models.CharField(max_length=255, null=True, default="new")
+    status = models.CharField(
+        max_length=255,
+        null=True,
+        default=StatusChoices.NEW,
+        choices=StatusChoices.CHOICES
+    )
     session = models.ForeignKey(
         to=Session,
         on_delete=models.SET_NULL,
@@ -97,7 +139,12 @@ class Template(models.Model):
     template = models.TextField(null=True)
     froms = models.TextField(null=True)
     subject = models.TextField(null=True)
-    status = models.CharField(max_length=255, null=True)
+    status = models.CharField(
+        max_length=255,
+        null=True,
+        default=StatusChoices.NEW,
+        choices=StatusChoices.CHOICES
+    )
     session = models.ForeignKey(
         to=Session,
         on_delete=models.SET_NULL,
@@ -110,7 +157,12 @@ class Template(models.Model):
 
 class Temp(models.Model):
     tempName = models.CharField(max_length=255, null=True)
-    status = models.CharField(max_length=255, null=True)
+    status = models.CharField(
+        max_length=255,
+        null=True,
+        default=StatusChoices.NEW,
+        choices=StatusChoices.CHOICES
+    )
     session = models.ForeignKey(
         to=Session,
         on_delete=models.SET_NULL,
@@ -122,7 +174,7 @@ class Temp(models.Model):
 
 class Log(models.Model):
     text = models.TextField(null=True)
-    type = models.CharField(max_length=255, null=True)
+    log_type = models.CharField(max_length=255, null=True)
     session = models.ForeignKey(
         to=Session,
         on_delete=models.SET_NULL,
@@ -130,7 +182,12 @@ class Log(models.Model):
         null=True,
         blank=True,
     )
-    status = models.CharField(max_length=255, null=True)
+    status = models.CharField(
+        max_length=255,
+        null=True,
+        default=StatusChoices.NEW,
+        choices=StatusChoices.CHOICES
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -139,7 +196,12 @@ class IMAP(models.Model):
     port = models.CharField(max_length=255, null=True)
     email = models.CharField(max_length=255, null=True)
     password = models.CharField(max_length=255, null=True)
-    status = models.CharField(max_length=255, null=True)
+    status = models.CharField(
+        max_length=255,
+        null=True,
+        default=StatusChoices.NEW,
+        choices=StatusChoices.CHOICES
+    )
     session = models.ForeignKey(
         to=Session,
         on_delete=models.SET_NULL,
@@ -155,7 +217,7 @@ class Setting(models.Model):
         on_delete=models.CASCADE,
         related_name="session_to_setting",
     )
-    type = models.CharField(max_length=255)
+    settings_type = models.CharField(max_length=255)
     data = models.IntegerField(null=True)
 
     class Meta:
