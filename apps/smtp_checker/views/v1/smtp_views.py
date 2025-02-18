@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from apps.smtp_checker.utils.smtp_service import check_server_task
+from apps.smtp_checker.choises import TaskStatus  # added import
 
 from apps.smtp_checker.models.models import (
     SMTPCheckerSettings,
@@ -131,20 +132,32 @@ class ServerCheckerTaskAPIView(MultiSerializerViewSet):
         """Runs the server check task asynchronously"""
         task = self.get_object()
 
-        if task.status in ["in_progress", "completed"]:
+        if task.status in [TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED]:
             logger.warning(f"Attempted to run already processed task {task.id}")
             return Response(
                 {"detail": "Task is already being processed or completed."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        logger.info(f"Starting SMTP check task {task.id} for user {request.user.id}")
-        check_server_task.delay(task.id, task.settings.id)
-
-        return Response(
-            {"detail": "Task has been queued for processing."},
-            status=status.HTTP_200_OK,
-        )
+        try:
+            logger.info(f"Starting SMTP check task {task.id} for user {request.user.id}")
+            task.status = TaskStatus.IN_PROGRESS
+            task.save()
+            
+            check_server_task.delay(task.id, task.settings.id)
+            
+            return Response(
+                {"detail": "Task has been queued for processing."},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            logger.error(f"Failed to queue task {task.id}: {str(e)}")
+            task.status = TaskStatus.FAILED
+            task.save()
+            return Response(
+                {"detail": "Failed to queue task. Please try again later."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
 
     @swagger_auto_schema(
         operation_summary="List SMTP Tasks",
