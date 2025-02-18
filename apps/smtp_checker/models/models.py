@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from apps.mail_servers.models import Server
-from apps.smtp_checker.choises import TaskStatus, TaskResult  # added import
+from apps.smtp_checker.choises import TaskStatus, TaskResult
 from django.utils import timezone
 
 
@@ -60,7 +60,7 @@ class SMTPCheckerTaskResult(models.Model):
     )
     server = models.ForeignKey(Server, on_delete=models.CASCADE, related_name="results")
     result = models.CharField(
-        max_length=50, choices=TaskResult.CHOICES, default=TaskResult.FAILURE  # dynamic default
+        max_length=50, choices=TaskResult.CHOICES, default=TaskResult.FAILURE
     )
     response_time = models.FloatField(null=True, blank=True)
     error_message = models.TextField(null=True, blank=True)
