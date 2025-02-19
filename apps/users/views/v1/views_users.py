@@ -8,7 +8,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.parsers import MultiPartParser, JSONParser
+from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -414,7 +414,7 @@ class UserViewSet(MultiSerializerViewSet):
         if not self.request or getattr(self.request, "method", None) is None:
             return []
         if self.request.method in ("POST", "PATCH"):
-            return [parser() for parser in (MultiPartParser, JSONParser)]
+            return [parser() for parser in (MultiPartParser, FormParser)]
         return [parser() for parser in (JSONParser,)]
 
     def retrieve(self, request, *args, **kwargs):
