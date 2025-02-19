@@ -126,6 +126,7 @@ class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
     This API allows authenticated users to logout by blacklisting their refresh token,
     effectively invalidating their access.
     """
+
     authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (IsAuthenticated,)
 
@@ -187,6 +188,7 @@ class RegistrationViewSet(MultiSerializerViewSet):
     Allows users to register a new account.
     Sends a verification email upon successful registration.
     """
+
     queryset = User.objects.none()
     serializers = {
         "registration": UserRegistrationSerializer,
@@ -393,6 +395,7 @@ class UserViewSet(MultiSerializerViewSet):
     Allows authenticated users to retrieve their own user details.
     Only authenticated users with a valid token can access this API.
     """
+
     queryset = User.objects.filter(is_active=True).all()
     serializers = {
         "retrieve": UserDetailSerializer,
@@ -415,6 +418,7 @@ class OneTimeJWTFunctionsViewSet(MultiSerializerViewSet):
     Allows users with a valid one-time JWT to restore their password.
     Requires authentication with a valid one-time token.
     """
+
     queryset = User.objects.filter(is_active=True)
     serializers = {
         "restore_password": RestorePasswordSerializer,
@@ -448,6 +452,7 @@ class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
     This API allows clients to exchange a valid refresh token for a new access token,
     without requiring the user to re-authenticate.
     """
+
     authentication_classes = ()
     permission_classes = ()
 
@@ -476,20 +481,22 @@ class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
+
 class UserDetailsView(generics.UpdateAPIView):
     """
     Updates user details.
     This API allows users to update their profile information.
     """
+
     serializer_class = UserDetailSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_object(self):
-        user_id = self.request.data.get('user_id', self.request.user.id)
+        user_id = self.request.data.get("user_id", self.request.user.id)
         return User.objects.get(id=user_id)
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
         request.data["user_id"] = instance.id
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
@@ -497,6 +504,9 @@ class UserDetailsView(generics.UpdateAPIView):
         self.perform_update(serializer)
 
         return Response(
-            {"message": _("Successfully updated user details."), "data": serializer.data},
+            {
+                "message": _("Successfully updated user details."),
+                "data": serializer.data,
+            },
             status=status.HTTP_200_OK,
         )

@@ -133,6 +133,11 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "is_staff",
             "user_tariff",
             "telegram_username",
+            "birth_date",
+            "gender",
+            "position",
+            "bio",
+            "avatar",
         )
 
     def get_user_tariff(self, obj):
