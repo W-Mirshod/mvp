@@ -135,7 +135,6 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "telegram_username",
             "birth_date",
             "gender",
-            "position",
             "bio",
             "avatar",
         )
