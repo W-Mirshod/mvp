@@ -149,6 +149,22 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return None
 
 
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "first_name",
+            "last_name",
+            "email",
+            "role",
+            "telegram_username",
+            "birth_date",
+            "gender",
+            "bio",
+            "avatar",
+        )
+
+
 class RestorePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True)
 
