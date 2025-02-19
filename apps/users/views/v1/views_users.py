@@ -6,8 +6,9 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, generics
+from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -28,6 +29,7 @@ from apps.users.serializers import (
     EmailTokenGenerationSerializer,
     UserDetailSerializer,
     RestorePasswordSerializer,
+    UserUpdateSerializer,
 )
 from apps.users.services.jwt import create_one_time_jwt
 from utils.permissions import IsOneTimeTokenValid, IsTokenValid
@@ -399,17 +401,35 @@ class UserViewSet(MultiSerializerViewSet):
     queryset = User.objects.filter(is_active=True).all()
     serializers = {
         "retrieve": UserDetailSerializer,
+        "partial_update": UserUpdateSerializer,
     }
     permission_classes = (
         IsAuthenticated,
         IsTokenValid,
     )
 
+    parser_classes = None
+
+    def get_parsers(self):
+        if not self.request or getattr(self.request, "method", None) is None:
+            return []
+        if self.request.method in ("POST", "PATCH"):
+            return [parser() for parser in (MultiPartParser, JSONParser)]
+        return [parser() for parser in (JSONParser,)]
+
     def retrieve(self, request, *args, **kwargs):
         """
         User`s view
         """
         return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Partial user update.",
+        operation_description="Partial user update.",
+        request_body=UserUpdateSerializer,
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
 
 
 class OneTimeJWTFunctionsViewSet(MultiSerializerViewSet):
@@ -480,33 +500,3 @@ class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
         data["user_id"] = refresh.payload["user_id"]
 
         return Response(data, status=status.HTTP_200_OK)
-
-
-class UserDetailsView(generics.UpdateAPIView):
-    """
-    Updates user details.
-    This API allows users to update their profile information.
-    """
-
-    serializer_class = UserDetailSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get_object(self):
-        user_id = self.request.data.get("user_id", self.request.user.id)
-        return User.objects.get(id=user_id)
-
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop("partial", False)
-        instance = self.get_object()
-        request.data["user_id"] = instance.id
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        return Response(
-            {
-                "message": _("Successfully updated user details."),
-                "data": serializer.data,
-            },
-            status=status.HTTP_200_OK,
-        )
