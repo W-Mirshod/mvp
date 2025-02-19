@@ -1,5 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.utils.translation import gettext_lazy as _
@@ -68,9 +69,18 @@ class User(ChangeloggableMixin, AbstractUser):
         choices=UserConstance.USER_ROLES_CHOICES,
         default=UserConstance.USER,
     )
-
     telegram_username = models.CharField(
         max_length=UserConstance.TG_USERNAME_MAX_LENGTH, blank=True, null=True
+    )
+    birth_date = models.DateField(null=True, blank=True)
+    gender = models.CharField(
+        max_length=16, choices=UserConstance.USER_GENDER_CHOICES, null=True, blank=False
+    )
+    bio = models.TextField(null=True, blank=True)
+    avatar = models.ImageField(
+        null=True,
+        upload_to="users",
+        validators=[FileExtensionValidator(allowed_extensions=["jpeg", "jpg", "png"])],
     )
     username = None
 
