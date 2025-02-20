@@ -506,16 +506,27 @@ class UserDetailsView(generics.UpdateAPIView):
 
 class TelegramLoginViewSet(MultiSerializerViewSet):
     """
-    API ViewSet to authenticate users via Telegram login.
+    API ViewSet to authenticate users via Telegram login and return JWT tokens.
     """
     authentication_classes = []
     permission_classes = []
 
     @swagger_auto_schema(
-        operation_description="Authenticate users via Telegram Login Widget.",
+        operation_description="Authenticate users via Telegram Login Widget and return JWT tokens.",
         request_body=TelegramAuthSerializer,
         responses={
-            200: TelegramUserResponseSerializer,
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "user_id": openapi.Schema(type=openapi.TYPE_INTEGER, title="User ID"),
+                    "telegram_id": openapi.Schema(type=openapi.TYPE_INTEGER, title="Telegram ID"),
+                    "telegram_username": openapi.Schema(type=openapi.TYPE_STRING, title="Telegram Username"),
+                    "first_name": openapi.Schema(type=openapi.TYPE_STRING, title="First Name"),
+                    "last_name": openapi.Schema(type=openapi.TYPE_STRING, title="Last Name"),
+                    "refresh": openapi.Schema(type=openapi.TYPE_STRING, title="Refresh Token"),
+                    "access": openapi.Schema(type=openapi.TYPE_STRING, title="Access Token"),
+                },
+            ),
             400: openapi.Response("Bad Request"),
             403: openapi.Response("Forbidden (Invalid Hash)"),
         },
@@ -549,5 +560,17 @@ class TelegramLoginViewSet(MultiSerializerViewSet):
             }
         )
 
-        response_data = TelegramUserResponseSerializer(user).data
+        token_serializer = TokenSerializer()
+        refresh = token_serializer.get_token(user)
+
+        response_data = {
+            "user_id": user.id,
+            "telegram_id": user.telegram_id,
+            "telegram_username": user.telegram_username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }
+
         return Response(response_data, status=status.HTTP_200_OK)
