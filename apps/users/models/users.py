@@ -69,6 +69,10 @@ class User(ChangeloggableMixin, AbstractUser):
         default=UserConstance.USER,
     )
 
+    telegram_id = models.BigIntegerField(
+        _("Telegram ID"), unique=True, blank=True, null=True
+    )
+
     telegram_username = models.CharField(
         max_length=UserConstance.TG_USERNAME_MAX_LENGTH, blank=True, null=True
     )

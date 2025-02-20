@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import logging
 
 from django.conf import settings
@@ -28,6 +30,7 @@ from apps.users.serializers import (
     EmailTokenGenerationSerializer,
     UserDetailSerializer,
     RestorePasswordSerializer,
+    TelegramAuthSerializer, TelegramUserResponseSerializer
 )
 from apps.users.services.jwt import create_one_time_jwt
 from utils.permissions import IsOneTimeTokenValid, IsTokenValid
@@ -500,3 +503,51 @@ class UserDetailsView(generics.UpdateAPIView):
             {"message": _("Successfully updated user details."), "data": serializer.data},
             status=status.HTTP_200_OK,
         )
+
+class TelegramLoginViewSet(MultiSerializerViewSet):
+    """
+    API ViewSet to authenticate users via Telegram login.
+    """
+    authentication_classes = []
+    permission_classes = []
+
+    @swagger_auto_schema(
+        operation_description="Authenticate users via Telegram Login Widget.",
+        request_body=TelegramAuthSerializer,
+        responses={
+            200: TelegramUserResponseSerializer,
+            400: openapi.Response("Bad Request"),
+            403: openapi.Response("Forbidden (Invalid Hash)"),
+        },
+    )
+    def create(self, request):
+        bot_token = settings.TELEGRAM_BOT_TOKEN
+        secret_key = hashlib.sha256(bot_token.encode()).digest()
+
+        serializer = TelegramAuthSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        auth_data = serializer.validated_data
+        received_hash = auth_data.pop("hash", None)
+
+        data_check_string = "\n".join(f"{key}={value}" for key, value in sorted(auth_data.items()) if value is not None)
+        expected_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+
+        if expected_hash != received_hash:
+            return Response({"error": "Invalid Telegram authentication (Hash mismatch)"}, status=status.HTTP_403_FORBIDDEN)
+
+        user, created = User.objects.get_or_create(
+            telegram_id=auth_data["id"],
+            defaults={
+                "email": f"{auth_data['id']}@telegram.com",
+                "username": None,
+                "telegram_username": auth_data.get("username", ""),
+                "first_name": auth_data.get("first_name", ""),
+                "last_name": auth_data.get("last_name", ""),
+                "is_active": True,
+            }
+        )
+
+        response_data = TelegramUserResponseSerializer(user).data
+        return Response(response_data, status=status.HTTP_200_OK)

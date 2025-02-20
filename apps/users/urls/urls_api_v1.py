@@ -9,6 +9,7 @@ from apps.users.views.v1.views_users import (
     RegistrationViewSet,
     OneTimeJWTFunctionsViewSet,
     UserDetailsView,
+    TelegramLoginViewSet,
 )
 
 app_name = "users_api"
@@ -56,4 +57,9 @@ urlpatterns = [
         UserDetailsView.as_view(),
         name="user_details",
     ),
+    path("telegram-login/",
+         TelegramLoginViewSet.as_view({"post": "create"}),
+         name="telegram_login"
+    ),
+
 ]
