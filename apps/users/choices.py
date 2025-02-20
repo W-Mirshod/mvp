@@ -23,3 +23,18 @@ class UserConstance:
     )
 
     """ <- User roles"""
+
+    """ User gender -> """
+    MALE = "male"
+    FEMALE = "female"
+    OTHER = "other"
+    NON_BINARY = "non-binary"
+
+    USER_GENDER_CHOICES = (
+        (MALE, _("Male")),
+        (FEMALE, _("Female")),
+        (OTHER, _("Other")),
+        (NON_BINARY, _("binary")),
+    )
+
+    """ <- User gender"""

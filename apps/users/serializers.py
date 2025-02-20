@@ -133,6 +133,10 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "is_staff",
             "user_tariff",
             "telegram_username",
+            "birth_date",
+            "gender",
+            "bio",
+            "avatar",
         )
 
     def get_user_tariff(self, obj):
@@ -143,6 +147,22 @@ class UserDetailSerializer(serializers.ModelSerializer):
                 return UserTariffSerializer(user_tariff).data
 
         return None
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "first_name",
+            "last_name",
+            "email",
+            "role",
+            "telegram_username",
+            "birth_date",
+            "gender",
+            "bio",
+            "avatar",
+        )
 
 
 class RestorePasswordSerializer(serializers.Serializer):
