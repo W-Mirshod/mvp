@@ -10,6 +10,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, generics
 from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -30,7 +31,8 @@ from apps.users.serializers import (
     EmailTokenGenerationSerializer,
     UserDetailSerializer,
     RestorePasswordSerializer,
-    TelegramAuthSerializer, TelegramUserResponseSerializer
+    TelegramAuthSerializer,
+    UserUpdateSerializer,
 )
 from apps.users.services.jwt import create_one_time_jwt
 from utils.permissions import IsOneTimeTokenValid, IsTokenValid
@@ -129,6 +131,7 @@ class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
     This API allows authenticated users to logout by blacklisting their refresh token,
     effectively invalidating their access.
     """
+
     authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (IsAuthenticated,)
 
@@ -190,6 +193,7 @@ class RegistrationViewSet(MultiSerializerViewSet):
     Allows users to register a new account.
     Sends a verification email upon successful registration.
     """
+
     queryset = User.objects.none()
     serializers = {
         "registration": UserRegistrationSerializer,
@@ -396,20 +400,39 @@ class UserViewSet(MultiSerializerViewSet):
     Allows authenticated users to retrieve their own user details.
     Only authenticated users with a valid token can access this API.
     """
+
     queryset = User.objects.filter(is_active=True).all()
     serializers = {
         "retrieve": UserDetailSerializer,
+        "partial_update": UserUpdateSerializer,
     }
     permission_classes = (
         IsAuthenticated,
         IsTokenValid,
     )
 
+    parser_classes = None
+
+    def get_parsers(self):
+        if not self.request or getattr(self.request, "method", None) is None:
+            return []
+        if self.request.method in ("POST", "PATCH"):
+            return [parser() for parser in (MultiPartParser, FormParser)]
+        return [parser() for parser in (JSONParser,)]
+
     def retrieve(self, request, *args, **kwargs):
         """
         User`s view
         """
         return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Partial user update.",
+        operation_description="Partial user update.",
+        request_body=UserUpdateSerializer,
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
 
 
 class OneTimeJWTFunctionsViewSet(MultiSerializerViewSet):
@@ -418,6 +441,7 @@ class OneTimeJWTFunctionsViewSet(MultiSerializerViewSet):
     Allows users with a valid one-time JWT to restore their password.
     Requires authentication with a valid one-time token.
     """
+
     queryset = User.objects.filter(is_active=True)
     serializers = {
         "restore_password": RestorePasswordSerializer,
@@ -451,6 +475,7 @@ class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
     This API allows clients to exchange a valid refresh token for a new access token,
     without requiring the user to re-authenticate.
     """
+
     authentication_classes = ()
     permission_classes = ()
 

@@ -18,7 +18,9 @@ app_name = "users_api"
 urlpatterns = [
     path(
         "<int:pk>/",
-        UserViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
+        UserViewSet.as_view(
+            {"get": "retrieve", "delete": "destroy", "patch": "partial_update"}
+        ),
         name="manage",
     ),
     path(
@@ -61,5 +63,4 @@ urlpatterns = [
          TelegramLoginViewSet.as_view({"post": "create"}),
          name="telegram_login"
     ),
-
 ]
