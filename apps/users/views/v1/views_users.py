@@ -523,12 +523,14 @@ class TelegramLoginViewSet(MultiSerializerViewSet):
                     "telegram_username": openapi.Schema(type=openapi.TYPE_STRING, title="Telegram Username"),
                     "first_name": openapi.Schema(type=openapi.TYPE_STRING, title="First Name"),
                     "last_name": openapi.Schema(type=openapi.TYPE_STRING, title="Last Name"),
+                    "email": openapi.Schema(type=openapi.TYPE_STRING, title="Email"),
                     "refresh": openapi.Schema(type=openapi.TYPE_STRING, title="Refresh Token"),
                     "access": openapi.Schema(type=openapi.TYPE_STRING, title="Access Token"),
                 },
             ),
             400: openapi.Response("Bad Request"),
             403: openapi.Response("Forbidden (Invalid Hash)"),
+            404: openapi.Response("User Not Found"),
         },
     )
     def create(self, request):
@@ -548,17 +550,11 @@ class TelegramLoginViewSet(MultiSerializerViewSet):
         if expected_hash != received_hash:
             return Response({"error": "Invalid Telegram authentication (Hash mismatch)"}, status=status.HTTP_403_FORBIDDEN)
 
-        user, created = User.objects.get_or_create(
-            telegram_id=auth_data["id"],
-            defaults={
-                "email": f"{auth_data['id']}@telegram.com",
-                "username": None,
-                "telegram_username": auth_data.get("username", ""),
-                "first_name": auth_data.get("first_name", ""),
-                "last_name": auth_data.get("last_name", ""),
-                "is_active": True,
-            }
-        )
+        try:
+            user = User.objects.get(telegram_username=auth_data.get("username"))
+        except User.DoesNotExist:
+            return Response({"error": "User not found. Please link your Telegram account in settings."},
+                            status=status.HTTP_404_NOT_FOUND)
 
         token_serializer = TokenSerializer()
         refresh = token_serializer.get_token(user)
@@ -569,6 +565,7 @@ class TelegramLoginViewSet(MultiSerializerViewSet):
             "telegram_username": user.telegram_username,
             "first_name": user.first_name,
             "last_name": user.last_name,
+            "email": user.email,
             "refresh": str(refresh),
             "access": str(refresh.access_token),
         }
