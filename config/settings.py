@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     "health_check.contrib.celery",
     "health_check.contrib.celery_ping",
     "health_check.contrib.redis",
+    "django_telegram_login",
     #
     "anymail",
     #
@@ -561,8 +562,5 @@ POST_OFFICE = {
 
 """ <-POST OFFICE"""
 
-"""<-  OLLAMA CONFIG """
-
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434/api/generate")
-
-""" OLLAMA CONFIG ->"""
+TELEGRAM_BOT_NAME = "Mailertgauth"
+TELEGRAM_BOT_TOKEN = "7851509671:AAG3qyLKcyxwKD8APLwKO5mdF0I4AHCGMoE"
