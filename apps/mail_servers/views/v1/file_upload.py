@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 class FileUploadView(APIView):
     """File upload with materials"""
 
+    permission_classes = []
     parser_classes = (MultiPartParser, FormParser)
 
     @swagger_auto_schema(
@@ -78,15 +79,11 @@ class FileUploadView(APIView):
             # File validation
             SecurityUtils.validate_file_upload(file_obj)
 
-            # Save to temporary file
+            # Read file content directly
             content = file_obj.read().decode("utf-8")
-            temp_path = FileService.save_temp_file(content)
 
             processor = FileService.get_processor(request.POST.get("type"))
             result = processor(content, session)
-
-            # Remove temporary file
-            os.remove(temp_path)
 
             return Response(result)
 
