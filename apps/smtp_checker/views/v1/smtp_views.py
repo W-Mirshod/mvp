@@ -282,7 +282,7 @@ class ServerCheckerTaskResultAPIView(MultiSerializerViewSet):
 
 
 class SMTPStatisticsAPIView(APIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         queryset = SMTPStatisticsQuerySet()
