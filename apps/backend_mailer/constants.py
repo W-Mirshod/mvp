@@ -105,3 +105,15 @@ class BackendConstants:
     }
 
     """<- EMAIL BACKENDS"""
+
+    """ TEMPLATE TYPE ->"""
+    PROMOTIONAL = "Promotional"
+    TRANSACTIONAL = "Transactional"
+    NEWSLETTER = "Newsletter"
+
+    TEMPLATE_TYPE_CHOICES = (
+        (PROMOTIONAL, _("Promotional")),
+        (TRANSACTIONAL, _("Transactional")),
+        (NEWSLETTER, _("Newsletter")),
+    )
+    """<- TEMPLATE TYPE"""

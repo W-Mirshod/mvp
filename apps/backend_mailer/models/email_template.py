@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.backend_mailer import cache
+from apps.backend_mailer.constants import BackendConstants
 from apps.backend_mailer.logutils import setup_loghandlers
 from apps.backend_mailer.validators import validate_template_syntax
 
@@ -35,6 +36,12 @@ class EmailTemplate(models.Model):
     )
     content = models.TextField(
         blank=True, verbose_name=_("Content"), validators=[validate_template_syntax]
+    )
+    type = models.CharField(
+        max_length=30,
+        choices=BackendConstants.TEMPLATE_TYPE_CHOICES,
+        verbose_name=_("Template Type"),
+        default=BackendConstants.PROMOTIONAL,
     )
     html_content = models.TextField(
         blank=True,
