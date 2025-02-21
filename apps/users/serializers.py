@@ -241,3 +241,11 @@ class EmailTokenGenerationSerializer(serializers.Serializer):
                 {"error": _("Max JWT try reached, try after an hour.")},
                 code="invalid_otp",
             )
+
+class TelegramAuthSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField(required=False, allow_null=True)
+    username = serializers.CharField(required=False, allow_null=True)
+    auth_date = serializers.IntegerField()
+    hash = serializers.CharField()

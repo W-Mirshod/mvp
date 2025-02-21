@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import logging
 
 from django.conf import settings
@@ -29,6 +31,7 @@ from apps.users.serializers import (
     EmailTokenGenerationSerializer,
     UserDetailSerializer,
     RestorePasswordSerializer,
+    TelegramAuthSerializer,
     UserUpdateSerializer,
 )
 from apps.users.services.jwt import create_one_time_jwt
@@ -500,3 +503,72 @@ class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
         data["user_id"] = refresh.payload["user_id"]
 
         return Response(data, status=status.HTTP_200_OK)
+
+
+class TelegramLoginViewSet(MultiSerializerViewSet):
+    """
+    API ViewSet to authenticate users via Telegram login and return JWT tokens.
+    """
+    authentication_classes = []
+    permission_classes = []
+
+    @swagger_auto_schema(
+        operation_description="Authenticate users via Telegram Login Widget and return JWT tokens.",
+        request_body=TelegramAuthSerializer,
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "user_id": openapi.Schema(type=openapi.TYPE_INTEGER, title="User ID"),
+                    "telegram_id": openapi.Schema(type=openapi.TYPE_INTEGER, title="Telegram ID"),
+                    "telegram_username": openapi.Schema(type=openapi.TYPE_STRING, title="Telegram Username"),
+                    "first_name": openapi.Schema(type=openapi.TYPE_STRING, title="First Name"),
+                    "last_name": openapi.Schema(type=openapi.TYPE_STRING, title="Last Name"),
+                    "email": openapi.Schema(type=openapi.TYPE_STRING, title="Email"),
+                    "refresh": openapi.Schema(type=openapi.TYPE_STRING, title="Refresh Token"),
+                    "access": openapi.Schema(type=openapi.TYPE_STRING, title="Access Token"),
+                },
+            ),
+            400: openapi.Response("Bad Request"),
+            403: openapi.Response("Forbidden (Invalid Hash)"),
+            404: openapi.Response("User Not Found"),
+        },
+    )
+    def create(self, request):
+        bot_token = settings.TELEGRAM_BOT_TOKEN
+        secret_key = hashlib.sha256(bot_token.encode()).digest()
+
+        serializer = TelegramAuthSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        auth_data = serializer.validated_data
+        received_hash = auth_data.pop("hash", None)
+
+        data_check_string = "\n".join(f"{key}={value}" for key, value in sorted(auth_data.items()) if value is not None)
+        expected_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+
+        if expected_hash != received_hash:
+            return Response({"error": "Invalid Telegram authentication (Hash mismatch)"}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            user = User.objects.get(telegram_username=auth_data.get("username"))
+        except User.DoesNotExist:
+            return Response({"error": "User not found. Please link your Telegram account in settings."},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        token_serializer = TokenSerializer()
+        refresh = token_serializer.get_token(user)
+
+        response_data = {
+            "user_id": user.id,
+            "telegram_id": user.telegram_id,
+            "telegram_username": user.telegram_username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
