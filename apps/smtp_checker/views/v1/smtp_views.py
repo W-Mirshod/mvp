@@ -1,10 +1,15 @@
 import logging
+from django.http import JsonResponse
 from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
+from apps.smtp_checker.choises import TaskStatus
 from apps.smtp_checker.utils.smtp_service import check_server_task
+from apps.smtp_checker.view_logic.statics_view import SMTPStatisticsQuerySet
+
 
 from apps.smtp_checker.models.models import (
     SMTPCheckerSettings,
@@ -131,20 +136,32 @@ class ServerCheckerTaskAPIView(MultiSerializerViewSet):
         """Runs the server check task asynchronously"""
         task = self.get_object()
 
-        if task.status in ["in_progress", "completed"]:
+        if task.status in [TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED]:
             logger.warning(f"Attempted to run already processed task {task.id}")
             return Response(
                 {"detail": "Task is already being processed or completed."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        logger.info(f"Starting SMTP check task {task.id} for user {request.user.id}")
-        check_server_task.delay(task.id, task.settings.id)
-
-        return Response(
-            {"detail": "Task has been queued for processing."},
-            status=status.HTTP_200_OK,
-        )
+        try:
+            logger.info(f"Starting SMTP check task {task.id} for user {request.user.id}")
+            task.status = TaskStatus.IN_PROGRESS
+            task.save()
+            
+            check_server_task.delay(task.id, task.settings.id)
+            
+            return Response(
+                {"detail": "Task has been queued for processing."},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            logger.error(f"Failed to queue task {task.id}: {str(e)}")
+            task.status = TaskStatus.FAILED
+            task.save()
+            return Response(
+                {"detail": "Failed to queue task. Please try again later."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
 
     @swagger_auto_schema(
         operation_summary="List SMTP Tasks",
@@ -262,3 +279,36 @@ class ServerCheckerTaskResultAPIView(MultiSerializerViewSet):
     def destroy(self, request, *args, **kwargs):
         logger.debug(f"Deleting SMTP result for user {request.user.id}")
         return super().destroy(request, *args, **kwargs)
+
+
+class SMTPStatisticsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        queryset = SMTPStatisticsQuerySet()
+        total_processed = SMTPCheckerTaskResult.objects.filter(task__user=request.user).count()
+        
+        tasks_data = queryset.get_tasks_data()
+        results_data = queryset.get_results_data()
+        smtp_time_passed = queryset.get_time_passed()
+        estimated_remaining_time = queryset.get_estimated_remaining_time(
+            total_processed, 
+            tasks_data['remaining_tasks']
+        )
+
+        data = {
+            "smtp_for_check": tasks_data['total'],
+            "sending_per_minute": results_data['sending_per_minute'],
+            "stopped": tasks_data['stopped'],
+            "smtp_in_clipboard": queryset.current_stats.smtp_in_clipboard if queryset.current_stats else 0,
+            "proxy_on": results_data['proxy_success'],
+            "recipients_queue": queryset.current_stats.recipients_queue if queryset.current_stats else 0,
+            "sent": results_data['successful'],
+            "invalid_recipients": results_data['invalid_recipients'],
+            "active_threads": tasks_data['active'],
+            "valid_smtp": results_data['successful'],
+            "time_passed": str(smtp_time_passed).split('.')[0] if smtp_time_passed else "00:00:00",
+            "time_left": str(estimated_remaining_time).split('.')[0]
+        }
+        
+        return JsonResponse(data)
