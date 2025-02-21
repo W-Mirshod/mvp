@@ -65,7 +65,7 @@ class User(ChangeloggableMixin, AbstractUser):
     jwt_max_out = models.DateTimeField(blank=True, null=True)
 
     role = models.CharField(
-        max_length=255,
+        max_length=55,
         choices=UserConstance.USER_ROLES_CHOICES,
         default=UserConstance.USER,
     )
@@ -86,6 +86,11 @@ class User(ChangeloggableMixin, AbstractUser):
         null=True,
         upload_to="users",
         validators=[FileExtensionValidator(allowed_extensions=["jpeg", "jpg", "png"])],
+    )
+    position = models.CharField(
+        max_length=35,
+        choices=UserConstance.USER_POSITION_CHOICES,
+        default=UserConstance.NEW,
     )
     username = None
 

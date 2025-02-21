@@ -39,6 +39,7 @@ class CustomUserAdmin(UserAdmin):
                     "first_name",
                     "last_name",
                     "role",
+                    "position",
                     "telegram_username",
                     "gender",
                     "birth_date",
