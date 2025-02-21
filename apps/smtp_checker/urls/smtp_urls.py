@@ -4,8 +4,8 @@ from apps.smtp_checker.views.v1.smtp_views import (
     ServerCheckerSettingsAPIView,
     ServerCheckerTaskAPIView,
     ServerCheckerTaskResultAPIView,
+    SMTPStatisticsAPIView,
 )
-from apps.smtp_checker.views.v1.statistics_views import SMTPStatisticsAPIView
 
 app_name = "server_checker"
 

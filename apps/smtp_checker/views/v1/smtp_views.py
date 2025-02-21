@@ -1,11 +1,15 @@
 import logging
+from django.http import JsonResponse
 from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
+from apps.smtp_checker.choises import TaskStatus
 from apps.smtp_checker.utils.smtp_service import check_server_task
-from apps.smtp_checker.choises import TaskStatus  # added import
+from apps.smtp_checker.view_logic.statics_view import SMTPStatisticsQuerySet
+
 
 from apps.smtp_checker.models.models import (
     SMTPCheckerSettings,
@@ -275,3 +279,36 @@ class ServerCheckerTaskResultAPIView(MultiSerializerViewSet):
     def destroy(self, request, *args, **kwargs):
         logger.debug(f"Deleting SMTP result for user {request.user.id}")
         return super().destroy(request, *args, **kwargs)
+
+
+class SMTPStatisticsAPIView(APIView):
+    permission_classes = []
+
+    def get(self, request):
+        queryset = SMTPStatisticsQuerySet()
+        total_processed = SMTPCheckerTaskResult.objects.filter(task__user=request.user).count()
+        
+        tasks_data = queryset.get_tasks_data()
+        results_data = queryset.get_results_data()
+        smtp_time_passed = queryset.get_time_passed()
+        estimated_remaining_time = queryset.get_estimated_remaining_time(
+            total_processed, 
+            tasks_data['remaining_tasks']
+        )
+
+        data = {
+            "smtp_for_check": tasks_data['total'],
+            "sending_per_minute": results_data['sending_per_minute'],
+            "stopped": tasks_data['stopped'],
+            "smtp_in_clipboard": queryset.current_stats.smtp_in_clipboard if queryset.current_stats else 0,
+            "proxy_on": results_data['proxy_success'],
+            "recipients_queue": queryset.current_stats.recipients_queue if queryset.current_stats else 0,
+            "sent": results_data['successful'],
+            "invalid_recipients": results_data['invalid_recipients'],
+            "active_threads": tasks_data['active'],
+            "valid_smtp": results_data['successful'],
+            "time_passed": str(smtp_time_passed).split('.')[0] if smtp_time_passed else "00:00:00",
+            "time_left": str(estimated_remaining_time).split('.')[0]
+        }
+        
+        return JsonResponse(data)
