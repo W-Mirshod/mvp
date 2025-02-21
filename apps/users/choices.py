@@ -6,20 +6,17 @@ class UserConstance:
     TG_USERNAME_MAX_LENGTH = 255
 
     """ User roles -> """
-    STUFF = "stuff"
+    TECH = "tech"
+    STAFF = "staff"
+    SUPER_STAFF = "super_staff"
     ADMIN = "admin"
     USER = "user"
-    OWNER_COMPANY = "owner_company"
-    SUPPORT = "support"
-
-    ITEMS = [STUFF, ADMIN, USER, OWNER_COMPANY, SUPPORT]
 
     USER_ROLES_CHOICES = (
-        (STUFF, _("STUFF")),
+        (TECH, _("Tech")),
+        (STAFF, _("Staff")),
+        (SUPER_STAFF, _("Super_staff")),
         (ADMIN, _("ADMIN")),
-        (USER, _("USER")),
-        (OWNER_COMPANY, _("OWNER_COMPANY")),
-        (SUPPORT, _("SUPPORT")),
     )
 
     """ <- User roles"""
@@ -38,3 +35,18 @@ class UserConstance:
     )
 
     """ <- User gender"""
+
+    """ <- User roles"""
+
+    """ User positions -> """
+    NEW = "new"
+    MEMBER = "member"
+    SALE = "sale"
+
+    USER_POSITION_CHOICES = (
+        (NEW, _("New")),
+        (MEMBER, _("Member")),
+        (SALE, _("Sale")),
+    )
+
+    """ <- User positions"""
