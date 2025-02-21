@@ -120,8 +120,6 @@ class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
             )
             logger.error(f"Can`t login to service: {ex}")
             current_status = status.HTTP_500_INTERNAL_SERVER_ERROR
-        if "error" in serializer.validated_data.keys():
-            current_status = status.HTTP_401_UNAUTHORIZED
         return Response(serializer.validated_data, status=current_status)
 
 

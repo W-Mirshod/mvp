@@ -1,4 +1,0 @@
-WARNING | 2025-02-01 17:37:32,828 | log.py (241) | log_response | Not Found: /
-WARNING | 2025-02-01 17:37:32,831 | basehttp.py (212) | log_message | "GET / HTTP/1.1" 404 15593
-WARNING | 2025-02-01 17:37:33,640 | log.py (241) | log_response | Not Found: /favicon.ico
-WARNING | 2025-02-01 17:37:33,641 | basehttp.py (212) | log_message | "GET /favicon.ico HTTP/1.1" 404 15655
