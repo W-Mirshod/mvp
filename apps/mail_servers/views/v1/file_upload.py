@@ -1,17 +1,17 @@
 import logging
-import os
 
-from apps.mail_servers.export_service import ExportService
-from apps.mail_servers.file_service import FileService
-from apps.mail_servers.security import SecurityUtils
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from rest_framework.parsers import MultiPartParser, FormParser
-from django.http import HttpResponse
+
+from apps.mail_servers.security import SecurityUtils
+from apps.mail_servers.services.export_service import ExportService
+from apps.mail_servers.services.file_service import FileService
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 class FileUploadView(APIView):
     """File upload with materials"""
 
+    permission_classes = []
     parser_classes = (MultiPartParser, FormParser)
 
     @swagger_auto_schema(
@@ -78,15 +79,11 @@ class FileUploadView(APIView):
             # File validation
             SecurityUtils.validate_file_upload(file_obj)
 
-            # Save to temporary file
+            # Read file content directly
             content = file_obj.read().decode("utf-8")
-            temp_path = FileService.save_temp_file(content)
 
             processor = FileService.get_processor(request.POST.get("type"))
             result = processor(content, session)
-
-            # Remove temporary file
-            os.remove(temp_path)
 
             return Response(result)
 

@@ -4,6 +4,7 @@ from apps.smtp_checker.views.v1.smtp_views import (
     ServerCheckerSettingsAPIView,
     ServerCheckerTaskAPIView,
     ServerCheckerTaskResultAPIView,
+    SMTPStatisticsAPIView,
 )
 
 app_name = "server_checker"
@@ -19,4 +20,5 @@ router.register(
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("statistics/", SMTPStatisticsAPIView.as_view(), name="smtp_statistics"),
 ]

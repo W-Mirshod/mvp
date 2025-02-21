@@ -3,6 +3,7 @@ from apps.mail_servers.models.mailer import Log
 import magic
 import logging
 import shutil
+import re
 
 from datetime import datetime, timedelta
 from django.conf import settings
@@ -108,3 +109,54 @@ class FileService:
             logger.info(f"Compressed archive: {archive_path}")
         except Exception as e:
             logger.error(f"Error compressing archive {archive_path}: {str(e)}")
+
+    @classmethod
+    def get_processor(cls, material_type):
+        processor_map = {
+            "base": cls.process_base,
+            "smtp": cls.process_smtp,
+            "proxy": cls.process_proxy,
+        }
+        try:
+            return processor_map[material_type]
+        except KeyError:
+            raise ValueError(f"Invalid materials type: {material_type}")
+
+    @classmethod
+    def process_base(cls, content, session):
+        lines = content.splitlines()
+        total = len(lines)
+        processed = sum(1 for line in lines if line.strip())
+        failed = total - processed
+        logger.info(f"[session {session}] Base processing: total={total}, processed={processed}, failed={failed}")
+        return {"total": total, "processed": processed, "failed": failed}
+
+    @classmethod
+    def process_smtp(cls, content, session):
+        lines = content.splitlines()
+        total = len(lines)
+        processed = 0
+        failed = 0
+        for line in lines:
+            line = line.strip()
+            if "@" in line and "." in line:
+                processed += 1
+            else:
+                failed += 1
+        logger.info(f"[session {session}] SMTP processing: total={total}, processed={processed}, failed={failed}")
+        return {"total": total, "processed": processed, "failed": failed}
+
+    @classmethod
+    def process_proxy(cls, content, session):
+        proxy_regex = re.compile(r"^(?:\d{1,3}\.){3}\d{1,3}:\d+$")
+        lines = content.splitlines()
+        total = len(lines)
+        processed = 0
+        failed = 0
+        for line in lines:
+            if proxy_regex.match(line.strip()):
+                processed += 1
+            else:
+                failed += 1
+        logger.info(f"[session {session}] Proxy processing: total={total}, processed={processed}, failed={failed}")
+        return {"total": total, "processed": processed, "failed": failed}
