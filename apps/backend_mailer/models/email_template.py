@@ -37,11 +37,17 @@ class EmailTemplate(models.Model):
     content = models.TextField(
         blank=True, verbose_name=_("Content"), validators=[validate_template_syntax]
     )
-    type = models.CharField(
+    template_type = models.CharField(
         max_length=30,
         choices=BackendConstants.TEMPLATE_TYPE_CHOICES,
         verbose_name=_("Template Type"),
         default=BackendConstants.PROMOTIONAL,
+    )
+    template_status = models.CharField(
+        max_length=30,
+        choices=BackendConstants.TEMPLATE_STATUS_CHOICES,
+        verbose_name=_("Template Status"),
+        default=BackendConstants.DRAFT,
     )
     html_content = models.TextField(
         blank=True,

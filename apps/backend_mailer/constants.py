@@ -117,3 +117,16 @@ class BackendConstants:
         (NEWSLETTER, _("Newsletter")),
     )
     """<- TEMPLATE TYPE"""
+
+    """ TEMPLATE STATUS ->"""
+    ACTIVE = "Active"
+    DRAFT = "Draft"
+    ARCHIVED = "Archived"
+
+    TEMPLATE_STATUS_CHOICES = (
+        (ACTIVE, _("Active")),
+        (DRAFT, _("Draft")),
+        (ARCHIVED, _("Archived")),
+    )
+    """<- TEMPLATE STATUS"""
+
