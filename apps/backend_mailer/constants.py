@@ -105,3 +105,28 @@ class BackendConstants:
     }
 
     """<- EMAIL BACKENDS"""
+
+    """ TEMPLATE TYPE ->"""
+    PROMOTIONAL = "Promotional"
+    TRANSACTIONAL = "Transactional"
+    NEWSLETTER = "Newsletter"
+
+    TEMPLATE_TYPE_CHOICES = (
+        (PROMOTIONAL, _("Promotional")),
+        (TRANSACTIONAL, _("Transactional")),
+        (NEWSLETTER, _("Newsletter")),
+    )
+    """<- TEMPLATE TYPE"""
+
+    """ TEMPLATE STATUS ->"""
+    ACTIVE = "Active"
+    DRAFT = "Draft"
+    ARCHIVED = "Archived"
+
+    TEMPLATE_STATUS_CHOICES = (
+        (ACTIVE, _("Active")),
+        (DRAFT, _("Draft")),
+        (ARCHIVED, _("Archived")),
+    )
+    """<- TEMPLATE STATUS"""
+
