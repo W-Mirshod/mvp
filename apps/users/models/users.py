@@ -93,11 +93,15 @@ class User(ChangeloggableMixin, AbstractUser):
         max_length=55,
         choices=UserConstance.MAILING_EXPERIENCE_CHOICES,
         default=UserConstance.NO_EXPERIENCE,
+        blank=True,
+        null=True,
     )
     working_area = models.CharField(
         max_length=55,
         choices=UserConstance.WORKING_AREA_CHOICES,
         default=UserConstance.REMOTE,
+        blank=True,
+        null=True,
     )
     username = None
 

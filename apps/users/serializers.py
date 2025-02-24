@@ -135,9 +135,10 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "user_tariff",
             "telegram_username",
             "birth_date",
-            "gender",
             "bio",
             "avatar",
+            "mailing_experience",
+            "working_area",
         )
 
     def get_user_tariff(self, obj):
@@ -161,11 +162,11 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "position",
             "telegram_username",
             "birth_date",
-            "gender",
             "bio",
             "avatar",
+            "mailing_experience",
+            "working_area",
         )
-
 
 class RestorePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True)
