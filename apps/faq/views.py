@@ -3,8 +3,12 @@ from apps.faq.serializers import FAQSerializer
 from .models import FAQ
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework.response import Response
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class FAQListView(RetrieveUpdateDestroyAPIView):
     serializer_class = FAQSerializer
     lookup_field = 'id'
@@ -38,7 +42,23 @@ class FAQListView(RetrieveUpdateDestroyAPIView):
         }
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_description="Create new FAQ",
+        request_body=FAQSerializer,
+        responses={
+            201: FAQSerializer,
+            400: "Bad Request"
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=201)
 
     @swagger_auto_schema(
         operation_description="Update FAQ",
@@ -59,7 +79,11 @@ class FAQListView(RetrieveUpdateDestroyAPIView):
         }
     )
     def put(self, request, *args, **kwargs):
-        return super().put(request, *args, **kwargs)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_description="Partially update FAQ",
@@ -80,7 +104,11 @@ class FAQListView(RetrieveUpdateDestroyAPIView):
         }
     )
     def patch(self, request, *args, **kwargs):
-        return super().patch(request, *args, **kwargs)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_description="Delete FAQ",
@@ -99,4 +127,6 @@ class FAQListView(RetrieveUpdateDestroyAPIView):
         }
     )
     def delete(self, request, *args, **kwargs):
-        return super().delete(request, *args, **kwargs)
+        instance = self.get_object()
+        instance.delete()
+        return Response(status=204)

@@ -5,5 +5,5 @@ app_name = 'faq'
 
 
 urlpatterns = [
-    path('', FAQListView.as_view(), name='faq_list'),
+    path('<int:id>/', FAQListView.as_view(), name='faq_detail'),
 ]
