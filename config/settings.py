@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     "apps.smtp_checker",
     "apps.websocket",
     "apps.notify",
+    "apps.faq"
 ]
 
 MIDDLEWARE = [

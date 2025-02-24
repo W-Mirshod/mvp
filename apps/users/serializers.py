@@ -25,6 +25,7 @@ logger = logging.getLogger(__file__)
 
 
 class TokenSerializer(TokenObtainPairSerializer):
+    username_field = 'email'
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[Any, Any]:
         authenticate_kwargs = {
@@ -80,6 +81,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             "email",
+            "username",
             "password",
             "telegram_username",
         )
@@ -95,6 +97,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create(
             email=validated_data["email"],
+            username=validated_data["username"],
             telegram_username=validated_data["telegram_username"],
         )
 
@@ -121,6 +124,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             "id",
+            "username",
             "first_name",
             "last_name",
             "last_login",
@@ -157,6 +161,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = (
             "first_name",
             "last_name",
+            "username",
             "email",
             "role",
             "position",
