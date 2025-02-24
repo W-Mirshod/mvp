@@ -78,9 +78,6 @@ class User(ChangeloggableMixin, AbstractUser):
         max_length=UserConstance.TG_USERNAME_MAX_LENGTH, blank=True, null=True
     )
     birth_date = models.DateField(null=True, blank=True)
-    gender = models.CharField(
-        max_length=16, choices=UserConstance.USER_GENDER_CHOICES, null=True, blank=False
-    )
     bio = models.TextField(null=True, blank=True)
     avatar = models.ImageField(
         null=True,
@@ -91,6 +88,16 @@ class User(ChangeloggableMixin, AbstractUser):
         max_length=35,
         choices=UserConstance.USER_POSITION_CHOICES,
         default=UserConstance.NEW,
+    )
+    mailing_experience = models.CharField(
+        max_length=55,
+        choices=UserConstance.MAILING_EXPERIENCE_CHOICES,
+        default=UserConstance.NO_EXPERIENCE,
+    )
+    working_area = models.CharField(
+        max_length=55,
+        choices=UserConstance.WORKING_AREA_CHOICES,
+        default=UserConstance.REMOTE,
     )
     username = None
 
@@ -105,7 +112,6 @@ class User(ChangeloggableMixin, AbstractUser):
 
     def restore_password(self, new_password: str):
         self.set_password(new_password)
-        self.save(update_fields=("password",))
 
 
 post_save.connect(journal_save_handler, sender=User)

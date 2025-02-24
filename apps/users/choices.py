@@ -50,3 +50,30 @@ class UserConstance:
     )
 
     """ <- User positions"""
+
+    """ Mailing experience -> """
+    NO_EXPERIENCE = "no_experience"
+    ONE_YEAR = "one_year"
+    THREE_YEARS = "three_years"
+    FIVE_YEARS = "five_years"
+
+    MAILING_EXPERIENCE_CHOICES = (
+        (NO_EXPERIENCE, _("No experience")),
+        (ONE_YEAR, _("1 year")),
+        (THREE_YEARS, _("3 years")),
+        (FIVE_YEARS, _("5+ years")),
+    )
+
+    """ <- Mailing experience"""
+
+    """ Working area -> """
+    REMOTE = "remote"
+    OFFICE = "office"
+    HYBRID = "hybrid"
+
+    WORKING_AREA_CHOICES = (
+        (REMOTE, _("Remote")),
+        (OFFICE, _("Office")),
+        (HYBRID, _("Hybrid")),
+    )
+    """ <- Working area"""
