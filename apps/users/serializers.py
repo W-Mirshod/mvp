@@ -25,6 +25,7 @@ logger = logging.getLogger(__file__)
 
 
 class TokenSerializer(TokenObtainPairSerializer):
+    username_field = 'email'
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[Any, Any]:
         authenticate_kwargs = {

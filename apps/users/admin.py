@@ -30,7 +30,7 @@ class CustomUserAdmin(UserAdmin):
         "mailing_experience",
         "working_area",
     )
-    search_fields = ("email", "username")
+    search_fields = ("email",)
     list_per_page = 25
     fieldsets = (
         (
@@ -93,7 +93,7 @@ class CustomUserAdmin(UserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "username", "password1", "password2"),
+                "fields": ("email", "password1", "password2"),
             },
         ),
     )

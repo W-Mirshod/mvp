@@ -61,6 +61,8 @@ class User(ChangeloggableMixin, AbstractUser):
         error_messages={
             "unique": _("A user with that username already exists."),
         },
+        blank=True,
+        null=True
     )
     is_verified = models.BooleanField(_("Email verified"), default=False)
     is_active = models.BooleanField(
@@ -117,7 +119,7 @@ class User(ChangeloggableMixin, AbstractUser):
     )
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username"]
+    REQUIRED_FIELDS = []
 
     objects = UserManager()
 
