@@ -16,6 +16,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = (
         "id",
         "email",
+        "username",
         "role",
         "is_active",
         "is_verified",
@@ -29,7 +30,7 @@ class CustomUserAdmin(UserAdmin):
         "mailing_experience",
         "working_area",
     )
-    search_fields = ("email",)
+    search_fields = ("email", "username")
     list_per_page = 25
     fieldsets = (
         (
@@ -37,6 +38,7 @@ class CustomUserAdmin(UserAdmin):
             {
                 "fields": (
                     "email",
+                    "username",
                     "password",
                     "first_name",
                     "last_name",
@@ -91,7 +93,7 @@ class CustomUserAdmin(UserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "password1", "password2"),
+                "fields": ("email", "username", "password1", "password2"),
             },
         ),
     )

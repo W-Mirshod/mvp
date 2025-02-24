@@ -50,6 +50,18 @@ class User(ChangeloggableMixin, AbstractUser):
     """User`s model"""
 
     email = models.EmailField(_("e-mail"), unique=True, db_index=True)
+    username = models.CharField(
+        _("username"),
+        max_length=150,
+        unique=False,
+        help_text=_(
+            "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+        ),
+        validators=[AbstractUser.username_validator],
+        error_messages={
+            "unique": _("A user with that username already exists."),
+        },
+    )
     is_verified = models.BooleanField(_("Email verified"), default=False)
     is_active = models.BooleanField(
         _("active"),
@@ -103,10 +115,9 @@ class User(ChangeloggableMixin, AbstractUser):
         blank=True,
         null=True,
     )
-    username = None
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["username"]
 
     objects = UserManager()
 
