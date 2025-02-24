@@ -8,3 +8,4 @@ class FAQAdmin(admin.ModelAdmin):
     list_filter = ('is_active', 'created_at')
     search_fields = ('question', 'answer')
     ordering = ('-created_at',)
+    
