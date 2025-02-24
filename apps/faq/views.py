@@ -1,17 +1,21 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 from apps.faq.serializers import FAQSerializer
 from .models import FAQ
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class FAQListView(RetrieveUpdateDestroyAPIView):
     serializer_class = FAQSerializer
     lookup_field = 'id'
+    permission_classes = [IsAuthenticated]
+
     
     def get_queryset(self):
         return FAQ.objects.filter(is_active=True)
