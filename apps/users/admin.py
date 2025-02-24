@@ -22,10 +22,12 @@ class CustomUserAdmin(UserAdmin):
         "jwt_max_out",
         "is_one_time_jwt_created",
         "telegram_username",
-        "gender",
         "birth_date",
         "bio",
         "avatar",
+        "position",
+        "mailing_experience",
+        "working_area",
     )
     search_fields = ("email",)
     list_per_page = 25
@@ -41,10 +43,11 @@ class CustomUserAdmin(UserAdmin):
                     "role",
                     "position",
                     "telegram_username",
-                    "gender",
                     "birth_date",
                     "bio",
                     "avatar",
+                    "mailing_experience",
+                    "working_area",
                 )
             },
         ),
