@@ -16,11 +16,19 @@ class CustomUserAdmin(UserAdmin):
     list_display = (
         "id",
         "email",
+        "username",
         "role",
         "is_active",
         "is_verified",
         "jwt_max_out",
         "is_one_time_jwt_created",
+        "telegram_username",
+        "birth_date",
+        "bio",
+        "avatar",
+        "position",
+        "mailing_experience",
+        "working_area",
     )
     search_fields = ("email",)
     list_per_page = 25
@@ -30,10 +38,18 @@ class CustomUserAdmin(UserAdmin):
             {
                 "fields": (
                     "email",
+                    "username",
                     "password",
                     "first_name",
                     "last_name",
                     "role",
+                    "position",
+                    "telegram_username",
+                    "birth_date",
+                    "bio",
+                    "avatar",
+                    "mailing_experience",
+                    "working_area",
                 )
             },
         ),

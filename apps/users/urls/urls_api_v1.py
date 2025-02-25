@@ -8,6 +8,7 @@ from apps.users.views.v1.views_users import (
     RefreshTokenView,
     RegistrationViewSet,
     OneTimeJWTFunctionsViewSet,
+    TelegramLoginViewSet,
 )
 
 app_name = "users_api"
@@ -16,7 +17,9 @@ app_name = "users_api"
 urlpatterns = [
     path(
         "<int:pk>/",
-        UserViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
+        UserViewSet.as_view(
+            {"get": "retrieve", "delete": "destroy", "patch": "partial_update"}
+        ),
         name="manage",
     ),
     path(
@@ -49,5 +52,9 @@ urlpatterns = [
         "restore_password/",
         OneTimeJWTFunctionsViewSet.as_view({"patch": "restore_password"}),
         name="restore_password",
+    ),
+    path("telegram-login/",
+         TelegramLoginViewSet.as_view({"post": "create"}),
+         name="telegram_login"
     ),
 ]

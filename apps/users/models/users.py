@@ -1,5 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.utils.translation import gettext_lazy as _
@@ -49,6 +50,20 @@ class User(ChangeloggableMixin, AbstractUser):
     """User`s model"""
 
     email = models.EmailField(_("e-mail"), unique=True, db_index=True)
+    username = models.CharField(
+        _("username"),
+        max_length=150,
+        unique=False,
+        help_text=_(
+            "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+        ),
+        validators=[AbstractUser.username_validator],
+        error_messages={
+            "unique": _("A user with that username already exists."),
+        },
+        blank=True,
+        null=True
+    )
     is_verified = models.BooleanField(_("Email verified"), default=False)
     is_active = models.BooleanField(
         _("active"),
@@ -64,15 +79,44 @@ class User(ChangeloggableMixin, AbstractUser):
     jwt_max_out = models.DateTimeField(blank=True, null=True)
 
     role = models.CharField(
-        max_length=255,
+        max_length=55,
         choices=UserConstance.USER_ROLES_CHOICES,
         default=UserConstance.USER,
+    )
+
+    telegram_id = models.BigIntegerField(
+        _("Telegram ID"), unique=True, blank=True, null=True
     )
 
     telegram_username = models.CharField(
         max_length=UserConstance.TG_USERNAME_MAX_LENGTH, blank=True, null=True
     )
-    username = None
+    birth_date = models.DateField(null=True, blank=True)
+    bio = models.TextField(null=True, blank=True)
+    avatar = models.ImageField(
+        null=True,
+        upload_to="users",
+        validators=[FileExtensionValidator(allowed_extensions=["jpeg", "jpg", "png"])],
+    )
+    position = models.CharField(
+        max_length=35,
+        choices=UserConstance.USER_POSITION_CHOICES,
+        default=UserConstance.NEW,
+    )
+    mailing_experience = models.CharField(
+        max_length=55,
+        choices=UserConstance.MAILING_EXPERIENCE_CHOICES,
+        default=UserConstance.NO_EXPERIENCE,
+        blank=True,
+        null=True,
+    )
+    working_area = models.CharField(
+        max_length=55,
+        choices=UserConstance.WORKING_AREA_CHOICES,
+        default=UserConstance.REMOTE,
+        blank=True,
+        null=True,
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -85,7 +129,6 @@ class User(ChangeloggableMixin, AbstractUser):
 
     def restore_password(self, new_password: str):
         self.set_password(new_password)
-        self.save(update_fields=("password",))
 
 
 post_save.connect(journal_save_handler, sender=User)

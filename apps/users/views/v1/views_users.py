@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import logging
 
 from django.conf import settings
@@ -8,6 +10,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -28,6 +31,8 @@ from apps.users.serializers import (
     EmailTokenGenerationSerializer,
     UserDetailSerializer,
     RestorePasswordSerializer,
+    TelegramAuthSerializer,
+    UserUpdateSerializer,
 )
 from apps.users.services.jwt import create_one_time_jwt
 from utils.permissions import IsOneTimeTokenValid, IsTokenValid
@@ -115,8 +120,6 @@ class LoginTokenView(TokenObtainPairView, MultiSerializerViewSet):
             )
             logger.error(f"Can`t login to service: {ex}")
             current_status = status.HTTP_500_INTERNAL_SERVER_ERROR
-        if "error" in serializer.validated_data.keys():
-            current_status = status.HTTP_401_UNAUTHORIZED
         return Response(serializer.validated_data, status=current_status)
 
 
@@ -126,6 +129,7 @@ class BlacklistTokenView(TokenBlacklistView, MultiSerializerViewSet):
     This API allows authenticated users to logout by blacklisting their refresh token,
     effectively invalidating their access.
     """
+
     authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (IsAuthenticated,)
 
@@ -187,6 +191,7 @@ class RegistrationViewSet(MultiSerializerViewSet):
     Allows users to register a new account.
     Sends a verification email upon successful registration.
     """
+
     queryset = User.objects.none()
     serializers = {
         "registration": UserRegistrationSerializer,
@@ -382,6 +387,7 @@ class EmailVerificationView(MultiSerializerViewSet):
             )
 
         user.is_verified = True
+        user.is_one_time_jwt_created = False
         user.save()
         return Response({"detail": "Email verified"}, status=status.HTTP_200_OK)
 
@@ -392,20 +398,39 @@ class UserViewSet(MultiSerializerViewSet):
     Allows authenticated users to retrieve their own user details.
     Only authenticated users with a valid token can access this API.
     """
+
     queryset = User.objects.filter(is_active=True).all()
     serializers = {
         "retrieve": UserDetailSerializer,
+        "partial_update": UserUpdateSerializer,
     }
     permission_classes = (
         IsAuthenticated,
         IsTokenValid,
     )
 
+    parser_classes = None
+
+    def get_parsers(self):
+        if not self.request or getattr(self.request, "method", None) is None:
+            return []
+        if self.request.method in ("POST", "PATCH"):
+            return [parser() for parser in (MultiPartParser, FormParser)]
+        return [parser() for parser in (JSONParser,)]
+
     def retrieve(self, request, *args, **kwargs):
         """
         User`s view
         """
         return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Partial user update.",
+        operation_description="Partial user update.",
+        request_body=UserUpdateSerializer,
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
 
 
 class OneTimeJWTFunctionsViewSet(MultiSerializerViewSet):
@@ -414,6 +439,7 @@ class OneTimeJWTFunctionsViewSet(MultiSerializerViewSet):
     Allows users with a valid one-time JWT to restore their password.
     Requires authentication with a valid one-time token.
     """
+
     queryset = User.objects.filter(is_active=True)
     serializers = {
         "restore_password": RestorePasswordSerializer,
@@ -447,6 +473,7 @@ class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
     This API allows clients to exchange a valid refresh token for a new access token,
     without requiring the user to re-authenticate.
     """
+
     authentication_classes = ()
     permission_classes = ()
 
@@ -474,3 +501,72 @@ class RefreshTokenView(TokenRefreshView, MultiSerializerViewSet):
         data["user_id"] = refresh.payload["user_id"]
 
         return Response(data, status=status.HTTP_200_OK)
+
+
+class TelegramLoginViewSet(MultiSerializerViewSet):
+    """
+    API ViewSet to authenticate users via Telegram login and return JWT tokens.
+    """
+    authentication_classes = []
+    permission_classes = []
+
+    @swagger_auto_schema(
+        operation_description="Authenticate users via Telegram Login Widget and return JWT tokens.",
+        request_body=TelegramAuthSerializer,
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "user_id": openapi.Schema(type=openapi.TYPE_INTEGER, title="User ID"),
+                    "telegram_id": openapi.Schema(type=openapi.TYPE_INTEGER, title="Telegram ID"),
+                    "telegram_username": openapi.Schema(type=openapi.TYPE_STRING, title="Telegram Username"),
+                    "first_name": openapi.Schema(type=openapi.TYPE_STRING, title="First Name"),
+                    "last_name": openapi.Schema(type=openapi.TYPE_STRING, title="Last Name"),
+                    "email": openapi.Schema(type=openapi.TYPE_STRING, title="Email"),
+                    "refresh": openapi.Schema(type=openapi.TYPE_STRING, title="Refresh Token"),
+                    "access": openapi.Schema(type=openapi.TYPE_STRING, title="Access Token"),
+                },
+            ),
+            400: openapi.Response("Bad Request"),
+            403: openapi.Response("Forbidden (Invalid Hash)"),
+            404: openapi.Response("User Not Found"),
+        },
+    )
+    def create(self, request):
+        bot_token = settings.TELEGRAM_BOT_TOKEN
+        secret_key = hashlib.sha256(bot_token.encode()).digest()
+
+        serializer = TelegramAuthSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        auth_data = serializer.validated_data
+        received_hash = auth_data.pop("hash", None)
+
+        data_check_string = "\n".join(f"{key}={value}" for key, value in sorted(auth_data.items()) if value is not None)
+        expected_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+
+        if expected_hash != received_hash:
+            return Response({"error": "Invalid Telegram authentication (Hash mismatch)"}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            user = User.objects.get(telegram_username=auth_data.get("username"))
+        except User.DoesNotExist:
+            return Response({"error": "User not found. Please link your Telegram account in settings."},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        token_serializer = TokenSerializer()
+        refresh = token_serializer.get_token(user)
+
+        response_data = {
+            "user_id": user.id,
+            "telegram_id": user.telegram_id,
+            "telegram_username": user.telegram_username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)

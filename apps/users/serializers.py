@@ -25,6 +25,7 @@ logger = logging.getLogger(__file__)
 
 
 class TokenSerializer(TokenObtainPairSerializer):
+    username_field = 'email'
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[Any, Any]:
         authenticate_kwargs = {
@@ -80,9 +81,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             "email",
+            "username",
             "password",
-            "first_name",
-            "last_name",
+            "telegram_username",
         )
 
     def validate_email(self, attr):
@@ -96,8 +97,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create(
             email=validated_data["email"],
-            first_name=validated_data["first_name"],
-            last_name=validated_data["last_name"],
+            username=validated_data["username"],
+            telegram_username=validated_data["telegram_username"],
         )
 
         user.set_password(validated_data["password"])
@@ -123,6 +124,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             "id",
+            "username",
             "first_name",
             "last_name",
             "last_login",
@@ -131,9 +133,16 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "date_joined",
             "email",
             "role",
+            "position",
             "is_verified",
             "is_staff",
             "user_tariff",
+            "telegram_username",
+            "birth_date",
+            "bio",
+            "avatar",
+            "mailing_experience",
+            "working_area",
         )
 
     def get_user_tariff(self, obj):
@@ -145,6 +154,24 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
         return None
 
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "first_name",
+            "last_name",
+            "username",
+            "email",
+            "role",
+            "position",
+            "telegram_username",
+            "birth_date",
+            "bio",
+            "avatar",
+            "mailing_experience",
+            "working_area",
+        )
 
 class RestorePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True)
@@ -222,3 +249,11 @@ class EmailTokenGenerationSerializer(serializers.Serializer):
                 {"error": _("Max JWT try reached, try after an hour.")},
                 code="invalid_otp",
             )
+
+class TelegramAuthSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField(required=False, allow_null=True)
+    username = serializers.CharField(required=False, allow_null=True)
+    auth_date = serializers.IntegerField()
+    hash = serializers.CharField()

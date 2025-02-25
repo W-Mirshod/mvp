@@ -14,5 +14,5 @@ class CampaignAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
-    search_fields = ("campaign_name", "status", "comment")
-    list_filter = ("status", "shipping_type", "message_type", "country_tag")
+    search_fields = ("campaign_name", "status", "email_content")
+    list_filter = ("status", "country")

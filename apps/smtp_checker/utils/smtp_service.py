@@ -9,6 +9,7 @@ from apps.smtp_checker.models.models import (
     SMTPCheckerTaskResult,
     SMTPCheckerSettings,
 )
+from apps.smtp_checker.choises import TaskStatus, TaskResult
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +23,11 @@ def check_server_task(task_id, settings_id):
 
     task = SMTPCheckerTask.objects.get(id=task_id)
     settings = SMTPCheckerSettings.objects.get(id=settings_id)
-    task.status = "in_progress"
+    task.status = TaskStatus.IN_PROGRESS
     task.save()
 
     for server in task.servers.all():
-        result = "failure"
+        result = TaskResult.FAILURE
         error_message = None
         response_time = None
 
@@ -43,7 +44,7 @@ def check_server_task(task_id, settings_id):
             else:
                 raise ValueError(f"Unknown server type: {server.type}")
 
-            result = "success"
+            result = TaskResult.SUCCESS
 
         except Exception as e:
             error_message = str(e)
@@ -59,7 +60,7 @@ def check_server_task(task_id, settings_id):
             error_message=error_message,
         )
 
-    task.status = "completed"
+    task.status = TaskStatus.COMPLETED
     task.save()
 
 
